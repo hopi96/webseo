@@ -44,7 +44,7 @@ export function KeywordsTable({ keywords }: KeywordsTableProps) {
           </div>
           
           <div className="space-y-3">
-            {keywords.slice(0, 5).map((keyword, index) => (
+            {keywords?.slice(0, 5).map((keyword, index) => (
               <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                 <div className="flex-1">
                   <div className="font-medium text-gray-900 dark:text-white">{keyword.keyword}</div>
