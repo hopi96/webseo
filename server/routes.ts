@@ -61,26 +61,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const websiteId = parseInt(req.params.id);
       let analysis = await storage.getSeoAnalysis(websiteId);
       
-      // If no analysis exists, create one with real data
+      // Always perform real analysis if no analysis exists
       if (!analysis) {
         const website = await storage.getWebsite(websiteId);
         if (!website) {
           return res.status(404).json({ message: "Website not found" });
         }
 
-        try {
-          console.log(`Performing real SEO analysis for ${website.url}...`);
-          const realSeoData = await performComprehensiveSeoAnalysis(website.url);
-          analysis = await storage.createSeoAnalysis({
-            ...realSeoData,
-            websiteId
-          });
-        } catch (seoError) {
-          console.error("Real SEO analysis failed:", seoError);
-          return res.status(500).json({ 
-            message: "Failed to analyze website. Please check if the URL is accessible and try again." 
-          });
-        }
+        console.log(`Performing real SEO analysis for ${website.url}...`);
+        const realSeoData = await performComprehensiveSeoAnalysis(website.url);
+        analysis = await storage.createSeoAnalysis({
+          ...realSeoData,
+          websiteId
+        });
       }
       
       res.json(analysis);
