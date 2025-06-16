@@ -177,7 +177,7 @@ function extractRecommendations(audits: any): Array<{
 }
 
 // Comprehensive SEO analysis combining multiple sources
-export async function performComprehensiveSeoAnalysis(url: string): Promise<Partial<InsertSeoAnalysis>> {
+export async function performComprehensiveSeoAnalysis(url: string): Promise<InsertSeoAnalysis> {
   try {
     const [pageSpeedData, technicalData] = await Promise.all([
       analyzePageSpeed(url),
@@ -203,7 +203,7 @@ export async function performComprehensiveSeoAnalysis(url: string): Promise<Part
       recommendations: pageSpeedData.recommendations,
       keywords: [], // Would need Search Console API
       trafficData: [] // Would need Analytics API
-    };
+    } as any;
   } catch (error) {
     console.error('Comprehensive SEO analysis failed:', error);
     throw error;
