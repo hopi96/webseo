@@ -179,6 +179,8 @@ function extractRecommendations(audits: any): Array<{
 // Comprehensive SEO analysis combining multiple sources
 export async function performComprehensiveSeoAnalysis(url: string): Promise<InsertSeoAnalysis> {
   try {
+    console.log(`Starting real SEO analysis for: ${url}`);
+    
     const [pageSpeedData, technicalData] = await Promise.all([
       analyzePageSpeed(url),
       analyzeTechnicalSeo(url)
@@ -193,6 +195,8 @@ export async function performComprehensiveSeoAnalysis(url: string): Promise<Inse
       recommendations: pageSpeedData.recommendations
     });
 
+    console.log(`SEO analysis completed. PageSpeed: ${avgPageSpeed}, Overall Score: ${overallScore}`);
+
     return {
       overallScore,
       organicTraffic: 0, // Would need Google Analytics API
@@ -206,7 +210,30 @@ export async function performComprehensiveSeoAnalysis(url: string): Promise<Inse
     } as any;
   } catch (error) {
     console.error('Comprehensive SEO analysis failed:', error);
-    throw error;
+    
+    // Return fallback data with error indication
+    return {
+      overallScore: 0,
+      organicTraffic: 0,
+      keywordsRanking: 0,
+      backlinks: 0,
+      pageSpeed: 0,
+      technicalSeo: {
+        mobileFriendly: false,
+        httpsSecure: false,
+        xmlSitemap: false,
+        robotsTxt: false
+      },
+      recommendations: [{
+        id: 'api-error',
+        title: 'API Error',
+        description: 'Unable to analyze website. Please check the URL and try again.',
+        priority: 'high' as const,
+        category: 'Error'
+      }],
+      keywords: [],
+      trafficData: []
+    } as any;
   }
 }
 
