@@ -13,7 +13,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
     if (num >= 1000) {
       return `${(num / 1000).toFixed(1)}K`;
     }
-    return num.toString();
+    return num?.toString() || '0';
   };
 
   const stats = [
@@ -28,7 +28,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
     },
     {
       title: "Keywords Ranking",
-      value: keywordsRanking.toString(),
+      value: (keywordsRanking || 0).toString(),
       icon: Key,
       color: "text-seo-success",
       bgColor: "bg-green-100 dark:bg-green-900/30",
@@ -37,7 +37,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
     },
     {
       title: "Backlinks",
-      value: formatNumber(backlinks),
+      value: formatNumber(backlinks || 0),
       icon: Link,
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
@@ -46,7 +46,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
     },
     {
       title: "Page Speed",
-      value: pageSpeed.toString(),
+      value: (pageSpeed || 0).toString(),
       icon: Gauge,
       color: "text-seo-warning",
       bgColor: "bg-orange-100 dark:bg-orange-900/30",

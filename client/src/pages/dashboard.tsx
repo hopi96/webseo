@@ -111,19 +111,19 @@ export default function Dashboard() {
             />
 
             <StatsGrid
-              organicTraffic={seoAnalysis.organicTraffic}
-              keywordsRanking={seoAnalysis.keywordsRanking}
-              backlinks={seoAnalysis.backlinks}
-              pageSpeed={seoAnalysis.pageSpeed}
+              organicTraffic={seoAnalysis.organicTraffic || 0}
+              keywordsRanking={seoAnalysis.keywordsRanking || 0}
+              backlinks={seoAnalysis.backlinks || 0}
+              pageSpeed={seoAnalysis.pageSpeed || 0}
             />
 
-            <TrafficChart data={seoAnalysis.trafficData} />
+            <TrafficChart data={seoAnalysis.trafficData || []} />
 
-            <KeywordsTable keywords={seoAnalysis.keywords} />
+            <KeywordsTable keywords={seoAnalysis.keywords || []} />
 
-            <RecommendationsCard recommendations={seoAnalysis.recommendations} />
+            <RecommendationsCard recommendations={seoAnalysis.recommendations || []} />
 
-            <TechnicalSeoCard technicalSeo={seoAnalysis.technicalSeo} />
+            <TechnicalSeoCard technicalSeo={seoAnalysis.technicalSeo || {}} />
           </>
         )}
       </main>
