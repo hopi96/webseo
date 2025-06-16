@@ -17,10 +17,10 @@ export function TrafficChart({ data }: TrafficChartProps) {
     return d.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
-  const chartData = data.map(item => ({
+  const chartData = data?.map(item => ({
     ...item,
     formattedDate: formatDate(item.date)
-  }));
+  })) || [];
 
   return (
     <div className="px-4 pb-4">

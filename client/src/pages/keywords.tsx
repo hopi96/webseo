@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
@@ -24,7 +24,7 @@ export default function Keywords() {
   });
 
   // Auto-select first website if none selected
-  React.useEffect(() => {
+  useEffect(() => {
     if (websites && websites.length > 0 && !selectedWebsiteId) {
       setSelectedWebsiteId(websites[0].id);
     }
@@ -62,7 +62,7 @@ export default function Keywords() {
     return 'bg-gray-500 text-white';
   };
 
-  const filteredKeywords = seoAnalysis?.keywords.filter(keyword =>
+  const filteredKeywords = seoAnalysis?.keywords?.filter(keyword =>
     keyword.keyword.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
@@ -96,7 +96,7 @@ export default function Keywords() {
               <Card>
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {seoAnalysis.keywords.length}
+                    {seoAnalysis.keywords?.length || 0}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">Total Keywords</div>
                 </CardContent>
@@ -105,7 +105,7 @@ export default function Keywords() {
               <Card>
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-seo-success">
-                    {seoAnalysis.keywords.filter(k => k.position <= 10).length}
+                    {seoAnalysis.keywords?.filter(k => k.position <= 10).length || 0}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">Top 10</div>
                 </CardContent>
@@ -114,7 +114,7 @@ export default function Keywords() {
               <Card>
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-seo-warning">
-                    {seoAnalysis.keywords.filter(k => k.position <= 3).length}
+                    {seoAnalysis.keywords?.filter(k => k.position <= 3).length || 0}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">Top 3</div>
                 </CardContent>

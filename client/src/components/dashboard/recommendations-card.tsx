@@ -38,7 +38,7 @@ export function RecommendationsCard({ recommendations }: RecommendationsCardProp
           </div>
           
           <div className="space-y-4">
-            {recommendations.slice(0, 3).map((recommendation) => (
+            {recommendations?.slice(0, 3).map((recommendation) => (
               <div key={recommendation.id} className="flex">
                 <div className={`w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0 ${getPriorityColor(recommendation.priority)}`}></div>
                 <div className="flex-1">

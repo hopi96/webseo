@@ -105,9 +105,9 @@ export default function Dashboard() {
           <>
             <SeoScoreCard
               score={seoAnalysis.overallScore}
-              goodCount={seoAnalysis.recommendations.filter(r => r.priority === 'low').length + 15}
-              warningCount={seoAnalysis.recommendations.filter(r => r.priority === 'medium').length}
-              errorCount={seoAnalysis.recommendations.filter(r => r.priority === 'high').length}
+              goodCount={(seoAnalysis.recommendations?.filter(r => r.priority === 'low').length || 0) + 15}
+              warningCount={seoAnalysis.recommendations?.filter(r => r.priority === 'medium').length || 0}
+              errorCount={seoAnalysis.recommendations?.filter(r => r.priority === 'high').length || 0}
             />
 
             <StatsGrid

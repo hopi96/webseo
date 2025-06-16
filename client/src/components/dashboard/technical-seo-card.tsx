@@ -18,25 +18,25 @@ export function TechnicalSeoCard({ technicalSeo }: TechnicalSeoCardProps) {
       key: 'mobileFriendly',
       icon: Smartphone,
       label: 'Mobile Friendly',
-      status: technicalSeo.mobileFriendly
+      status: technicalSeo?.mobileFriendly || false
     },
     {
       key: 'httpsSecure',
       icon: Shield,
       label: 'HTTPS Secure',
-      status: technicalSeo.httpsSecure
+      status: technicalSeo?.httpsSecure || false
     },
     {
       key: 'xmlSitemap',
       icon: FileText,
       label: 'XML Sitemap',
-      status: technicalSeo.xmlSitemap
+      status: technicalSeo?.xmlSitemap || false
     },
     {
       key: 'robotsTxt',
       icon: Bot,
       label: 'Robots.txt',
-      status: technicalSeo.robotsTxt
+      status: technicalSeo?.robotsTxt || false
     }
   ];
 
