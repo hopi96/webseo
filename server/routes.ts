@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertWebsiteSchema, insertSeoAnalysisSchema } from "@shared/schema";
+import { performComprehensiveSeoAnalysis } from "./seo-services";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -58,10 +59,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/websites/:id/seo-analysis", async (req, res) => {
     try {
       const websiteId = parseInt(req.params.id);
-      const analysis = await storage.getSeoAnalysis(websiteId);
+      let analysis = await storage.getSeoAnalysis(websiteId);
+      
+      // If no analysis exists, create one with real data
       if (!analysis) {
-        return res.status(404).json({ message: "SEO analysis not found" });
+        const website = await storage.getWebsite(websiteId);
+        if (!website) {
+          return res.status(404).json({ message: "Website not found" });
+        }
+
+        try {
+          console.log(`Performing real SEO analysis for ${website.url}...`);
+          const realSeoData = await performComprehensiveSeoAnalysis(website.url);
+          analysis = await storage.createSeoAnalysis({
+            websiteId,
+            ...realSeoData
+          });
+        } catch (seoError) {
+          console.error("Real SEO analysis failed:", seoError);
+          return res.status(500).json({ 
+            message: "Failed to analyze website. Please check if the URL is accessible and try again." 
+          });
+        }
       }
+      
       res.json(analysis);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch SEO analysis" });

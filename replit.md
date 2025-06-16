@@ -103,3 +103,5 @@ Changelog:
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Language: French (user communicates in French)
+Interest: Real SEO data integration rather than mock data
