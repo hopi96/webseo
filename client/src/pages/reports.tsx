@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
@@ -23,11 +23,11 @@ export default function Reports() {
   });
 
   // Auto-select first website if none selected
-  React.useEffect(() => {
+  useState(() => {
     if (websites && websites.length > 0 && !selectedWebsiteId) {
       setSelectedWebsiteId(websites[0].id);
     }
-  }, [websites, selectedWebsiteId]);
+  });
 
   const handleWebsiteChange = (websiteId: number) => {
     setSelectedWebsiteId(websiteId);
