@@ -72,8 +72,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Performing real SEO analysis for ${website.url}...`);
           const realSeoData = await performComprehensiveSeoAnalysis(website.url);
           analysis = await storage.createSeoAnalysis({
-            websiteId,
-            ...realSeoData
+            ...realSeoData,
+            websiteId
           });
         } catch (seoError) {
           console.error("Real SEO analysis failed:", seoError);
@@ -116,6 +116,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(analysis);
     } catch (error) {
       res.status(500).json({ message: "Failed to update SEO analysis" });
+    }
+  });
+
+  // Force refresh SEO analysis with real API data
+  app.put("/api/websites/:id/seo-analysis/refresh", async (req, res) => {
+    try {
+      const websiteId = parseInt(req.params.id);
+      const website = await storage.getWebsite(websiteId);
+      if (!website) {
+        return res.status(404).json({ message: "Website not found" });
+      }
+
+      console.log(`Refreshing SEO analysis for ${website.url}...`);
+      const realSeoData = await performComprehensiveSeoAnalysis(website.url);
+      
+      let analysis = await storage.getSeoAnalysis(websiteId);
+      if (analysis) {
+        analysis = await storage.updateSeoAnalysis(websiteId, realSeoData);
+      } else {
+        analysis = await storage.createSeoAnalysis({
+          ...realSeoData,
+          websiteId
+        });
+      }
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error("SEO analysis refresh failed:", error);
+      res.status(500).json({ message: "Failed to refresh SEO analysis" });
     }
   });
 

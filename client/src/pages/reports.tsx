@@ -23,11 +23,11 @@ export default function Reports() {
   });
 
   // Auto-select first website if none selected
-  useState(() => {
+  useEffect(() => {
     if (websites && websites.length > 0 && !selectedWebsiteId) {
       setSelectedWebsiteId(websites[0].id);
     }
-  });
+  }, [websites, selectedWebsiteId]);
 
   const handleWebsiteChange = (websiteId: number) => {
     setSelectedWebsiteId(websiteId);
