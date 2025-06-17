@@ -31,8 +31,6 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
     
-    console.log('Fetching URL:', url);
-    
     const res = await fetch(url, {
       credentials: "include",
     });

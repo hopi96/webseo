@@ -39,7 +39,7 @@ export default function Reports() {
   });
 
   const { data: seoAnalysis, isLoading: analysisLoading } = useQuery<SeoAnalysis>({
-    queryKey: ["/api/websites", selectedWebsiteId, "seo-analysis"],
+    queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
     enabled: !!selectedWebsiteId,
   });
 

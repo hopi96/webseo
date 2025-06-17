@@ -143,10 +143,7 @@ export default function Dashboard() {
     );
   }
 
-  // Debug: Log des données reçues
-  console.log('Dashboard - selectedWebsiteId:', selectedWebsiteId);
-  console.log('Dashboard - seoAnalysis:', seoAnalysis);
-  console.log('Dashboard - analysisLoading:', analysisLoading);
+
 
   if (!seoAnalysis && !analysisLoading) {
     return (
