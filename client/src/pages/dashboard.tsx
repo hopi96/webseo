@@ -196,105 +196,218 @@ export default function Dashboard() {
   const selectedWebsite = websites?.find(w => w.id === selectedWebsiteId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Background decorative elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-emerald-400/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-pink-400/10 to-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
+      </div>
+      
+      <div className="relative container mx-auto px-4 py-8 max-w-7xl">
         
-        {/* En-tête moderne */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                Analyse SEO
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                {selectedWebsite?.name || "Tableau de bord SEO"}
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Badge variant="outline" className="px-3 py-1">
-                <Clock className="h-3 w-3 mr-1" />
-                Dernière analyse: {new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR')}
-              </Badge>
+        {/* En-tête moderne avec glassmorphism */}
+        <div className="mb-12">
+          <div className="backdrop-blur-xl bg-white/30 dark:bg-slate-800/30 rounded-3xl border border-white/20 dark:border-slate-700/20 p-8 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+                    <BarChart3 className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                      Tableau de bord SEO
+                    </h1>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg">
+                      Analyse complète de {selectedWebsite?.name || 'votre site web'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Indicateurs de statut en temps réel */}
+                <div className="flex items-center space-x-6 mt-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Analyse active</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4 text-slate-500" />
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                      Dernière mise à jour: {seoAnalysis?.analyzedAt ? new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR') : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="hidden lg:block">
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-slate-800 dark:text-white">{seoAnalysis.overallScore}/100</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-300">Score global</div>
+                    <div className="w-16 h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-2">
+                      <div 
+                        className="h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-1000"
+                        style={{ width: `${seoAnalysis.overallScore}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Score principal moderne */}
-        <Card className={`mb-8 border-2 ${getScoreBgColor(seoAnalysis.overallScore)}`}>
-          <CardContent className="p-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center space-x-4">
-                  <div className={`text-5xl font-bold ${getScoreColor(seoAnalysis.overallScore)}`}>
+        {/* Score principal avec design premium */}
+        <div className="mb-12">
+          <div className="backdrop-blur-xl bg-gradient-to-r from-white/40 to-white/20 dark:from-slate-800/40 dark:to-slate-800/20 rounded-3xl border border-white/30 dark:border-slate-700/30 p-8 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+              
+              {/* Score principal */}
+              <div className="lg:col-span-1 text-center lg:text-left">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4 shadow-lg">
+                  <Target className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">Score SEO Global</h3>
+                <div className="flex items-center justify-center lg:justify-start space-x-2">
+                  <div className={`text-6xl font-bold ${getScoreColor(seoAnalysis.overallScore)}`}>
                     {seoAnalysis.overallScore}
                   </div>
-                  <div>
-                    <div className="text-lg font-semibold text-slate-700">Score SEO Global</div>
-                    <div className="text-sm text-slate-500">
-                      {seoAnalysis.overallScore >= 80 ? 'Excellent' : 
-                       seoAnalysis.overallScore >= 60 ? 'Bon' : 'À améliorer'}
-                    </div>
+                  <div className="text-slate-500 text-2xl">/100</div>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-3">
+                    <div 
+                      className="h-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-1000 shadow-sm"
+                      style={{ width: `${seoAnalysis.overallScore}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {seoAnalysis.overallScore >= 80 ? 'Excellent' : seoAnalysis.overallScore >= 60 ? 'Bon' : 'À améliorer'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Métriques détaillées */}
+              <div className="lg:col-span-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-white/50 dark:bg-slate-700/50 rounded-2xl border border-white/20 dark:border-slate-600/20 backdrop-blur-sm">
+                    <div className="text-2xl font-bold text-emerald-600">{seoAnalysis.organicTraffic}</div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">Trafic/mois</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/50 dark:bg-slate-700/50 rounded-2xl border border-white/20 dark:border-slate-600/20 backdrop-blur-sm">
+                    <div className="text-2xl font-bold text-blue-600">{seoAnalysis.keywordsRanking}</div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">Mots-clés</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/50 dark:bg-slate-700/50 rounded-2xl border border-white/20 dark:border-slate-600/20 backdrop-blur-sm">
+                    <div className="text-2xl font-bold text-purple-600">{seoAnalysis.backlinks}</div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">Backlinks</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/50 dark:bg-slate-700/50 rounded-2xl border border-white/20 dark:border-slate-600/20 backdrop-blur-sm">
+                    <div className="text-2xl font-bold text-amber-600">{seoAnalysis.pageSpeed}</div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">Vitesse</div>
                   </div>
                 </div>
-                <Progress value={seoAnalysis.overallScore} className="mt-4 h-3" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-600">{seoAnalysis.pageSpeed}</div>
-                <div className="text-sm text-slate-500">Vitesse Page</div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Métriques principales - Design épuré */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg bg-white/70 backdrop-blur">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-2xl font-bold text-slate-900">{seoAnalysis.organicTraffic}</div>
-                  <div className="text-sm text-slate-600">Trafic Organique/mois</div>
+        {/* Grille de sections principales avec glassmorphism */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          
+          {/* Section Mots-clés avec design premium */}
+          <div className="backdrop-blur-xl bg-white/30 dark:bg-slate-800/30 rounded-3xl border border-white/20 dark:border-slate-700/20 p-8 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+                  <Search className="h-6 w-6 text-white" />
                 </div>
-                <Users className="h-8 w-8 text-blue-600" />
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-white">Top Mots-clés</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{seoAnalysis.keywordsRanking} positions suivies</p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            
+            <div className="space-y-4">
+              {seoAnalysis.keywords?.slice(0, 4).map((keyword, index) => (
+                <div key={keyword.keyword} className="flex items-center justify-between p-4 bg-white/50 dark:bg-slate-700/50 rounded-2xl border border-white/20 dark:border-slate-600/20">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                      {keyword.position}
+                    </div>
+                    <div>
+                      <div className="font-medium text-slate-800 dark:text-white">{keyword.keyword}</div>
+                      <div className="text-xs text-slate-500">{keyword.volume} recherches/mois</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {keyword.trend === 'up' && <TrendingUp className="h-4 w-4 text-emerald-500" />}
+                    {keyword.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500" />}
+                    {keyword.trend === 'stable' && <Minus className="h-4 w-4 text-slate-400" />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-lg bg-white/70 backdrop-blur">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-2xl font-bold text-slate-900">{seoAnalysis.keywordsRanking}</div>
-                  <div className="text-sm text-slate-600">Mots-clés Classés</div>
+          {/* Section Technique avec glassmorphism */}
+          <div className="backdrop-blur-xl bg-white/30 dark:bg-slate-800/30 rounded-3xl border border-white/20 dark:border-slate-700/20 p-8 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+                  <Globe className="h-6 w-6 text-white" />
                 </div>
-                <Search className="h-8 w-8 text-emerald-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-white/70 backdrop-blur">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-slate-900">{seoAnalysis.backlinks}</div>
-                  <div className="text-sm text-slate-600">Backlinks</div>
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-white">État Technique</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Vérifications SEO</p>
                 </div>
-                <Link className="h-8 w-8 text-purple-600" />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-white/70 backdrop-blur">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-2xl font-bold text-slate-900">{seoAnalysis.pageSpeed}/100</div>
-                  <div className="text-sm text-slate-600">Performance</div>
-                </div>
-                <Zap className="h-8 w-8 text-amber-600" />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="text-center p-4 bg-white/50 dark:bg-slate-700/50 rounded-2xl border border-white/20 dark:border-slate-600/20">
+                <div className="text-3xl font-bold text-emerald-600">{seoAnalysis.organicTraffic}</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">Visiteurs/mois</div>
               </div>
-            </CardContent>
-          </Card>
+              <div className="text-center p-4 bg-white/50 dark:bg-slate-700/50 rounded-2xl border border-white/20 dark:border-slate-600/20">
+                <div className="text-3xl font-bold text-purple-600">{seoAnalysis.backlinks}</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">Backlinks</div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-slate-700/50 rounded-xl">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Mobile-friendly</span>
+                {seoAnalysis.technicalSeo?.mobileFriendly ? 
+                  <CheckCircle className="h-5 w-5 text-emerald-500" /> : 
+                  <XCircle className="h-5 w-5 text-red-500" />
+                }
+              </div>
+              <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-slate-700/50 rounded-xl">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">HTTPS sécurisé</span>
+                {seoAnalysis.technicalSeo?.httpsSecure ? 
+                  <CheckCircle className="h-5 w-5 text-emerald-500" /> : 
+                  <XCircle className="h-5 w-5 text-red-500" />
+                }
+              </div>
+              <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-slate-700/50 rounded-xl">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Sitemap XML</span>
+                {seoAnalysis.technicalSeo?.xmlSitemap ? 
+                  <CheckCircle className="h-5 w-5 text-emerald-500" /> : 
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                }
+              </div>
+              <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-slate-700/50 rounded-xl">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Robots.txt</span>
+                {seoAnalysis.technicalSeo?.robotsTxt ? 
+                  <CheckCircle className="h-5 w-5 text-emerald-500" /> : 
+                  <XCircle className="h-5 w-5 text-red-500" />
+                }
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
