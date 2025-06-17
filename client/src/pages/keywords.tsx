@@ -21,7 +21,7 @@ import { Shimmer, MetricShimmer, KeywordShimmer } from "@/components/ui/shimmer"
 import type { Website, SeoAnalysis } from "@shared/schema";
 
 export default function Keywords() {
-  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number | undefined>();
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"position" | "volume" | "keyword">("position");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");

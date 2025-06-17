@@ -32,7 +32,7 @@ import {
 import type { Website, SeoAnalysis } from "@shared/schema";
 
 export default function Reports() {
-  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number | undefined>();
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
 
   const { data: websites, isLoading: websitesLoading } = useQuery<Website[]>({
     queryKey: ["/api/websites"],
