@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "pageAnalyzed": "https://www.plug2ai.com/#services",
+    "crawlDate": "2024-06-17",
+    "locale": "fr-FR"
+  },
+  "overview": {
+    "httpStatus": 200,
+    "title": "Plug2AI – Accélérez votre transformation Data & IA",
+    "metaDescription": "Plug2AI accompagne votre transformation numérique grâce à l’IA, la Data Science et l’Automatisation. Conseil, développement et formation.",
+    "wordCount": 2300,
+    "mainH1": "Simplifiez la Data, libérez l’IA"
+  },
+  "technical": {
+    "coreWebVitals": {
+      "mobile": { "LCPs": 3.1, "CLS": 0.22, "INP": 310 },
+      "desktop": { "LCPs": 1.9, "CLS": 0.08, "INP": 130 }
+    },
+    "images": {
+      "count": 18,
+      "totalWeightMB": 2.7,
+      "lazyLoad": true,
+      "webpOrAvifRate": 0.28
+    },
+    "canonical": { "present": false },
+    "hreflang": { "present": false, "expected": ["fr-FR", "en-US"] },
+    "structuredData": { "typesDetected": [], "needed": ["Organization", "Service", "FAQPage"] },
+    "securityHeaders": {
+      "present": ["Strict-Transport-Security"],
+      "missing": ["Content-Security-Policy", "X-Content-Type-Options", "Permissions-Policy"]
+    }
+  },
+  "domainMetrics": {
+    "domainAuthorityMoz": 11,
+    "referringDomains": 24,
+    "totalBacklinks": 51,
+    "totalOrganicKeywords": 16,
+    "estOrganicTrafficMonthly": 30
+  },
+  "keywordStats": {
+    "brandKeywords": [
+      {
+        "keyword": "plug2ai",
+        "globalVolume": 30,
+        "frVolume": 15,
+        "rankFR": 1,
+        "difficulty": 2,
+        "cpcUsd": 0.00,
+        "trafficSharePct": 63
+      }
+    ],
+    "nonBrandTop10FR": [
+      { "keyword": "expert ia paris", "volume": 20, "rank": 8, "difficulty": 21, "estimatedTraffic": 2 },
+      { "keyword": "conseil data science", "volume": 30, "rank": 10, "difficulty": 23, "estimatedTraffic": 2 }
+    ],
+    "questionKeywordsFR": [
+      { "keyword": "comment déployer une stratégie ia", "volume": 15 },
+      { "keyword": "qu’est-ce qu’une data factory", "volume": 30 }
+    ]
+  },
+  "competitors": [
+    { "domain": "datasulting.fr", "trafficEst": 1100, "domainAuthority": 33, "overlapKeywords": 7, "positioning": "Conseil Data PME" },
+    { "domain": "quantmetry.com", "trafficEst": 4000, "domainAuthority": 38, "overlapKeywords": 11, "positioning": "IA/ML Grandes entreprises" },
+    { "domain": "axionable.com", "trafficEst": 1600, "domainAuthority": 36, "overlapKeywords": 6, "positioning": "Sustainable AI, Développement IA" }
+  ],
+  "actionPlan90Days": [
+    {
+      "priority": "high",
+      "task": "Implémenter une balise canonique sur chaque URL principale",
+      "expectedImpact": "Meilleure indexation, diminution des conflits d’URL",
+      "kpi": "-100% d’alertes URL dupliquées (GSC)"
+    },
+    {
+      "priority": "high",
+      "task": "Ajouter balises hreflang FR/EN pour préparer l’internationalisation",
+      "expectedImpact": "Alignement SEO multilingue, visibilité UK/US",
+      "kpi": "Pages indexées EN > 0 (GSC)"
+    },
+    {
+      "priority": "high",
+      "task": "Réduction du poids des images >150Ko en WebP + lazy loading généralisé",
+      "expectedImpact": "LCP mobile <2,5s, score PSI mobile >90",
+      "kpi": "LCP mobile <2,5s"
+    },
+    {
+      "priority": "medium",
+      "task": "Structurer la Home : 1 seul H1 <h1> sur la proposition de valeur clé",
+      "expectedImpact": "Cohérence sémantique, meilleure lecture robots",
+      "kpi": "+5 pts sur score de lisibilité Ahrefs"
+    },
+    {
+      "priority": "medium",
+      "task": "Ajouter un bloc FAQ sur l’IA & la Data (avec données structurées)",
+      "expectedImpact": "Ottention en People Also Ask, +CTR",
+      "kpi": "Rich snippet FAQ visible (SERP)"
+    },
+    {
+      "priority": "low",
+      "task": "Lister l’entreprise sur Crunchbase, Annuaire Alliance Data, FrenchTech",
+      "expectedImpact": "Obtenir 10 à 20 domains .fr référents à DA>30",
+      "kpi": "+10 referring domains (Ahrefs)"
+    }
+  ],
+  "recommendations": {
+    "onPage": [
+      "Limiter la page à un <h1> unique contenant le mot-clé cible principal (eg. 'Conseil IA et Data Science Paris – Plug2AI').",
+      "Utiliser des H2 structurants : Services, Méthodologie, Réalisations, FAQ.",
+      "Reformuler les CTA pour intégrer des mots-clés secondaires ('Accompagnement IA', 'Développement data sur mesure')."
+    ],
+    "content": [
+      "Publier un nouvel article blog : 'Comment une PME peut exploiter l’IA concrètement en 2024 ?' (cibler 'stratégie ia pme', volume 30).",
+      "Créer une page 'Cas Clients' incluant témoignages et screenshots (utiliser Review schema)."
+    ],
+    "technical": [
+      "Activer Brotli ou Gzip sur le serveur, appliquer un cache browser 1 an sur les ressources statiques.",
+      "Ajouter les données structurées Organization et Service sur la page d’accueil et la page services.",
+      "Corriger les problèmes de CLS mobile (réserver la hauteur pour tous les carrousels et images)."
+    ],
+    "international": [
+      "Traduire une page /en/ (Landing EN) et préparer le sitemap multilingue avec hreflang FR/EN.",
+      "Déployer votre site sur un CDN européen (OVH/Railgun/Cloudflare EU) pour réduire le TTFB FR."
+    ],
+    "offPage": [
+      "Obtenir des backlinks depuis des blogs français data/tech (ex: Siècle Digital, IA @ FrenchWeb, Data News).",
+      "Proposer un guest-post 'Automatisation IA pour TPE: 3 cas d’usage concrets' sur BlogDuModerateur ou BDM."
+    ],
+    "coreWebVitals": [
+      "Précharger le premier visuel (<link rel=\"preload\" as=\"image\">) du hero.",
+      "Supprimer les animations gourmandes au scroll sur mobile ou les retarder après l’interaction utilisateur.",
+      "Monitorer la performance via CrUX et mettre en place une alerte slack si LCP >2.6s (mobile)."
+    ],
+    "keywordStrategy": [
+      {
+        "cluster": "conseil IA PME",
+        "newKeywords": ["accompagnement ia tpe", "expert ia indépendant"],
+        "contentType": "landing page + article comparatif",
+        "internalLinking": "Depuis /blog/ vers /services avec ancre 'solutions IA PME'"
+      },
+      {
+        "cluster": "data science",
+        "newKeywords": ["usages data science pme", "data factory sur-mesure"],
+        "contentType": "liste de cas d’usage téléchargeable",
+        "internalLinking": "Section 'Ressources' avec CTA 'Télécharger le guide Data Science'"
+      }
+    ]
+  },
+  "notes": "Site récent avec faibles signaux d’autorité, priorité à l’optimisation technique et structurelle. Prochaine mise à jour à J+90 ou après refonte multilingue. Mettre à jour les mot-clés/ciblages via API Semrush tous les 30j."
+}
