@@ -19,7 +19,8 @@ import {
   Clock,
   Target,
   BarChart3,
-  Users
+  Users,
+  ArrowUpRight
 } from "lucide-react";
 import { 
   Shimmer, 
