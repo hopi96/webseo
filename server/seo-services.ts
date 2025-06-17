@@ -121,12 +121,12 @@ function extractRecommendations(audits: any): Array<{
 }> {
   const recommendations = [];
   
-  // Performance recommendations
+  // Recommandations de performance
   if (audits['first-contentful-paint']?.score < 0.9) {
     recommendations.push({
       id: 'fcp',
-      title: 'Improve First Contentful Paint',
-      description: 'Optimize images and reduce server response time to improve loading speed.',
+      title: 'Améliorer le Premier Contenu Affiché',
+      description: 'Optimisez les images et réduisez le temps de réponse du serveur pour améliorer la vitesse de chargement.',
       priority: 'high' as const,
       category: 'Performance'
     });
@@ -135,8 +135,8 @@ function extractRecommendations(audits: any): Array<{
   if (audits['largest-contentful-paint']?.score < 0.9) {
     recommendations.push({
       id: 'lcp',
-      title: 'Optimize Largest Contentful Paint',
-      description: 'Reduce render-blocking resources and optimize critical images.',
+      title: 'Optimiser le Plus Grand Élément Affiché',
+      description: 'Réduisez les ressources bloquant le rendu et optimisez les images critiques.',
       priority: 'high' as const,
       category: 'Performance'
     });
@@ -145,19 +145,19 @@ function extractRecommendations(audits: any): Array<{
   if (audits['cumulative-layout-shift']?.score < 0.9) {
     recommendations.push({
       id: 'cls',
-      title: 'Minimize Layout Shift',
-      description: 'Ensure images and ads have defined dimensions to prevent layout shifts.',
+      title: 'Minimiser les Décalages de Mise en Page',
+      description: 'Assurez-vous que les images et publicités ont des dimensions définies pour éviter les décalages.',
       priority: 'medium' as const,
       category: 'Performance'
     });
   }
 
-  // SEO recommendations
+  // Recommandations SEO
   if (audits['meta-description']?.score === null || audits['meta-description']?.score < 1) {
     recommendations.push({
       id: 'meta-description',
-      title: 'Add Meta Descriptions',
-      description: 'Add unique meta descriptions to improve search result click-through rates.',
+      title: 'Ajouter des Méta-Descriptions',
+      description: 'Ajoutez des méta-descriptions uniques pour améliorer le taux de clic dans les résultats de recherche.',
       priority: 'high' as const,
       category: 'SEO'
     });
@@ -166,8 +166,8 @@ function extractRecommendations(audits: any): Array<{
   if (audits['document-title']?.score < 1) {
     recommendations.push({
       id: 'page-title',
-      title: 'Optimize Page Titles',
-      description: 'Ensure all pages have unique, descriptive titles.',
+      title: 'Optimiser les Titres de Page',
+      description: 'Assurez-vous que toutes les pages ont des titres uniques et descriptifs.',
       priority: 'high' as const,
       category: 'SEO'
     });
@@ -226,10 +226,10 @@ export async function performComprehensiveSeoAnalysis(url: string): Promise<Inse
       },
       recommendations: [{
         id: 'api-error',
-        title: 'API Error',
-        description: 'Unable to analyze website. Please check the URL and try again.',
+        title: 'Erreur d\'Analyse',
+        description: 'Impossible d\'analyser le site web. Veuillez vérifier l\'URL et réessayer.',
         priority: 'high' as const,
-        category: 'Error'
+        category: 'Erreur'
       }],
       keywords: [],
       trafficData: []
