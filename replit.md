@@ -99,9 +99,12 @@ The application uses two main tables:
 
 Changelog:
 - June 16, 2025. Initial setup
+- June 17, 2025. Integrated real SEO data via Google PageSpeed Insights API, complete French translation, removed all mock data
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 Language: French (user communicates in French)
 Interest: Real SEO data integration rather than mock data
+Requirements: No fictional/mock data, only authentic SEO analysis from real APIs
+Interface: Complete French translation required
