@@ -1,275 +1,384 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MobileHeader } from "@/components/layout/mobile-header";
-import { BottomNavigation } from "@/components/layout/bottom-navigation";
-import { WebsiteSelector } from "@/components/website/website-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Download, Calendar, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
+import { 
+  FileText, 
+  Download,
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Target,
+  Globe,
+  Zap,
+  Users,
+  Search,
+  Link
+} from "lucide-react";
 import type { Website, SeoAnalysis } from "@shared/schema";
 
 export default function Reports() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number | undefined>();
 
-  const { data: websites } = useQuery<Website[]>({
+  const { data: websites, isLoading: websitesLoading } = useQuery<Website[]>({
     queryKey: ["/api/websites"],
   });
 
-  const { data: seoAnalysis } = useQuery<SeoAnalysis>({
+  const { data: seoAnalysis, isLoading: analysisLoading } = useQuery<SeoAnalysis>({
     queryKey: ["/api/websites", selectedWebsiteId, "seo-analysis"],
     enabled: !!selectedWebsiteId,
   });
 
-  // Auto-select first website if none selected
   useEffect(() => {
     if (websites && websites.length > 0 && !selectedWebsiteId) {
       setSelectedWebsiteId(websites[0].id);
     }
   }, [websites, selectedWebsiteId]);
 
-  const handleWebsiteChange = (websiteId: number) => {
-    setSelectedWebsiteId(websiteId);
-  };
+  const selectedWebsite = websites?.find(w => w.id === selectedWebsiteId);
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-seo-success";
-    if (score >= 60) return "text-seo-warning";
-    return "text-seo-error";
-  };
-
-  const getScoreLabel = (score: number) => {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good";
-    return "Needs Improvement";
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return <AlertTriangle className="w-4 h-4 text-seo-error" />;
-      case 'medium':
-        return <AlertTriangle className="w-4 h-4 text-seo-warning" />;
-      default:
-        return <CheckCircle className="w-4 h-4 text-seo-success" />;
-    }
-  };
-
-  const technicalChecks = seoAnalysis ? [
-    { name: "Mobile Friendly", status: seoAnalysis.technicalSeo.mobileFriendly },
-    { name: "HTTPS Secure", status: seoAnalysis.technicalSeo.httpsSecure },
-    { name: "XML Sitemap", status: seoAnalysis.technicalSeo.xmlSitemap },
-    { name: "Robots.txt", status: seoAnalysis.technicalSeo.robotsTxt },
-  ] : [];
-
-  const passedChecks = technicalChecks.filter(check => check.status).length;
-  const technicalScore = (passedChecks / technicalChecks.length) * 100;
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark pb-20">
-      <MobileHeader />
-      
-      <WebsiteSelector
-        selectedWebsiteId={selectedWebsiteId}
-        onWebsiteChange={handleWebsiteChange}
-      />
-
-      <main className="px-4 py-4">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">SEO Reports</h1>
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
-        </div>
-
-        {seoAnalysis && (
-          <div className="space-y-4">
-            {/* Overall Score */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Overall SEO Score</span>
-                  <Badge variant="outline" className="flex items-center">
-                    <Calendar className="w-3 h-3 mr-1" />
-                    {new Date(seoAnalysis.analyzedAt).toLocaleDateString()}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`text-3xl font-bold ${getScoreColor(seoAnalysis.overallScore)}`}>
-                    {seoAnalysis.overallScore}/100
-                  </span>
-                  <span className={`text-sm font-medium ${getScoreColor(seoAnalysis.overallScore)}`}>
-                    {getScoreLabel(seoAnalysis.overallScore)}
-                  </span>
-                </div>
-                <Progress value={seoAnalysis.overallScore} className="h-2" />
-              </CardContent>
-            </Card>
-
-            {/* Performance Metrics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-2xl font-bold text-primary mb-1">
-                      {seoAnalysis.organicTraffic.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Organic Traffic</div>
-                    <div className="flex items-center justify-center mt-1 text-seo-success">
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                      <span className="text-xs">+12.5%</span>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-2xl font-bold text-seo-success mb-1">
-                      {seoAnalysis.keywordsRanking}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Keywords Ranking</div>
-                    <div className="flex items-center justify-center mt-1 text-seo-success">
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                      <span className="text-xs">+8.2%</span>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600 mb-1">
-                      {seoAnalysis.backlinks.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Backlinks</div>
-                    <div className="flex items-center justify-center mt-1 text-seo-success">
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                      <span className="text-xs">+5.1%</span>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-2xl font-bold text-seo-warning mb-1">
-                      {seoAnalysis.pageSpeed}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Page Speed</div>
-                    <div className="flex items-center justify-center mt-1 text-seo-error">
-                      <TrendingUp className="w-3 h-3 mr-1 rotate-180" />
-                      <span className="text-xs">-2.3%</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Technical SEO */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Technical SEO Health</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Overall Technical Score</span>
-                    <span className={`text-sm font-bold ${getScoreColor(technicalScore)}`}>
-                      {Math.round(technicalScore)}%
-                    </span>
-                  </div>
-                  <Progress value={technicalScore} className="h-2" />
-                </div>
-                
-                <div className="space-y-3">
-                  {technicalChecks.map((check, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{check.name}</span>
-                      <div className="flex items-center">
-                        <span className={`text-xs font-medium mr-2 ${check.status ? 'text-seo-success' : 'text-seo-error'}`}>
-                          {check.status ? 'Passed' : 'Failed'}
-                        </span>
-                        {check.status ? (
-                          <CheckCircle className="w-4 h-4 text-seo-success" />
-                        ) : (
-                          <AlertTriangle className="w-4 h-4 text-seo-error" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Issues & Recommendations */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Issues & Recommendations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {seoAnalysis.recommendations.map((recommendation) => (
-                    <div key={recommendation.id} className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      {getPriorityIcon(recommendation.priority)}
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900 dark:text-white mb-1">
-                          {recommendation.title}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                          {recommendation.description}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {recommendation.category}
-                          </Badge>
-                          <Badge 
-                            variant={recommendation.priority === 'high' ? 'destructive' : 
-                                   recommendation.priority === 'medium' ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {recommendation.priority} priority
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Keywords */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Performing Keywords</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {seoAnalysis.keywords.slice(0, 5).map((keyword, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                      <div>
-                        <div className="font-medium text-sm">{keyword.keyword}</div>
-                        <div className="text-xs text-gray-500">Volume: {keyword.volume.toLocaleString()}</div>
-                      </div>
-                      <Badge variant={keyword.position <= 3 ? 'default' : keyword.position <= 10 ? 'secondary' : 'outline'}>
-                        #{keyword.position}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {!seoAnalysis && (
-          <div className="text-center py-12">
-            <div className="text-gray-500 dark:text-gray-400">
-              No analysis data available. Please select a website with existing analysis.
+  if (websitesLoading || analysisLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-slate-200 rounded-lg w-64"></div>
+            <div className="h-32 bg-slate-200 rounded-2xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-48 bg-slate-200 rounded-xl"></div>
+              ))}
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      </div>
+    );
+  }
 
-      <BottomNavigation />
+  if (!seoAnalysis) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <Card className="p-8 text-center max-w-md">
+          <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-slate-600 mb-2">Aucun rapport disponible</h3>
+          <p className="text-slate-500">Sélectionnez un site web pour générer son rapport SEO.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  const getScoreGrade = (score: number) => {
+    if (score >= 80) return { grade: "A", color: "text-emerald-600", bg: "bg-emerald-50" };
+    if (score >= 60) return { grade: "B", color: "text-amber-600", bg: "bg-amber-50" };
+    if (score >= 40) return { grade: "C", color: "text-orange-600", bg: "bg-orange-50" };
+    return { grade: "D", color: "text-red-600", bg: "bg-red-50" };
+  };
+
+  const scoreGrade = getScoreGrade(seoAnalysis.overallScore);
+
+  const highPriorityRecommendations = seoAnalysis.recommendations?.filter(r => r.priority === 'high') || [];
+  const mediumPriorityRecommendations = seoAnalysis.recommendations?.filter(r => r.priority === 'medium') || [];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        
+        {/* En-tête du rapport */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                Rapport SEO Complet
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-1">
+                {selectedWebsite?.name} - {new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Exporter PDF
+              </Button>
+              <Badge variant="outline" className="px-3 py-1">
+                <Calendar className="h-3 w-3 mr-1" />
+                {new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR')}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Résumé exécutif */}
+        <Card className="mb-8 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              <span>Résumé Exécutif</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              {/* Score global avec note */}
+              <div className="lg:col-span-1">
+                <div className={`p-8 rounded-2xl ${scoreGrade.bg} text-center`}>
+                  <div className={`text-6xl font-bold ${scoreGrade.color} mb-2`}>
+                    {scoreGrade.grade}
+                  </div>
+                  <div className="text-3xl font-bold text-slate-700 mb-2">
+                    {seoAnalysis.overallScore}/100
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    Score SEO Global
+                  </div>
+                  <Progress value={seoAnalysis.overallScore} className="mt-4 h-2" />
+                </div>
+              </div>
+
+              {/* Métriques clés */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-white rounded-xl shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-slate-900">{seoAnalysis.organicTraffic}</div>
+                        <div className="text-sm text-slate-600">Trafic Organique/mois</div>
+                      </div>
+                      <Users className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-white rounded-xl shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-slate-900">{seoAnalysis.keywordsRanking}</div>
+                        <div className="text-sm text-slate-600">Mots-clés Classés</div>
+                      </div>
+                      <Search className="h-6 w-6 text-emerald-600" />
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-white rounded-xl shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-slate-900">{seoAnalysis.backlinks}</div>
+                        <div className="text-sm text-slate-600">Backlinks</div>
+                      </div>
+                      <Link className="h-6 w-6 text-purple-600" />
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-white rounded-xl shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-slate-900">{seoAnalysis.pageSpeed}</div>
+                        <div className="text-sm text-slate-600">Performance</div>
+                      </div>
+                      <Zap className="h-6 w-6 text-amber-600" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          
+          {/* Analyse technique détaillée */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Globe className="h-5 w-5 text-emerald-600" />
+                <span>Analyse Technique</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-slate-50 rounded-xl">
+                  <div className="text-2xl font-bold text-slate-900 mb-1">
+                    {Object.values(seoAnalysis.technicalSeo || {}).filter(Boolean).length}
+                  </div>
+                  <div className="text-sm text-slate-600">Tests Réussis</div>
+                </div>
+                <div className="text-center p-4 bg-slate-50 rounded-xl">
+                  <div className="text-2xl font-bold text-slate-900 mb-1">
+                    {4 - Object.values(seoAnalysis.technicalSeo || {}).filter(Boolean).length}
+                  </div>
+                  <div className="text-sm text-slate-600">À Corriger</div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <span className="text-sm font-medium">Compatible Mobile</span>
+                  {seoAnalysis.technicalSeo?.mobileFriendly ? 
+                    <CheckCircle className="h-5 w-5 text-emerald-600" /> :
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  }
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <span className="text-sm font-medium">HTTPS Sécurisé</span>
+                  {seoAnalysis.technicalSeo?.httpsSecure ? 
+                    <CheckCircle className="h-5 w-5 text-emerald-600" /> :
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  }
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <span className="text-sm font-medium">Sitemap XML</span>
+                  {seoAnalysis.technicalSeo?.xmlSitemap ? 
+                    <CheckCircle className="h-5 w-5 text-emerald-600" /> :
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  }
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <span className="text-sm font-medium">Robots.txt</span>
+                  {seoAnalysis.technicalSeo?.robotsTxt ? 
+                    <CheckCircle className="h-5 w-5 text-emerald-600" /> :
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  }
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top mots-clés */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Target className="h-5 w-5 text-blue-600" />
+                <span>Top Mots-clés</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {seoAnalysis.keywords?.slice(0, 5).map((keyword, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                    <div>
+                      <div className="font-semibold text-slate-900">{keyword.keyword}</div>
+                      <div className="text-sm text-slate-600">Volume: {keyword.volume}/mois</div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className="px-2 py-1">
+                        #{keyword.position}
+                      </Badge>
+                      {keyword.trend === 'up' ? (
+                        <TrendingUp className="h-4 w-4 text-emerald-600" />
+                      ) : keyword.trend === 'down' ? (
+                        <TrendingDown className="h-4 w-4 text-red-600" />
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Plan d'action prioritaire */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Clock className="h-5 w-5 text-amber-600" />
+              <span>Plan d'Action Prioritaire</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              
+              {/* Actions priorité haute */}
+              {highPriorityRecommendations.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-red-800 mb-4 flex items-center">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Actions Urgentes ({highPriorityRecommendations.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {highPriorityRecommendations.map((rec, index) => (
+                      <div key={index} className="p-6 bg-red-50 rounded-xl border-l-4 border-l-red-500">
+                        <h5 className="font-semibold text-slate-900 mb-2">{rec.title}</h5>
+                        <p className="text-sm text-slate-600 mb-3">{rec.description}</p>
+                        <Badge className="bg-red-100 text-red-800 text-xs">
+                          {rec.category}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions priorité moyenne */}
+              {mediumPriorityRecommendations.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-amber-800 mb-4 flex items-center">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Actions Recommandées ({mediumPriorityRecommendations.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {mediumPriorityRecommendations.map((rec, index) => (
+                      <div key={index} className="p-6 bg-amber-50 rounded-xl border-l-4 border-l-amber-500">
+                        <h5 className="font-semibold text-slate-900 mb-2">{rec.title}</h5>
+                        <p className="text-sm text-slate-600 mb-3">{rec.description}</p>
+                        <Badge className="bg-amber-100 text-amber-800 text-xs">
+                          {rec.category}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Conclusion et prochaines étapes */}
+        <Card className="mt-8 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Target className="h-5 w-5 text-blue-600" />
+              <span>Conclusions et Recommandations</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose max-w-none">
+              <p className="text-slate-700 mb-4">
+                L'analyse SEO de <strong>{selectedWebsite?.name}</strong> révèle un score global de{" "}
+                <strong>{seoAnalysis.overallScore}/100</strong>, classé en catégorie{" "}
+                <strong>{scoreGrade.grade}</strong>.
+              </p>
+              
+              <div className="bg-blue-50 p-6 rounded-xl mb-6">
+                <h4 className="font-semibold text-blue-900 mb-3">Points Forts Identifiés</h4>
+                <ul className="space-y-2 text-blue-800">
+                  {seoAnalysis.technicalSeo?.httpsSecure && <li>• Site sécurisé avec HTTPS</li>}
+                  {seoAnalysis.technicalSeo?.mobileFriendly && <li>• Compatible avec les appareils mobiles</li>}
+                  {seoAnalysis.technicalSeo?.robotsTxt && <li>• Fichier robots.txt présent</li>}
+                  {seoAnalysis.keywords && seoAnalysis.keywords.length > 0 && (
+                    <li>• {seoAnalysis.keywords.length} mots-clés positionnés</li>
+                  )}
+                </ul>
+              </div>
+
+              <div className="bg-amber-50 p-6 rounded-xl">
+                <h4 className="font-semibold text-amber-900 mb-3">Axes d'Amélioration Prioritaires</h4>
+                <ul className="space-y-2 text-amber-800">
+                  {!seoAnalysis.technicalSeo?.xmlSitemap && <li>• Implémentation d'un sitemap XML</li>}
+                  {highPriorityRecommendations.length > 0 && (
+                    <li>• {highPriorityRecommendations.length} actions urgentes à traiter</li>
+                  )}
+                  <li>• Optimisation des performances (score actuel: {seoAnalysis.pageSpeed}/100)</li>
+                  <li>• Amélioration du contenu et de la structure</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
