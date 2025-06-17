@@ -12,7 +12,7 @@ export function MobileHeader() {
           <div className="w-8 h-8 bg-gradient-to-r from-primary to-seo-secondary rounded-lg flex items-center justify-center">
             <ChartLine className="text-white w-4 h-4" />
           </div>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">SEO Analytics</h1>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Analyse SEO</h1>
         </div>
         <div className="flex items-center space-x-2">
           <Button

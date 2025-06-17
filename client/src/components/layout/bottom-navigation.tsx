@@ -5,10 +5,10 @@ export function BottomNavigation() {
   const [location] = useLocation();
 
   const navItems = [
-    { path: "/", icon: ChartLine, label: "Dashboard" },
-    { path: "/keywords", icon: Search, label: "Keywords" },
-    { path: "/reports", icon: FileText, label: "Reports" },
-    { path: "/settings", icon: Settings, label: "Settings" },
+    { path: "/", icon: ChartLine, label: "Tableau de bord" },
+    { path: "/keywords", icon: Search, label: "Mots-clés" },
+    { path: "/reports", icon: FileText, label: "Rapports" },
+    { path: "/settings", icon: Settings, label: "Paramètres" },
   ];
 
   return (

@@ -30,63 +30,7 @@ export class MemStorage implements IStorage {
   }
 
   private async initializeSampleData() {
-    // Create sample websites
-    const sampleWebsites = [
-      { url: "https://example.com", name: "Example Site" },
-      { url: "https://mystore.com", name: "My Store" },
-      { url: "https://techblog.net", name: "Tech Blog" }
-    ];
-
-    for (const site of sampleWebsites) {
-      const website = await this.createWebsite(site);
-      
-      // Create sample SEO analysis for each website
-      await this.createSeoAnalysis({
-        websiteId: website.id,
-        overallScore: Math.floor(Math.random() * 30) + 70, // 70-100
-        organicTraffic: Math.floor(Math.random() * 10000) + 5000,
-        keywordsRanking: Math.floor(Math.random() * 200) + 100,
-        backlinks: Math.floor(Math.random() * 1000) + 500,
-        pageSpeed: Math.floor(Math.random() * 20) + 80,
-        technicalSeo: {
-          mobileFriendly: Math.random() > 0.2,
-          httpsSecure: Math.random() > 0.1,
-          xmlSitemap: Math.random() > 0.3,
-          robotsTxt: Math.random() > 0.2
-        },
-        recommendations: [
-          {
-            id: "meta-descriptions",
-            title: "Fix Missing Meta Descriptions",
-            description: "12 pages are missing meta descriptions. This impacts click-through rates from search results.",
-            priority: "high" as const,
-            category: "On-Page SEO"
-          },
-          {
-            id: "image-alt-text",
-            title: "Optimize Image Alt Text",
-            description: "45 images lack descriptive alt text. Improve accessibility and SEO by adding relevant descriptions.",
-            priority: "medium" as const,
-            category: "Technical SEO"
-          },
-          {
-            id: "internal-linking",
-            title: "Improve Internal Linking",
-            description: "Add more internal links to improve page authority distribution and user navigation.",
-            priority: "low" as const,
-            category: "Link Building"
-          }
-        ],
-        keywords: [
-          { keyword: "react tutorials", position: 3, volume: 8200, trend: "up" as const },
-          { keyword: "javascript guide", position: 7, volume: 12100, trend: "down" as const },
-          { keyword: "web development", position: 12, volume: 15300, trend: "stable" as const },
-          { keyword: "frontend frameworks", position: 5, volume: 6800, trend: "up" as const },
-          { keyword: "programming tips", position: 15, volume: 4500, trend: "stable" as const }
-        ],
-        trafficData: this.generateTrafficData()
-      });
-    }
+    // Aucune donnée simulée - seules les vraies données via APIs seront utilisées
   }
 
   private generateTrafficData() {
