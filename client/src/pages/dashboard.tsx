@@ -39,7 +39,7 @@ export default function Dashboard() {
   });
 
   const { data: seoAnalysis, isLoading: analysisLoading } = useQuery<SeoAnalysis>({
-    queryKey: ["/api/websites", selectedWebsiteId, "seo-analysis"],
+    queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
     enabled: !!selectedWebsiteId,
   });
 
@@ -143,7 +143,12 @@ export default function Dashboard() {
     );
   }
 
-  if (!seoAnalysis || !seoAnalysis.technicalSeo) {
+  // Debug: Log des données reçues
+  console.log('Dashboard - selectedWebsiteId:', selectedWebsiteId);
+  console.log('Dashboard - seoAnalysis:', seoAnalysis);
+  console.log('Dashboard - analysisLoading:', analysisLoading);
+
+  if (!seoAnalysis && !analysisLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
         <Card className="p-8 text-center max-w-md">
@@ -155,6 +160,11 @@ export default function Dashboard() {
         </Card>
       </div>
     );
+  }
+
+  // Vérifier que l'analyse existe avant de continuer
+  if (!seoAnalysis) {
+    return null; // Afficher le loading state
   }
 
   const getScoreColor = (score: number) => {
