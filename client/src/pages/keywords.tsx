@@ -17,6 +17,7 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from "lucide-react";
+import { Shimmer, MetricShimmer, KeywordShimmer } from "@/components/ui/shimmer";
 import type { Website, SeoAnalysis } from "@shared/schema";
 
 export default function Keywords() {
@@ -85,16 +86,67 @@ export default function Keywords() {
   if (websitesLoading || analysisLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-slate-200 rounded-lg w-64"></div>
-            <div className="h-12 bg-slate-200 rounded-lg"></div>
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-16 bg-slate-200 rounded-xl"></div>
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          
+          {/* En-tête avec animation */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-3">
+                <Shimmer className="h-8 w-56 rounded-lg" />
+                <Shimmer className="h-5 w-64 rounded" />
+              </div>
+              <Shimmer className="h-8 w-24 rounded-lg" />
+            </div>
+
+            {/* Statistiques globales avec animation flottante */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="animate-float" style={{ animationDelay: `${i * 0.15}s` }}>
+                  <MetricShimmer />
+                </div>
               ))}
             </div>
           </div>
+
+          {/* Contrôles de recherche avec shimmer */}
+          <Card className="mb-8 border-0 shadow-lg animate-pulse-glow">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <Shimmer className="h-10 w-full rounded-lg" />
+                </div>
+                <div className="flex gap-2">
+                  <Shimmer className="h-10 w-20 rounded-lg" />
+                  <Shimmer className="h-10 w-20 rounded-lg" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Liste des mots-clés avec animation séquentielle */}
+          <Card className="border-0 shadow-lg animate-pulse-glow" style={{ animationDelay: '0.3s' }}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Shimmer className="h-5 w-5 rounded" />
+                <Shimmer className="h-6 w-40 rounded" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <KeywordShimmer count={8} />
+            </CardContent>
+          </Card>
+
+          {/* Indicateur de chargement sophistiqué */}
+          <div className="fixed bottom-8 right-8">
+            <div className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-full shadow-lg animate-pulse-glow">
+              <div className="relative">
+                <div className="w-4 h-4 bg-emerald-600 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 w-4 h-4 bg-emerald-600 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <span className="text-sm font-medium text-slate-700">Analyse des mots-clés...</span>
+            </div>
+          </div>
+
         </div>
       </div>
     );
