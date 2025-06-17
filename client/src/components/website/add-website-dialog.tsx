@@ -74,7 +74,7 @@ export function AddWebsiteDialog({ open, onOpenChange }: AddWebsiteDialogProps) 
         <DialogHeader>
           <DialogTitle>Ajouter un Nouveau Site Web</DialogTitle>
           <DialogDescription>
-            Add a website to start monitoring its SEO performance.
+            Ajoutez un site web pour commencer à surveiller ses performances SEO avec de vraies données.
           </DialogDescription>
         </DialogHeader>
         
@@ -85,9 +85,9 @@ export function AddWebsiteDialog({ open, onOpenChange }: AddWebsiteDialogProps) 
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Website Name</FormLabel>
+                  <FormLabel>Nom du Site Web</FormLabel>
                   <FormControl>
-                    <Input placeholder="My Website" {...field} />
+                    <Input placeholder="Mon Site Web" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,10 +99,10 @@ export function AddWebsiteDialog({ open, onOpenChange }: AddWebsiteDialogProps) 
               name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Website URL</FormLabel>
+                  <FormLabel>URL du Site Web</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="https://example.com" 
+                      placeholder="https://monsite.com" 
                       type="url"
                       {...field} 
                     />
