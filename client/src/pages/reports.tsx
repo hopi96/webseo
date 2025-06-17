@@ -21,6 +21,14 @@ import {
   Search,
   Link
 } from "lucide-react";
+import { 
+  Shimmer, 
+  MetricShimmer, 
+  ScoreShimmer, 
+  KeywordShimmer, 
+  RecommendationShimmer, 
+  TechnicalCheckShimmer 
+} from "@/components/ui/shimmer";
 import type { Website, SeoAnalysis } from "@shared/schema";
 
 export default function Reports() {
@@ -46,16 +54,150 @@ export default function Reports() {
   if (websitesLoading || analysisLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-slate-200 rounded-lg w-64"></div>
-            <div className="h-32 bg-slate-200 rounded-2xl"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-48 bg-slate-200 rounded-xl"></div>
-              ))}
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          
+          {/* En-tête du rapport avec animation */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-3">
+                <Shimmer className="h-8 w-64 rounded-lg" />
+                <Shimmer className="h-5 w-80 rounded" />
+              </div>
+              <div className="flex items-center space-x-3">
+                <Shimmer className="h-8 w-28 rounded-lg" />
+                <Shimmer className="h-8 w-32 rounded-lg" />
+              </div>
             </div>
           </div>
+
+          {/* Résumé exécutif avec animation sophistiquée */}
+          <Card className="mb-8 border-0 shadow-lg animate-pulse-glow">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Shimmer className="h-5 w-5 rounded" />
+                <Shimmer className="h-6 w-40 rounded" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                  <div className="p-8 bg-slate-50 rounded-2xl text-center space-y-4">
+                    <Shimmer className="h-16 w-16 rounded-2xl mx-auto" />
+                    <Shimmer className="h-8 w-20 rounded mx-auto" />
+                    <Shimmer className="h-6 w-32 rounded mx-auto" />
+                    <Shimmer className="h-2 w-full rounded-full" />
+                  </div>
+                </div>
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="animate-float" style={{ animationDelay: `${i * 0.1}s` }}>
+                        <div className="p-4 bg-white rounded-xl shadow-sm space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Shimmer className="h-6 w-12 rounded" />
+                            <Shimmer className="h-6 w-6 rounded" />
+                          </div>
+                          <Shimmer className="h-4 w-24 rounded" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            
+            {/* Analyse technique avec shimmer avancé */}
+            <Card className="border-0 shadow-lg animate-pulse-glow" style={{ animationDelay: '0.2s' }}>
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Shimmer className="h-5 w-5 rounded" />
+                  <Shimmer className="h-6 w-32 rounded" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-slate-50 rounded-xl space-y-2">
+                    <Shimmer className="h-6 w-8 rounded mx-auto" />
+                    <Shimmer className="h-4 w-20 rounded mx-auto" />
+                  </div>
+                  <div className="text-center p-4 bg-slate-50 rounded-xl space-y-2">
+                    <Shimmer className="h-6 w-8 rounded mx-auto" />
+                    <Shimmer className="h-4 w-16 rounded mx-auto" />
+                  </div>
+                </div>
+                <TechnicalCheckShimmer />
+              </CardContent>
+            </Card>
+
+            {/* Top mots-clés avec animation */}
+            <Card className="border-0 shadow-lg animate-float" style={{ animationDelay: '0.4s' }}>
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Shimmer className="h-5 w-5 rounded" />
+                  <Shimmer className="h-6 w-28 rounded" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <KeywordShimmer count={5} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Plan d'action avec animation séquentielle */}
+          <Card className="border-0 shadow-lg animate-pulse-glow" style={{ animationDelay: '0.6s' }}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Shimmer className="h-5 w-5 rounded" />
+                <Shimmer className="h-6 w-48 rounded" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <RecommendationShimmer count={6} />
+            </CardContent>
+          </Card>
+
+          {/* Conclusion avec animation élégante */}
+          <Card className="mt-8 border-0 shadow-lg animate-float" style={{ animationDelay: '0.8s' }}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Shimmer className="h-5 w-5 rounded" />
+                <Shimmer className="h-6 w-56 rounded" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Shimmer className="h-4 w-full rounded" />
+                <Shimmer className="h-4 w-5/6 rounded" />
+                <div className="bg-blue-50 p-6 rounded-xl space-y-3">
+                  <Shimmer className="h-5 w-40 rounded" />
+                  <Shimmer className="h-4 w-full rounded" />
+                  <Shimmer className="h-4 w-4/5 rounded" />
+                  <Shimmer className="h-4 w-3/5 rounded" />
+                </div>
+                <div className="bg-amber-50 p-6 rounded-xl space-y-3">
+                  <Shimmer className="h-5 w-48 rounded" />
+                  <Shimmer className="h-4 w-full rounded" />
+                  <Shimmer className="h-4 w-5/6 rounded" />
+                  <Shimmer className="h-4 w-2/3 rounded" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Indicateur de génération de rapport */}
+          <div className="fixed bottom-8 right-8">
+            <div className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-full shadow-lg animate-pulse-glow">
+              <div className="relative">
+                <div className="w-4 h-4 bg-purple-600 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 w-4 h-4 bg-purple-600 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <span className="text-sm font-medium text-slate-700">Génération du rapport...</span>
+            </div>
+          </div>
+
         </div>
       </div>
     );
