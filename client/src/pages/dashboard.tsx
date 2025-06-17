@@ -21,6 +21,14 @@ import {
   BarChart3,
   Users
 } from "lucide-react";
+import { 
+  Shimmer, 
+  MetricShimmer, 
+  ScoreShimmer, 
+  KeywordShimmer, 
+  RecommendationShimmer, 
+  TechnicalCheckShimmer 
+} from "@/components/ui/shimmer";
 import type { Website, SeoAnalysis } from "@shared/schema";
 
 export default function Dashboard() {
@@ -44,16 +52,88 @@ export default function Dashboard() {
   if (websitesLoading || analysisLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-slate-200 rounded-lg w-64"></div>
-            <div className="h-32 bg-slate-200 rounded-2xl"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 bg-slate-200 rounded-xl"></div>
-              ))}
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          
+          {/* En-tête avec animation */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="space-y-3">
+                <Shimmer className="h-8 w-48 rounded-lg" />
+                <Shimmer className="h-5 w-64 rounded" />
+              </div>
+              <div className="flex items-center space-x-3">
+                <Shimmer className="h-8 w-32 rounded-lg" />
+              </div>
             </div>
           </div>
+
+          {/* Score principal avec animation shimmer */}
+          <div className="mb-8">
+            <ScoreShimmer className="animate-pulse-glow" />
+          </div>
+
+          {/* Métriques principales avec effet flottant */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-float" style={{ animationDelay: `${i * 0.2}s` }}>
+                <MetricShimmer />
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Section mots-clés avec shimmer avancé */}
+            <Card className="lg:col-span-2 border-0 shadow-lg animate-pulse-glow">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-2">
+                  <Shimmer className="h-5 w-5 rounded" />
+                  <Shimmer className="h-6 w-40 rounded" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <KeywordShimmer count={5} />
+              </CardContent>
+            </Card>
+
+            {/* État technique avec animation */}
+            <Card className="border-0 shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Shimmer className="h-5 w-5 rounded" />
+                  <Shimmer className="h-6 w-32 rounded" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <TechnicalCheckShimmer />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recommandations avec effet de pulsation */}
+          <Card className="mt-8 border-0 shadow-lg animate-pulse-glow" style={{ animationDelay: '0.8s' }}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Shimmer className="h-5 w-5 rounded" />
+                <Shimmer className="h-6 w-48 rounded" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <RecommendationShimmer count={6} />
+            </CardContent>
+          </Card>
+
+          {/* Indicateur de chargement élégant */}
+          <div className="fixed bottom-8 right-8">
+            <div className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-full shadow-lg animate-pulse-glow">
+              <div className="relative">
+                <div className="w-4 h-4 bg-blue-600 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 w-4 h-4 bg-blue-600 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <span className="text-sm font-medium text-slate-700">Analyse en cours...</span>
+            </div>
+          </div>
+
         </div>
       </div>
     );
