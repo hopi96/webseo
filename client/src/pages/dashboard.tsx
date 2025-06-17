@@ -65,10 +65,10 @@ export default function Dashboard() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              No websites found
+              Aucun site web trouvé
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Add your first website to start monitoring SEO performance.
+              Ajoutez votre premier site web pour commencer l'analyse SEO avec de vraies données.
             </p>
           </div>
         </div>

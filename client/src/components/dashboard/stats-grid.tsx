@@ -18,7 +18,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
 
   const stats = [
     {
-      title: "Organic Traffic",
+      title: "Trafic Organique",
       value: formatNumber(organicTraffic),
       icon: Search,
       color: "text-primary",
@@ -27,7 +27,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
       trendUp: true,
     },
     {
-      title: "Keywords Ranking",
+      title: "Classement Mots-clés",
       value: (keywordsRanking || 0).toString(),
       icon: Key,
       color: "text-seo-success",
@@ -36,7 +36,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
       trendUp: true,
     },
     {
-      title: "Backlinks",
+      title: "Liens Entrants",
       value: formatNumber(backlinks || 0),
       icon: Link,
       color: "text-purple-600",
@@ -45,7 +45,7 @@ export function StatsGrid({ organicTraffic, keywordsRanking, backlinks, pageSpee
       trendUp: true,
     },
     {
-      title: "Page Speed",
+      title: "Vitesse de Page",
       value: (pageSpeed || 0).toString(),
       icon: Gauge,
       color: "text-seo-warning",

@@ -72,7 +72,7 @@ export function AddWebsiteDialog({ open, onOpenChange }: AddWebsiteDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Website</DialogTitle>
+          <DialogTitle>Ajouter un Nouveau Site Web</DialogTitle>
           <DialogDescription>
             Add a website to start monitoring its SEO performance.
           </DialogDescription>

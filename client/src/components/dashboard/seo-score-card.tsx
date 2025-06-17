@@ -33,8 +33,8 @@ export function SeoScoreCard({
       <Card className="bg-white dark:bg-dark-surface shadow-sm border border-gray-200 dark:border-gray-700">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">SEO Health Score</h2>
-            <span className="text-sm text-gray-500 dark:text-gray-400">Last updated: {lastUpdated}</span>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Score de Santé SEO</h2>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Dernière mise à jour : {lastUpdated}</span>
           </div>
           
           <div className="flex items-center justify-center mb-4">
