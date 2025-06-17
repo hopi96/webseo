@@ -32,7 +32,7 @@ import {
 import type { Website, SeoAnalysis } from "@shared/schema";
 
 export default function Dashboard() {
-  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number | undefined>();
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
 
   const { data: websites, isLoading: websitesLoading } = useQuery<Website[]>({
     queryKey: ["/api/websites"],
@@ -44,8 +44,12 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    if (websites && websites.length > 0 && !selectedWebsiteId) {
-      setSelectedWebsiteId(websites[0].id);
+    if (websites && websites.length > 0 && selectedWebsiteId === 1) {
+      // Vérifier si le site Plug2AI existe, sinon prendre le premier
+      const plug2aiSite = websites.find(w => w.id === 1);
+      if (!plug2aiSite && websites[0]) {
+        setSelectedWebsiteId(websites[0].id);
+      }
     }
   }, [websites, selectedWebsiteId]);
 
