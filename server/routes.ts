@@ -144,6 +144,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(analysis);
     } catch (error) {
       console.error("SEO analysis refresh failed:", error);
+      
+      // Vérifier si c'est une erreur 404 du webhook n8n
+      if (error instanceof Error && error.message.includes('404')) {
+        return res.status(503).json({ 
+          message: "Webhook n8n non activé",
+          error: "Le webhook doit être activé en mode test dans n8n. Cliquez sur 'Test workflow' dans votre canvas n8n puis réessayez.",
+          webhookUrl: "https://doseit.app.n8n.cloud/webhook-test/4c07451f-11b9-4d71-8060-ac071029417d"
+        });
+      }
+      
       res.status(500).json({ 
         message: "Failed to refresh SEO analysis",
         error: error instanceof Error ? error.message : "Unknown error"

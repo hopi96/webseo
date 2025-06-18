@@ -57,11 +57,20 @@ export default function Dashboard() {
       });
     },
     onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de rafraîchir l'analyse SEO.",
-        variant: "destructive",
-      });
+      // Gestion spécifique pour l'erreur webhook n8n
+      if (error.message && error.message.includes('Webhook n8n non activé')) {
+        toast({
+          title: "Webhook n8n requis",
+          description: "Activez le webhook dans n8n en cliquant sur 'Test workflow' puis réessayez.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur d'analyse",
+          description: error.message || "Impossible de rafraîchir l'analyse SEO.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
