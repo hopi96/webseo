@@ -24,13 +24,14 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* Custom SEO Dashboard colors */
-  --seo-success: hsl(122, 39%, 49%);
-  --seo-warning: hsl(38, 92%, 50%);
-  --seo-error: hsl(0, 65%, 51%);
-  --seo-secondary: hsl(174, 100%, 29%);
-  --dark-surface: hsl(0, 0%, 12%);
-  --text-secondary: hsl(0, 0%, 40%);
+  /* Couleurs soft et douces */
+  --soft-blue: hsl(210, 40%, 85%);
+  --soft-green: hsl(150, 30%, 80%);
+  --soft-purple: hsl(260, 25%, 85%);
+  --soft-orange: hsl(30, 40%, 82%);
+  --soft-gray: hsl(220, 10%, 88%);
+  --soft-background: hsl(220, 20%, 97%);
+  --soft-text: hsl(220, 15%, 45%);
 }
 
 .dark {
@@ -72,36 +73,57 @@
 }
 
 @layer utilities {
-  .seo-success {
-    color: var(--seo-success);
+  /* Design soft et doux */
+  .soft-background {
+    background: linear-gradient(135deg, 
+      hsl(220, 25%, 98%) 0%,
+      hsl(210, 20%, 96%) 100%
+    );
   }
   
-  .seo-warning {
-    color: var(--seo-warning);
+  .soft-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   }
   
-  .seo-error {
-    color: var(--seo-error);
+  .soft-text {
+    color: var(--soft-text);
   }
   
-  .bg-seo-success {
-    background-color: var(--seo-success);
+  .soft-metric-blue {
+    background: linear-gradient(135deg, var(--soft-blue), hsl(210, 50%, 90%));
+    color: hsl(210, 60%, 35%);
   }
   
-  .bg-seo-warning {
-    background-color: var(--seo-warning);
+  .soft-metric-green {
+    background: linear-gradient(135deg, var(--soft-green), hsl(150, 40%, 85%));
+    color: hsl(150, 50%, 30%);
   }
   
-  .bg-seo-error {
-    background-color: var(--seo-error);
+  .soft-metric-purple {
+    background: linear-gradient(135deg, var(--soft-purple), hsl(260, 35%, 90%));
+    color: hsl(260, 40%, 35%);
   }
   
-  .text-secondary {
-    color: var(--text-secondary);
+  .soft-metric-orange {
+    background: linear-gradient(135deg, var(--soft-orange), hsl(30, 50%, 87%));
+    color: hsl(30, 60%, 30%);
   }
   
-  .bg-dark-surface {
-    background-color: var(--dark-surface);
+  .gentle-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .gentle-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+  
+  .soft-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
   }
 }
 
