@@ -48,7 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!deleted) {
         return res.status(404).json({ message: "Website not found" });
       }
-      res.json({ message: "Website deleted successfully" });
+      res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete website" });
     }
@@ -60,15 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const websiteId = parseInt(req.params.id);
       let analysis = await storage.getSeoAnalysis(websiteId);
       
-      // Always perform real analysis if no analysis exists
-      if (!analysis) {
-        const website = await storage.getWebsite(websiteId);
-        if (!website) {
-          return res.status(404).json({ message: "Website not found" });
-        }
-
-        // Analysis is created during storage initialization
-      }
+      // Analysis is created during storage initialization
       
       res.json(analysis);
     } catch (error) {
@@ -106,112 +98,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Force refresh SEO analysis with real API data
-  app.put("/api/websites/:id/seo-analysis/refresh", async (req, res) => {
-    try {
-      const websiteId = parseInt(req.params.id);
-      const website = await storage.getWebsite(websiteId);
-      if (!website) {
-        return res.status(404).json({ message: "Website not found" });
-      }
-
-      console.log(`Refreshing SEO analysis for ${website.url}...`);
-      const realSeoData = await performComprehensiveSeoAnalysis(website.url);
-      
-      let analysis = await storage.getSeoAnalysis(websiteId);
-      if (analysis) {
-        analysis = await storage.updateSeoAnalysis(websiteId, realSeoData);
-      } else {
-        analysis = await storage.createSeoAnalysis({
-          ...realSeoData,
-          websiteId
-        });
-      }
-      
-      res.json(analysis);
-    } catch (error) {
-      console.error("SEO analysis refresh failed:", error);
-      res.status(500).json({ message: "Failed to refresh SEO analysis" });
-    }
-  });
-
-  // Trigger new SEO analysis
-  app.post("/api/websites/:id/analyze", async (req, res) => {
-    try {
-      const websiteId = parseInt(req.params.id);
-      const website = await storage.getWebsite(websiteId);
-      
-      if (!website) {
-        return res.status(404).json({ message: "Website not found" });
-      }
-
-      // Simulate SEO analysis (in real app, this would call external APIs)
-      const analysisData = {
-        websiteId,
-        overallScore: Math.floor(Math.random() * 30) + 70,
-        organicTraffic: Math.floor(Math.random() * 10000) + 5000,
-        keywordsRanking: Math.floor(Math.random() * 200) + 100,
-        backlinks: Math.floor(Math.random() * 1000) + 500,
-        pageSpeed: Math.floor(Math.random() * 20) + 80,
-        technicalSeo: {
-          mobileFriendly: Math.random() > 0.2,
-          httpsSecure: Math.random() > 0.1,
-          xmlSitemap: Math.random() > 0.3,
-          robotsTxt: Math.random() > 0.2
-        },
-        recommendations: [
-          {
-            id: "meta-descriptions",
-            title: "Fix Missing Meta Descriptions",
-            description: "Pages are missing meta descriptions. This impacts click-through rates from search results.",
-            priority: "high" as const,
-            category: "On-Page SEO"
-          },
-          {
-            id: "image-alt-text",
-            title: "Optimize Image Alt Text",
-            description: "Images lack descriptive alt text. Improve accessibility and SEO by adding relevant descriptions.",
-            priority: "medium" as const,
-            category: "Technical SEO"
-          }
-        ],
-        keywords: [
-          { keyword: "react tutorials", position: Math.floor(Math.random() * 20) + 1, volume: 8200, trend: "up" as const },
-          { keyword: "javascript guide", position: Math.floor(Math.random() * 20) + 1, volume: 12100, trend: "down" as const },
-          { keyword: "web development", position: Math.floor(Math.random() * 20) + 1, volume: 15300, trend: "stable" as const }
-        ],
-        trafficData: generateTrafficData()
-      };
-
-      const existingAnalysis = await storage.getSeoAnalysis(websiteId);
-      let analysis;
-      
-      if (existingAnalysis) {
-        analysis = await storage.updateSeoAnalysis(websiteId, analysisData);
-      } else {
-        analysis = await storage.createSeoAnalysis(analysisData);
-      }
-
-      res.json(analysis);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to analyze website" });
-    }
-  });
-
   const httpServer = createServer(app);
   return httpServer;
-}
-
-function generateTrafficData() {
-  const data = [];
-  const now = new Date();
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    data.push({
-      date: date.toISOString().split('T')[0],
-      visitors: Math.floor(Math.random() * 500) + 1000
-    });
-  }
-  return data;
 }
