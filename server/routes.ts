@@ -165,6 +165,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Diagnostic webhook endpoint
+  app.get('/api/webhook/diagnostic', async (_req, res) => {
+    const webhookUrl = 'https://doseit.app.n8n.cloud/webhook-test/4c07451f-11b9-4d71-8060-ac071029417d';
+    const results = {
+      get: null as any,
+      post: null as any
+    };
+
+    // Test GET
+    try {
+      const getUrl = `${webhookUrl}?url=https://www.plug2ai.com&test=diagnostic`;
+      const getResponse = await fetch(getUrl);
+      results.get = {
+        status: getResponse.status,
+        statusText: getResponse.statusText,
+        body: await getResponse.text()
+      };
+    } catch (error) {
+      results.get = { error: error instanceof Error ? error.message : "Network error" };
+    }
+
+    // Test POST
+    try {
+      const postResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: 'https://www.plug2ai.com', test: 'diagnostic' })
+      });
+      results.post = {
+        status: postResponse.status,
+        statusText: postResponse.statusText,
+        body: await postResponse.text()
+      };
+    } catch (error) {
+      results.post = { error: error instanceof Error ? error.message : "Network error" };
+    }
+
+    res.json({
+      webhook_url: webhookUrl,
+      tests: results,
+      recommendation: results.post.status === 200 ? 'POST fonctionne' : 
+                     results.get.status === 200 ? 'GET fonctionne' : 
+                     'Aucune méthode ne fonctionne - vérifiez la configuration n8n'
+    });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
