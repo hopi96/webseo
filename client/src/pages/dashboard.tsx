@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,20 @@ import {
   Zap,
   Link,
   PieChart,
-  Activity
+  Activity,
+  RefreshCw
 } from "lucide-react";
 import { WebsiteSelector } from "@/components/website/website-selector";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { Website, SeoAnalysis } from "@shared/schema";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, RadialBarChart, RadialBar, LineChart, Line } from 'recharts';
 
 export default function Dashboard() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: websites = [] } = useQuery<Website[]>({
     queryKey: ['/api/websites'],

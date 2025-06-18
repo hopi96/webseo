@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertWebsiteSchema, insertSeoAnalysisSchema } from "@shared/schema";
+import { requestSeoAnalysisFromWebhook } from "./webhook-service";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -32,6 +33,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertWebsiteSchema.parse(req.body);
       const website = await storage.createWebsite(validatedData);
+      
+      // Request real-time SEO analysis from webhook
+      try {
+        console.log(`Requesting SEO analysis for new website: ${website.url}`);
+        const seoAnalysisData = await requestSeoAnalysisFromWebhook(website.url);
+        
+        // Create SEO analysis with webhook data
+        await storage.createSeoAnalysis({
+          ...seoAnalysisData,
+          websiteId: website.id
+        });
+        
+        console.log(`SEO analysis created for website ${website.id}`);
+      } catch (webhookError) {
+        console.error(`Webhook analysis failed for ${website.url}:`, webhookError);
+        // Website is still created even if SEO analysis fails
+      }
+      
       res.status(201).json(website);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -95,6 +114,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(analysis);
     } catch (error) {
       res.status(500).json({ message: "Failed to update SEO analysis" });
+    }
+  });
+
+  // Refresh SEO analysis with real-time webhook data
+  app.post("/api/websites/:id/refresh-analysis", async (req, res) => {
+    try {
+      const websiteId = parseInt(req.params.id);
+      const website = await storage.getWebsite(websiteId);
+      
+      if (!website) {
+        return res.status(404).json({ message: "Website not found" });
+      }
+
+      console.log(`Refreshing SEO analysis for ${website.url}...`);
+      const seoAnalysisData = await requestSeoAnalysisFromWebhook(website.url);
+      
+      // Update existing analysis or create new one
+      let analysis = await storage.getSeoAnalysis(websiteId);
+      if (analysis) {
+        analysis = await storage.updateSeoAnalysis(websiteId, seoAnalysisData);
+      } else {
+        analysis = await storage.createSeoAnalysis({
+          ...seoAnalysisData,
+          websiteId
+        });
+      }
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error("SEO analysis refresh failed:", error);
+      res.status(500).json({ 
+        message: "Failed to refresh SEO analysis",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

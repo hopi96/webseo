@@ -51,8 +51,8 @@ export function AddWebsiteDialog({ open, onOpenChange }: AddWebsiteDialogProps) 
       form.reset();
       onOpenChange(false);
       toast({
-        title: "Success",
-        description: "Website added successfully",
+        title: "Site web ajouté",
+        description: "Le site web a été ajouté avec succès. L'analyse SEO en temps réel est en cours...",
       });
     },
     onError: (error) => {
