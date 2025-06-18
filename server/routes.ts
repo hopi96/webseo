@@ -146,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("SEO analysis refresh failed:", error);
       
       // Vérifier si c'est une erreur webhook n8n
-      if (error instanceof Error && ((error as any).webhookError || error.message.includes('Webhook n8n non activé'))) {
+      if (error instanceof Error && ((error as any).isWebhookError || error.message.includes('Webhook n8n non activé'))) {
         return res.status(503).json({ 
           message: "Webhook n8n non activé",
           error: "Le webhook doit être activé en mode test dans n8n. Cliquez sur 'Test workflow' dans votre canvas n8n puis réessayez.",
