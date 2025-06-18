@@ -47,6 +47,12 @@ export default function Dashboard() {
   const refreshAnalysisMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", `/api/websites/${selectedWebsiteId}/refresh-analysis`, {});
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erreur inconnue");
+      }
+      
       return response.json();
     },
     onSuccess: () => {
