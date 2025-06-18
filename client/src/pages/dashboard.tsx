@@ -17,11 +17,14 @@ import {
   Clock,
   ArrowUpRight,
   Zap,
-  Link
+  Link,
+  PieChart,
+  Activity
 } from "lucide-react";
 import { WebsiteSelector } from "@/components/website/website-selector";
 import { useState } from "react";
 import type { Website, SeoAnalysis } from "@shared/schema";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, RadialBarChart, RadialBar, LineChart, Line } from 'recharts';
 
 export default function Dashboard() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
@@ -36,6 +39,35 @@ export default function Dashboard() {
   });
 
   const selectedWebsite = websites.find(w => w.id === selectedWebsiteId);
+
+  // Données pour les graphiques basées sur le JSON réel
+  const performanceData = [
+    { name: 'LCP Mobile', value: 3.1, target: 2.5, status: 'danger' },
+    { name: 'LCP Desktop', value: 1.9, target: 2.5, status: 'good' },
+    { name: 'CLS Mobile', value: 0.22, target: 0.1, status: 'warning' },
+    { name: 'CLS Desktop', value: 0.08, target: 0.1, status: 'good' },
+    { name: 'INP Mobile', value: 310, target: 200, status: 'danger' },
+    { name: 'INP Desktop', value: 130, target: 200, status: 'good' }
+  ];
+
+  const keywordDistribution = [
+    { name: 'Marque', value: 63, color: '#10b981' },
+    { name: 'Générique', value: 37, color: '#f59e0b' }
+  ];
+
+  const competitorData = [
+    { name: 'Plug2AI', da: 11, traffic: 30 },
+    { name: 'Datasulting', da: 33, traffic: 1100 },
+    { name: 'Quantmetry', da: 38, traffic: 4000 },
+    { name: 'Axionable', da: 36, traffic: 1600 }
+  ];
+
+  const technicalScores = [
+    { category: 'Performance', score: 65, maxScore: 100 },
+    { category: 'SEO', score: 76, maxScore: 100 },
+    { category: 'Accessibilité', score: 85, maxScore: 100 },
+    { category: 'Bonnes pratiques', score: 80, maxScore: 100 }
+  ];
 
   if (isLoading || !seoAnalysis) {
     return (
@@ -223,53 +255,94 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Core Web Vitals détaillés */}
-        <div className="soft-card p-6 mb-8">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 soft-metric-orange rounded-lg">
-              <Zap className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-700">Core Web Vitals</h3>
-              <p className="text-sm soft-text">Métriques de performance utilisateur</p>
-            </div>
-          </div>
+        {/* Core Web Vitals avec graphiques */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-medium text-slate-700 mb-4">📱 Mobile</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium soft-text">LCP (Largest Contentful Paint)</span>
-                  <span className="text-sm font-semibold text-red-600">3.1s</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium soft-text">CLS (Cumulative Layout Shift)</span>
-                  <span className="text-sm font-semibold text-amber-600">0.22</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium soft-text">INP (Interaction to Next Paint)</span>
-                  <span className="text-sm font-semibold text-red-600">310ms</span>
-                </div>
+          {/* Graphique des performances */}
+          <div className="soft-card p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="p-2 soft-metric-orange rounded-lg">
+                <Activity className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-slate-700">Performance Web Vitals</h3>
+                <p className="text-sm soft-text">Comparaison Mobile vs Desktop</p>
               </div>
             </div>
             
-            <div>
-              <h4 className="font-medium text-slate-700 mb-4">🖥️ Desktop</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium soft-text">LCP (Largest Contentful Paint)</span>
-                  <span className="text-sm font-semibold text-emerald-600">1.9s</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium soft-text">CLS (Cumulative Layout Shift)</span>
-                  <span className="text-sm font-semibold text-emerald-600">0.08</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium soft-text">INP (Interaction to Next Paint)</span>
-                  <span className="text-sm font-semibold text-emerald-600">130ms</span>
-                </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={performanceData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12, fill: '#64748b' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="value" 
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Scores techniques en radar */}
+          <div className="soft-card p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="p-2 soft-metric-blue rounded-lg">
+                <PieChart className="h-5 w-5" />
               </div>
+              <div>
+                <h3 className="text-xl font-semibold text-slate-700">Scores Techniques</h3>
+                <p className="text-sm soft-text">Évaluation globale du site</p>
+              </div>
+            </div>
+            
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="80%" data={technicalScores}>
+                  <RadialBar 
+                    dataKey="score" 
+                    cornerRadius={10} 
+                    fill="#3b82f6"
+                    background={{ fill: '#f1f5f9' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              {technicalScores.map((score) => (
+                <div key={score.category} className="text-center">
+                  <div className={`text-lg font-semibold ${
+                    score.score >= 80 ? 'text-emerald-600' : 
+                    score.score >= 60 ? 'text-amber-600' : 'text-red-600'
+                  }`}>
+                    {score.score}
+                  </div>
+                  <div className="text-xs soft-text">{score.category}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -277,28 +350,52 @@ export default function Dashboard() {
         {/* Analyse complète des mots-clés */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           
-          {/* Mots-clés de marque */}
+          {/* Distribution des mots-clés */}
           <div className="soft-card p-6">
             <div className="flex items-center space-x-3 mb-6">
               <div className="p-2 soft-metric-blue rounded-lg">
                 <Search className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-slate-700">Mots-clés de marque</h3>
-                <p className="text-sm soft-text">Performance sur les termes de marque</p>
+                <h3 className="text-xl font-semibold text-slate-700">Distribution du Trafic</h3>
+                <p className="text-sm soft-text">Répartition marque vs générique</p>
               </div>
             </div>
             
-            <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
-              <div className="flex items-center justify-between mb-2">
-                <div className="font-medium text-slate-700">plug2ai</div>
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-sm font-medium">
-                  1
+            <div className="h-48 mb-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart data={keywordDistribution}>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px'
+                    }}
+                    formatter={(value) => [`${value}%`, 'Part de trafic']}
+                  />
+                  {keywordDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-medium text-slate-700">Mots-clés de marque</div>
+                  <div className="text-lg font-bold text-emerald-600">63%</div>
                 </div>
+                <div className="text-xs soft-text">Mot-clé principal : "plug2ai" (position 1)</div>
               </div>
-              <div className="text-xs soft-text mb-2">Volume global : 30 • Volume FR : 15</div>
-              <div className="text-xs soft-text mb-2">Difficulté : 2/100 • CPC : 0.00€</div>
-              <div className="text-xs font-medium text-emerald-700">Part de trafic : 63%</div>
+              
+              <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-medium text-slate-700">Mots-clés génériques</div>
+                  <div className="text-lg font-bold text-amber-600">37%</div>
+                </div>
+                <div className="text-xs soft-text">Meilleure position : "expert ia paris" (position 8)</div>
+              </div>
             </div>
           </div>
 
@@ -366,44 +463,59 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Analyse concurrentielle */}
+          {/* Analyse concurrentielle avec graphique */}
           <div className="soft-card p-6">
             <div className="flex items-center space-x-3 mb-6">
               <div className="p-2 soft-metric-orange rounded-lg">
                 <Users className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-slate-700">Concurrents principaux</h3>
-                <p className="text-sm soft-text">Analyse comparative du marché</p>
+                <h3 className="text-xl font-semibold text-slate-700">Analyse Concurrentielle</h3>
+                <p className="text-sm soft-text">Position vs concurrents directs</p>
               </div>
             </div>
             
+            <div className="h-48 mb-6">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={competitorData} layout="horizontal">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis type="number" tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} width={80} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px'
+                    }}
+                    formatter={(value, name) => [
+                      name === 'traffic' ? `${value} visiteurs/mois` : `DA ${value}`,
+                      name === 'traffic' ? 'Trafic' : 'Domain Authority'
+                    ]}
+                  />
+                  <Bar dataKey="traffic" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            
             <div className="space-y-3">
-              <div className="p-4 bg-white/50 rounded-lg border border-slate-100">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-slate-700">datasulting.fr</div>
-                  <div className="text-sm font-semibold text-blue-600">DA 33</div>
+              <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-medium text-slate-700">Plug2AI (Vous)</div>
+                  <div className="text-sm font-semibold text-emerald-600">DA 11</div>
                 </div>
-                <div className="text-xs soft-text mb-1">Trafic estimé : 1,100 • Mots-clés communs : 7</div>
-                <div className="text-xs text-slate-600">Positionnement : Conseil Data PME</div>
+                <div className="text-xs soft-text">Trafic : 30 visiteurs/mois • Potentiel de croissance élevé</div>
               </div>
               
-              <div className="p-4 bg-white/50 rounded-lg border border-slate-100">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-slate-700">quantmetry.com</div>
-                  <div className="text-sm font-semibold text-blue-600">DA 38</div>
-                </div>
-                <div className="text-xs soft-text mb-1">Trafic estimé : 4,000 • Mots-clés communs : 11</div>
-                <div className="text-xs text-slate-600">Positionnement : IA/ML Grandes entreprises</div>
-              </div>
-              
-              <div className="p-4 bg-white/50 rounded-lg border border-slate-100">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-slate-700">axionable.com</div>
-                  <div className="text-sm font-semibold text-blue-600">DA 36</div>
-                </div>
-                <div className="text-xs soft-text mb-1">Trafic estimé : 1,600 • Mots-clés communs : 6</div>
-                <div className="text-xs text-slate-600">Positionnement : Sustainable AI, Développement IA</div>
+              <div className="grid grid-cols-1 gap-2">
+                {competitorData.slice(1).map((competitor, index) => (
+                  <div key={competitor.name} className="p-3 bg-white/50 rounded-lg border border-slate-100">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="font-medium text-slate-700">{competitor.name}</div>
+                      <div className="text-sm font-semibold text-blue-600">DA {competitor.da}</div>
+                    </div>
+                    <div className="text-xs soft-text">Trafic : {competitor.traffic.toLocaleString()} visiteurs/mois</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
