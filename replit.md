@@ -102,6 +102,7 @@ Changelog:
 - June 17, 2025. Integrated real SEO data via Google PageSpeed Insights API, complete French translation, removed all mock data
 - June 17, 2025. Enhanced dashboard design with modern glassmorphism effects, animated backgrounds, premium card layouts, and sophisticated loading states with shimmer animations
 - June 18, 2025. Complete dashboard redesign with ultra-modern mesh gradient backgrounds, morphing animations, glassmorphism effects, sequential entrance animations, and premium interactive elements
+- June 18, 2025. Dashboard redesigned with soft and gentle aesthetics - replaced flashy effects with subtle gradients, pastel colors, and calming interactions per user preference
 
 ## User Preferences
 
@@ -110,3 +111,4 @@ Language: French (user communicates in French)
 Interest: Real SEO data integration rather than mock data
 Requirements: No fictional/mock data, only authentic SEO analysis from real APIs
 Interface: Complete French translation required
+Design preference: Soft and gentle aesthetics (not flashy or ultra-modern effects)
