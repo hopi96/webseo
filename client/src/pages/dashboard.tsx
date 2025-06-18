@@ -43,6 +43,28 @@ export default function Dashboard() {
     enabled: !!selectedWebsiteId,
   });
 
+  // Mutation pour rafraîchir l'analyse SEO avec le webhook
+  const refreshAnalysisMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/websites/${selectedWebsiteId}/refresh-analysis`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
+      toast({
+        title: "Analyse SEO mise à jour",
+        description: "L'analyse SEO a été actualisée avec les dernières données.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de rafraîchir l'analyse SEO.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const selectedWebsite = websites.find(w => w.id === selectedWebsiteId);
 
   // Données pour les graphiques basées sur le JSON réel
@@ -144,17 +166,35 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <div className="hidden lg:block">
-                <div className="text-center soft-card p-6">
-                  <div className={`text-4xl font-bold mb-2 ${getScoreColor(seoAnalysis.overallScore)}`}>
-                    {seoAnalysis.overallScore}
-                  </div>
-                  <div className="text-sm soft-text mb-3">Score SEO Global</div>
-                  <div className="w-16 h-2 bg-slate-200 rounded-full">
-                    <div 
-                      className="h-2 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-1000"
-                      style={{ width: `${seoAnalysis.overallScore}%` }}
-                    ></div>
+              <div className="flex flex-col items-end space-y-4">
+                <Button
+                  onClick={() => refreshAnalysisMutation.mutate()}
+                  disabled={refreshAnalysisMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 soft-button"
+                >
+                  <RefreshCw className={`h-4 w-4 ${refreshAnalysisMutation.isPending ? 'animate-spin' : ''}`} />
+                  {refreshAnalysisMutation.isPending ? 'Analyse en cours...' : 'Actualiser l\'analyse'}
+                </Button>
+                
+                <WebsiteSelector 
+                  selectedWebsiteId={selectedWebsiteId}
+                  onWebsiteChange={setSelectedWebsiteId}
+                />
+                
+                <div className="hidden lg:block">
+                  <div className="text-center soft-card p-6">
+                    <div className={`text-4xl font-bold mb-2 ${getScoreColor(seoAnalysis?.overallScore || 0)}`}>
+                      {seoAnalysis?.overallScore || 0}
+                    </div>
+                    <div className="text-sm soft-text mb-3">Score SEO Global</div>
+                    <div className="w-16 h-2 bg-slate-200 rounded-full">
+                      <div 
+                        className="h-2 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-1000"
+                        style={{ width: `${seoAnalysis?.overallScore || 0}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
               </div>
