@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertWebsiteSchema, insertSeoAnalysisSchema } from "@shared/schema";
-import { performComprehensiveSeoAnalysis } from "./seo-services";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -68,12 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Website not found" });
         }
 
-        console.log(`Performing real SEO analysis for ${website.url}...`);
-        const realSeoData = await performComprehensiveSeoAnalysis(website.url);
-        analysis = await storage.createSeoAnalysis({
-          ...realSeoData,
-          websiteId
-        });
+        // Analysis is created during storage initialization
       }
       
       res.json(analysis);
