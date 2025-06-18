@@ -51,7 +51,15 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Webhook error response:`, errorText);
-      throw new Error(`Webhook request failed: ${response.status} ${response.statusText} - ${errorText}`);
+      
+      // Créer une erreur spécifique pour les erreurs 404 n8n
+      if (response.status === 404) {
+        const error = new Error(`Webhook n8n non activé`);
+        (error as any).isWebhookError = true;
+        throw error;
+      }
+      
+      throw new Error(`Webhook request failed: ${response.status} ${response.statusText}`);
     }
 
     const webhookData: WebhookSeoResponse = await response.json();
@@ -75,6 +83,12 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
 
   } catch (error) {
     console.error('Webhook SEO analysis failed:', error);
+    
+    // Propager l'erreur webhook spécifique si elle existe
+    if (error instanceof Error && (error as any).isWebhookError) {
+      throw error;
+    }
+    
     throw new Error(`Failed to get SEO analysis from webhook: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
