@@ -37,16 +37,15 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
   try {
     console.log(`Requesting SEO analysis for ${websiteUrl} from webhook...`);
     
-    // Construire l'URL avec les paramètres pour une requête GET
-    const webhookUrlWithParams = new URL(WEBHOOK_URL);
-    webhookUrlWithParams.searchParams.append('url', websiteUrl);
-    webhookUrlWithParams.searchParams.append('timestamp', new Date().toISOString());
-    
-    const response = await fetch(webhookUrlWithParams.toString(), {
-      method: 'GET',
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        url: websiteUrl,
+        timestamp: new Date().toISOString()
+      }),
     });
 
     if (!response.ok) {
@@ -62,6 +61,24 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
           const errorData = JSON.parse(errorText);
           if (errorData.hint && errorData.hint.includes('Test workflow')) {
             errorMessage = `Webhook n8n en mode test - cliquez sur 'Test workflow' puis réessayez immédiatement`;
+          }
+        } catch (e) {
+          // Ignorer l'erreur de parsing JSON
+        }
+        
+        const error = new Error(errorMessage);
+        (error as any).isWebhookError = true;
+        throw error;
+      }
+      
+      // Gérer les erreurs 500 spécifiques à n8n
+      if (response.status === 500) {
+        let errorMessage = `Erreur de configuration du workflow n8n`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.message && errorData.message.includes('Workflow could not be started')) {
+            errorMessage = `Workflow n8n ne peut pas démarrer - vérifiez la configuration de votre workflow`;
           }
         } catch (e) {
           // Ignorer l'erreur de parsing JSON
