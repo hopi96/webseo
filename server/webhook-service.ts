@@ -35,17 +35,18 @@ export interface WebhookSeoResponse {
 
 export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise<InsertSeoAnalysis> {
   try {
-    console.log(`Requesting SEO analysis for ${websiteUrl} from webhook...`);
+    console.log(`Requesting SEO analysis for ${websiteUrl} from webhook (GET method)...`);
     
-    const response = await fetch(WEBHOOK_URL, {
-      method: 'POST',
+    // Construire l'URL avec les paramètres pour une requête GET (confirmé par tests)
+    const webhookUrlWithParams = new URL(WEBHOOK_URL);
+    webhookUrlWithParams.searchParams.append('url', websiteUrl);
+    webhookUrlWithParams.searchParams.append('timestamp', new Date().toISOString());
+    
+    const response = await fetch(webhookUrlWithParams.toString(), {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        url: websiteUrl,
-        timestamp: new Date().toISOString()
-      }),
     });
 
     if (!response.ok) {
