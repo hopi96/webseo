@@ -1,6 +1,6 @@
 import type { InsertSeoAnalysis } from "@shared/schema";
 
-const WEBHOOK_URL = "https://doseit.app.n8n.cloud/webhook-test/a92c86af-1667-4186-9b06-048dd2b67866";
+const WEBHOOK_URL = "https://doseit.app.n8n.cloud/webhook-test/4c07451f-11b9-4d71-8060-ac071029417d";
 
 export interface WebhookSeoResponse {
   overallScore: number;
@@ -49,10 +49,13 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
     });
 
     if (!response.ok) {
-      throw new Error(`Webhook request failed: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Webhook error response:`, errorText);
+      throw new Error(`Webhook request failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const webhookData: WebhookSeoResponse = await response.json();
+    console.log(`Webhook response received:`, JSON.stringify(webhookData, null, 2));
     
     // Transform webhook response to our schema format
     const seoAnalysis: Omit<InsertSeoAnalysis, 'websiteId'> = {
