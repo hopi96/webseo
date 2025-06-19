@@ -109,6 +109,9 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
       trafficData: webhookData.trafficData,
     };
 
+    // Ajouter les données JSON complètes du webhook
+    (seoAnalysis as any).rawWebhookData = JSON.stringify(webhookData);
+    
     console.log(`SEO analysis received: Score ${webhookData.overallScore}, Traffic ${webhookData.organicTraffic}`);
     return seoAnalysis as InsertSeoAnalysis;
 
