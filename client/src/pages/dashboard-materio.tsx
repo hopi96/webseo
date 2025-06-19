@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { RefreshCw, TrendingUp, Users, Search, Zap, Trophy, Target, BarChart3 } from "lucide-react";
+import { RefreshCw, TrendingUp, Users, Search, Zap, Trophy, Target, BarChart3, Home, FileText, Settings } from "lucide-react";
 import { WebsiteSelector } from "@/components/website/website-selector";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { Link, useLocation } from "wouter";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 
 export default function DashboardMaterio() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
@@ -147,240 +149,304 @@ export default function DashboardMaterio() {
     );
   }
 
+  // Préparation des données pour les graphiques
+  const trafficData = seoAnalysis?.trafficData || [];
+  const keywordsData = seoAnalysis?.keywords?.slice(0, 5).map(k => ({
+    name: k.keyword,
+    position: k.position,
+    volume: k.volume
+  })) || [];
+  
+  const technicalData = [
+    { name: 'Mobile-Friendly', value: seoAnalysis?.technicalSeo?.mobileFriendly ? 100 : 0, color: '#10b981' },
+    { name: 'HTTPS Secure', value: seoAnalysis?.technicalSeo?.httpsSecure ? 100 : 0, color: '#3b82f6' },
+    { name: 'XML Sitemap', value: seoAnalysis?.technicalSeo?.xmlSitemap ? 100 : 0, color: '#8b5cf6' },
+    { name: 'Robots.txt', value: seoAnalysis?.technicalSeo?.robotsTxt ? 100 : 0, color: '#f59e0b' }
+  ];
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="px-6 py-8 space-y-8">
-        {/* En-tête */}
-        <div className="bg-blue-600 rounded-lg p-6 shadow-lg">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-blue-700 p-3 rounded-lg">
-                <Trophy className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white mb-1">
-                  Tableau de bord SEO - {selectedWebsite?.name || 'Site'}
-                </h1>
-                <p className="text-blue-100 text-base">
-                  Analyse complète de performance
-                </p>
-                <div className="mt-2">
-                  <span className="text-2xl font-bold text-white">{seoAnalysis?.organicTraffic || 0}</span>
-                  <span className="text-blue-100 ml-2">visiteurs/mois</span>
-                </div>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Barre de navigation supérieure */}
+      <nav className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-8">
+            <h1 className="text-xl font-semibold text-gray-900">SEO Dashboard</h1>
+            <div className="flex space-x-6">
+              <Link href="/" className="flex items-center space-x-2 text-blue-600 bg-blue-50 px-3 py-2 rounded-md">
+                <Home className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+              <Link href="/keywords" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md">
+                <Search className="h-4 w-4" />
+                <span>Mots-clés</span>
+              </Link>
+              <Link href="/reports" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md">
+                <FileText className="h-4 w-4" />
+                <span>Rapports</span>
+              </Link>
+              <Link href="/settings" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md">
+                <Settings className="h-4 w-4" />
+                <span>Paramètres</span>
+              </Link>
             </div>
-            <div className="flex items-center gap-3">
-              <WebsiteSelector
-                selectedWebsiteId={selectedWebsiteId}
-                onWebsiteChange={setSelectedWebsiteId}
-              />
-              <Button 
-                onClick={() => refreshAnalysis.mutate()} 
-                disabled={refreshAnalysis.isPending}
-                className="bg-blue-700 hover:bg-blue-800 text-white border-0 px-4"
-              >
-                {refreshAnalysis.isPending ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Actualiser
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Actualiser
-                  </>
-                )}
-              </Button>
+          </div>
+          <div className="flex items-center space-x-4">
+            <WebsiteSelector
+              selectedWebsiteId={selectedWebsiteId}
+              onWebsiteChange={setSelectedWebsiteId}
+            />
+            <Button 
+              onClick={() => refreshAnalysis.mutate()} 
+              disabled={refreshAnalysis.isPending}
+              variant="outline"
+              size="sm"
+            >
+              {refreshAnalysis.isPending ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Actualiser
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Actualiser
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="px-6 py-6 space-y-6">
+        {/* En-tête simplifié */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-1">
+                {selectedWebsite?.name || 'Site web'}
+              </h2>
+              <p className="text-gray-600">
+                Dernière analyse: {seoAnalysis?.analyzedAt ? new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR') : 'N/A'}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-gray-900">{seoAnalysis?.overallScore || 0}</div>
+              <div className="text-sm text-gray-600">Score SEO global</div>
             </div>
           </div>
         </div>
 
-        {/* Cartes de statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Score SEO */}
-          <Card className="bg-purple-500 text-white border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="bg-purple-600 p-2 rounded">
-                  <BarChart3 className="h-5 w-5" />
+        {/* Métriques principales simplifiées */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-white border border-gray-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-gray-100 rounded">
+                  <Users className="h-5 w-5 text-gray-600" />
                 </div>
-                <Badge className="bg-purple-600 text-white border-0">
-                  +12%
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-purple-100 text-sm">Score SEO Global</p>
-                <p className="text-2xl font-bold">{seoAnalysis?.overallScore || 0}</p>
-                <div className="flex items-center text-sm text-purple-100">
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  En hausse
+                <div className="ml-4">
+                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.organicTraffic || 0}</div>
+                  <div className="text-sm text-gray-600">Trafic organique</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Trafic Organique */}
-          <Card className="bg-green-500 text-white border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="bg-green-600 p-2 rounded">
-                  <Users className="h-5 w-5" />
+          <Card className="bg-white border border-gray-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-gray-100 rounded">
+                  <Search className="h-5 w-5 text-gray-600" />
                 </div>
-                <Badge className="bg-green-600 text-white border-0">
-                  +18%
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-green-100 text-sm">Trafic Organique</p>
-                <p className="text-2xl font-bold">{seoAnalysis?.organicTraffic || 0}</p>
-                <p className="text-green-100 text-sm">visiteurs/mois</p>
+                <div className="ml-4">
+                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.keywordsRanking || 0}</div>
+                  <div className="text-sm text-gray-600">Mots-clés</div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Mots-clés */}
-          <Card className="bg-orange-500 text-white border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="bg-orange-600 p-2 rounded">
-                  <Search className="h-5 w-5" />
+          <Card className="bg-white border border-gray-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-gray-100 rounded">
+                  <Zap className="h-5 w-5 text-gray-600" />
                 </div>
-                <Badge className="bg-orange-600 text-white border-0">
-                  Stable
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-orange-100 text-sm">Mots-clés Classés</p>
-                <p className="text-2xl font-bold">{seoAnalysis?.keywordsRanking || 0}</p>
-                <p className="text-orange-100 text-sm">positions suivies</p>
+                <div className="ml-4">
+                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.pageSpeed || 0}</div>
+                  <div className="text-sm text-gray-600">PageSpeed</div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Vitesse Page */}
-          <Card className="bg-blue-500 text-white border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="bg-blue-600 p-2 rounded">
-                  <Zap className="h-5 w-5" />
+          <Card className="bg-white border border-gray-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-gray-100 rounded">
+                  <Target className="h-5 w-5 text-gray-600" />
                 </div>
-                <Badge className="bg-blue-600 text-white border-0">
-                  Bon
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-blue-100 text-sm">Vitesse Page</p>
-                <p className="text-2xl font-bold">{seoAnalysis?.pageSpeed || 0}</p>
-                <p className="text-blue-100 text-sm">score PageSpeed</p>
+                <div className="ml-4">
+                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.backlinks || 0}</div>
+                  <div className="text-sm text-gray-600">Backlinks</div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Statistiques détaillées */}
+        {/* Graphiques basés sur les données JSON du webhook */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Performance générale */}
-          <Card className="bg-white border border-gray-300 shadow-md">
+          {/* Graphique de trafic dans le temps */}
+          <Card className="bg-white border border-gray-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-700">
-                <BarChart3 className="h-5 w-5 text-gray-600" />
-                Performance SEO
-              </CardTitle>
+              <CardTitle className="text-gray-700">Évolution du trafic</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Score global</span>
-                  <Badge className="bg-gray-100 text-gray-800">
-                    {seoAnalysis?.overallScore || 0}/100
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  <Progress value={seoAnalysis?.overallScore || 0} className="h-2" />
-                </div>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                  Voir les détails
-                </Button>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={trafficData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#6b7280"
+                      fontSize={12}
+                    />
+                    <YAxis 
+                      stroke="#6b7280"
+                      fontSize={12}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px'
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="visitors" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          {/* Métriques clés */}
-          <Card className="bg-white border border-gray-300 shadow-md">
+          {/* Positions des mots-clés */}
+          <Card className="bg-white border border-gray-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-700">
-                <Target className="h-5 w-5 text-gray-600" />
-                Métriques principales
-              </CardTitle>
+              <CardTitle className="text-gray-700">Top 5 mots-clés</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={keywordsData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="#6b7280"
+                      fontSize={12}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis 
+                      stroke="#6b7280"
+                      fontSize={12}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="position" 
+                      fill="#6b7280"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Audit technique et recommandations */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Audit technique (graphique en secteurs) */}
+          <Card className="bg-white border border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-700">Audit technique</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={technicalData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}%`}
+                    >
+                      {technicalData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recommandations simplifiées */}
+          <Card className="bg-white border border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-700">Recommandations prioritaires</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Trafic organique</span>
-                  <span className="font-semibold text-gray-800">{seoAnalysis?.organicTraffic || 0}</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Mots-clés positionnés</span>
-                  <span className="font-semibold text-gray-800">{seoAnalysis?.keywordsRanking || 0}</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Score PageSpeed</span>
-                  <span className="font-semibold text-gray-800">{seoAnalysis?.pageSpeed || 0}</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm text-gray-600">Backlinks</span>
-                  <span className="font-semibold text-gray-800">{seoAnalysis?.backlinks || 0}</span>
-                </div>
-              </div>  
+                {seoAnalysis?.recommendations?.slice(0, 4).map((rec: any, index: number) => (
+                  <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 text-sm mb-1">{rec.title}</h4>
+                        <p className="text-gray-600 text-xs">{rec.description}</p>
+                      </div>
+                      <Badge 
+                        variant="outline"
+                        className={`ml-2 text-xs ${
+                          rec.priority === 'high' 
+                            ? 'border-red-200 text-red-700' 
+                            : rec.priority === 'medium' 
+                            ? 'border-yellow-200 text-yellow-700' 
+                            : 'border-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {rec.priority === 'high' ? 'Haute' : rec.priority === 'medium' ? 'Moyenne' : 'Basse'}
+                      </Badge>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center py-8 text-gray-500">
+                    Aucune recommandation disponible
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Recommandations SEO */}
-        <Card className="bg-white border border-gray-300 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-gray-700">Recommandations prioritaires</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {seoAnalysis?.recommendations?.slice(0, 3).map((rec: any, index: number) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded">
-                  <div className="bg-blue-600 p-2 rounded flex-shrink-0">
-                    <Target className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-800 mb-1">{rec.title}</h4>
-                    <p className="text-gray-600 text-sm mb-2">{rec.description}</p>
-                    <Badge 
-                      className={`text-xs ${
-                        rec.priority === 'high' 
-                          ? 'bg-red-100 text-red-800' 
-                          : rec.priority === 'medium' 
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {rec.priority === 'high' ? 'Haute' : rec.priority === 'medium' ? 'Moyenne' : 'Basse'} priorité
-                    </Badge>
-                  </div>
-                </div>
-              )) || (
-                <div className="text-center py-8 text-gray-500">
-                  Aucune recommandation disponible
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+
       </div>
     </div>
   );
