@@ -55,16 +55,24 @@ export default function Dashboard() {
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Invalider et rafraîchir toutes les données SEO
       queryClient.invalidateQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/websites'] });
+      
+      // Forcer le rechargement immédiat des données
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
+      }, 500);
+      
       toast({
-        title: "Analyse SEO mise à jour",
-        description: "L'analyse SEO a été actualisée avec les dernières données.",
+        title: "Analyse SEO terminée",
+        description: `Nouvelle analyse reçue avec un score de ${data.overallScore}/100`,
       });
     },
     onError: (error: any) => {
       // Gestion spécifique pour l'erreur webhook n8n
-      if (error.message && error.message.includes('Webhook n8n non activé')) {
+      if (error.message && error.message.includes('Webhook n8n')) {
         toast({
           title: "Webhook n8n requis",
           description: "Activez le webhook dans n8n en cliquant sur 'Test workflow' puis réessayez.",
@@ -82,34 +90,59 @@ export default function Dashboard() {
 
   const selectedWebsite = websites.find(w => w.id === selectedWebsiteId);
 
-  // Données pour les graphiques basées sur le JSON réel
-  const performanceData = [
-    { name: 'LCP Mobile', value: 3.1, target: 2.5, status: 'danger' },
-    { name: 'LCP Desktop', value: 1.9, target: 2.5, status: 'good' },
-    { name: 'CLS Mobile', value: 0.22, target: 0.1, status: 'warning' },
-    { name: 'CLS Desktop', value: 0.08, target: 0.1, status: 'good' },
-    { name: 'INP Mobile', value: 310, target: 200, status: 'danger' },
-    { name: 'INP Desktop', value: 130, target: 200, status: 'good' }
-  ];
+  // Données dynamiques basées sur l'analyse SEO réelle
+  const performanceData = seoAnalysis ? [
+    { 
+      name: 'LCP Mobile', 
+      value: seoAnalysis.coreWebVitals?.lcpMobile || 0, 
+      target: 2.5, 
+      status: (seoAnalysis.coreWebVitals?.lcpMobile || 0) <= 2.5 ? 'good' : (seoAnalysis.coreWebVitals?.lcpMobile || 0) <= 4 ? 'warning' : 'danger'
+    },
+    { 
+      name: 'LCP Desktop', 
+      value: seoAnalysis.coreWebVitals?.lcpDesktop || 0, 
+      target: 2.5, 
+      status: (seoAnalysis.coreWebVitals?.lcpDesktop || 0) <= 2.5 ? 'good' : (seoAnalysis.coreWebVitals?.lcpDesktop || 0) <= 4 ? 'warning' : 'danger'
+    },
+    { 
+      name: 'CLS Mobile', 
+      value: seoAnalysis.coreWebVitals?.clsMobile || 0, 
+      target: 0.1, 
+      status: (seoAnalysis.coreWebVitals?.clsMobile || 0) <= 0.1 ? 'good' : (seoAnalysis.coreWebVitals?.clsMobile || 0) <= 0.25 ? 'warning' : 'danger'
+    },
+    { 
+      name: 'CLS Desktop', 
+      value: seoAnalysis.coreWebVitals?.clsDesktop || 0, 
+      target: 0.1, 
+      status: (seoAnalysis.coreWebVitals?.clsDesktop || 0) <= 0.1 ? 'good' : (seoAnalysis.coreWebVitals?.clsDesktop || 0) <= 0.25 ? 'warning' : 'danger'
+    },
+    { 
+      name: 'INP Mobile', 
+      value: seoAnalysis.coreWebVitals?.inpMobile || 0, 
+      target: 200, 
+      status: (seoAnalysis.coreWebVitals?.inpMobile || 0) <= 200 ? 'good' : (seoAnalysis.coreWebVitals?.inpMobile || 0) <= 500 ? 'warning' : 'danger'
+    },
+    { 
+      name: 'INP Desktop', 
+      value: seoAnalysis.coreWebVitals?.inpDesktop || 0, 
+      target: 200, 
+      status: (seoAnalysis.coreWebVitals?.inpDesktop || 0) <= 200 ? 'good' : (seoAnalysis.coreWebVitals?.inpDesktop || 0) <= 500 ? 'warning' : 'danger'
+    }
+  ] : [];
 
-  const keywordDistribution = [
-    { name: 'Marque', value: 63, color: '#10b981' },
-    { name: 'Générique', value: 37, color: '#f59e0b' }
-  ];
+  const keywordDistribution = seoAnalysis?.keywordAnalysis ? [
+    { name: 'Marque', value: seoAnalysis.keywordAnalysis.brandKeywords || 0, color: '#10b981' },
+    { name: 'Générique', value: seoAnalysis.keywordAnalysis.genericKeywords || 0, color: '#f59e0b' }
+  ] : [];
 
-  const competitorData = [
-    { name: 'Plug2AI', da: 11, traffic: 30 },
-    { name: 'Datasulting', da: 33, traffic: 1100 },
-    { name: 'Quantmetry', da: 38, traffic: 4000 },
-    { name: 'Axionable', da: 36, traffic: 1600 }
-  ];
+  const competitorData = seoAnalysis?.competitorAnalysis || [];
 
-  const technicalScores = [
-    { category: 'Performance', score: 65, maxScore: 100 },
-    { category: 'SEO', score: 76, maxScore: 100 },
-    { category: 'Accessibilité', score: 85, maxScore: 100 },
-    { category: 'Bonnes pratiques', score: 80, maxScore: 100 }
-  ];
+  const technicalScores = seoAnalysis ? [
+    { category: 'Performance', score: seoAnalysis.pageSpeed || 0, maxScore: 100 },
+    { category: 'SEO', score: seoAnalysis.overallScore || 0, maxScore: 100 },
+    { category: 'Accessibilité', score: seoAnalysis.technicalSeo?.accessibility || 0, maxScore: 100 },
+    { category: 'Bonnes pratiques', score: seoAnalysis.technicalSeo?.bestPractices || 0, maxScore: 100 }
+  ] : [];
 
   if (isLoading || !seoAnalysis) {
     return (
@@ -146,6 +179,28 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen soft-background">
+      {/* Superposition de chargement pendant l'analyse */}
+      {refreshAnalysisMutation.isPending && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="soft-card p-8 text-center space-y-4 mx-4">
+            <div className="flex justify-center">
+              <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                Analyse SEO en cours
+              </h3>
+              <p className="soft-text">
+                Récupération des données depuis le webhook n8n...
+              </p>
+              <div className="mt-4 bg-slate-200 rounded-full h-2 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="relative container mx-auto px-6 py-8 max-w-6xl">
         
         {/* En-tête doux et apaisant */}
@@ -169,8 +224,16 @@ export default function Dashboard() {
                 
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                    <span className="text-sm soft-text">Données actualisées</span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      refreshAnalysisMutation.isPending 
+                        ? 'bg-blue-400 animate-pulse' 
+                        : 'bg-emerald-400'
+                    }`}></div>
+                    <span className="text-sm soft-text">
+                      {refreshAnalysisMutation.isPending 
+                        ? 'Analyse en cours...' 
+                        : 'Données actualisées'}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-slate-400" />
