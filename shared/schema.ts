@@ -40,6 +40,7 @@ export const seoAnalyses = pgTable("seo_analyses", {
     date: string;
     visitors: number;
   }>>().notNull(),
+  rawWebhookData: jsonb("raw_webhook_data").$type<string>(),
   analyzedAt: timestamp("analyzed_at").defaultNow().notNull(),
 });
 
