@@ -24,10 +24,11 @@ export default function DashboardComplete() {
   const { data: seoAnalysis, isLoading, refetch } = useQuery({
     queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
     enabled: !!selectedWebsiteId,
-    refetchInterval: 2000, // Refetch toutes les 2 secondes pour capter les nouvelles données
+    refetchInterval: 1000, // Refetch toutes les secondes pour capter les changements
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    staleTime: 0, // Considérer les données comme périmées immédiatement
+    staleTime: 0, // Données toujours considérées comme périmées
+    cacheTime: 0, // Pas de cache côté client
   });
 
   type WebsiteType = {
