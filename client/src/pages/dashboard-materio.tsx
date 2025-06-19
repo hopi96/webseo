@@ -14,13 +14,37 @@ export default function DashboardMaterio() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
   const { toast } = useToast();
 
+  // Types pour les données
+  type WebsiteType = {
+    id: number;
+    url: string;
+    name: string;
+    createdAt: string;
+  };
+
+  type SeoAnalysisType = {
+    id: number;
+    websiteId: number;
+    overallScore: number;
+    organicTraffic: number;
+    keywordsRanking: number;
+    backlinks: number;
+    pageSpeed: number;
+    technicalSeo: any;
+    recommendations: any[];
+    keywords: any[];
+    trafficData: any[];
+    rawWebhookData?: string;
+    analyzedAt: string;
+  };
+
   // Récupération des sites web
-  const { data: websites = [] } = useQuery({
+  const { data: websites = [] } = useQuery<WebsiteType[]>({
     queryKey: ['/api/websites'],
   });
 
   // Récupération de l'analyse SEO
-  const { data: seoAnalysis, isLoading, refetch } = useQuery({
+  const { data: seoAnalysis, isLoading, refetch } = useQuery<SeoAnalysisType>({
     queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
     enabled: !!selectedWebsiteId,
     refetchInterval: 2000,
@@ -74,7 +98,7 @@ export default function DashboardMaterio() {
     },
   });
 
-  const selectedWebsite = websites.find((w: any) => w.id === selectedWebsiteId);
+  const selectedWebsite = websites.find((w: WebsiteType) => w.id === selectedWebsiteId);
 
   if (isLoading) {
     return (
@@ -141,7 +165,7 @@ export default function DashboardMaterio() {
                   Meilleur vendeur du mois
                 </p>
                 <div className="mt-2">
-                  <span className="text-4xl font-bold text-white">{seoAnalysis.organicTraffic}</span>
+                  <span className="text-4xl font-bold text-white">{seoAnalysis?.organicTraffic || 0}</span>
                   <span className="text-white/80 ml-2">visiteurs/mois</span>
                 </div>
               </div>
@@ -189,7 +213,7 @@ export default function DashboardMaterio() {
             <CardContent>
               <div className="space-y-2">
                 <p className="text-white/80 text-sm font-medium">Score SEO Global</p>
-                <p className="text-3xl font-bold">{seoAnalysis.overallScore}</p>
+                <p className="text-3xl font-bold">{seoAnalysis?.overallScore || 0}</p>
                 <div className="flex items-center text-sm text-white/80">
                   <TrendingUp className="h-4 w-4 mr-1" />
                   Tendance positive
@@ -213,7 +237,7 @@ export default function DashboardMaterio() {
             <CardContent>
               <div className="space-y-2">
                 <p className="text-white/80 text-sm font-medium">Trafic Organique</p>
-                <p className="text-3xl font-bold">{seoAnalysis.organicTraffic}</p>
+                <p className="text-3xl font-bold">{seoAnalysis?.organicTraffic || 0}</p>
                 <p className="text-white/80 text-sm">visiteurs/mois</p>
               </div>
             </CardContent>
@@ -234,7 +258,7 @@ export default function DashboardMaterio() {
             <CardContent>
               <div className="space-y-2">
                 <p className="text-white/80 text-sm font-medium">Mots-clés Classés</p>
-                <p className="text-3xl font-bold">{seoAnalysis.keywordsRanking}</p>
+                <p className="text-3xl font-bold">{seoAnalysis?.keywordsRanking || 0}</p>
                 <p className="text-white/80 text-sm">positions suivies</p>
               </div>
             </CardContent>
@@ -255,7 +279,7 @@ export default function DashboardMaterio() {
             <CardContent>
               <div className="space-y-2">
                 <p className="text-white/80 text-sm font-medium">Vitesse Page</p>
-                <p className="text-3xl font-bold">{seoAnalysis.pageSpeed}</p>
+                <p className="text-3xl font-bold">{seoAnalysis?.pageSpeed || 0}</p>
                 <p className="text-white/80 text-sm">score PageSpeed</p>
               </div>
             </CardContent>
@@ -346,7 +370,7 @@ export default function DashboardMaterio() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              {seoAnalysis.recommendations?.slice(0, 3).map((rec: any, index: number) => (
+              {seoAnalysis?.recommendations?.slice(0, 3).map((rec: any, index: number) => (
                 <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
                   <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-lg flex-shrink-0">
                     <Target className="h-4 w-4 text-white" />
@@ -362,7 +386,11 @@ export default function DashboardMaterio() {
                     </Badge>
                   </div>
                 </div>
-              ))}
+              )) || (
+                <div className="text-center py-8 text-gray-500">
+                  Aucune recommandation disponible
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
