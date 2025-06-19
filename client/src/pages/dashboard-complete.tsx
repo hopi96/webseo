@@ -28,7 +28,7 @@ export default function DashboardComplete() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0, // Données toujours considérées comme périmées
-    cacheTime: 0, // Pas de cache côté client
+    gcTime: 0, // Pas de cache côté client (TanStack Query v5)
   });
 
   type WebsiteType = {
@@ -177,27 +177,29 @@ export default function DashboardComplete() {
   }
 
   return (
-    <div className="min-h-screen soft-background">
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* En-tête avec sélecteur de site */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Tableau de bord SEO</h1>
-            <p className="text-gray-600">
-              Analyse complète de {selectedWebsite?.name || 'votre site'}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <WebsiteSelector
-              selectedWebsiteId={selectedWebsiteId}
-              onWebsiteChange={setSelectedWebsiteId}
-            />
-            <Button 
-              onClick={() => refreshAnalysisMutation.mutate()} 
-              disabled={refreshAnalysisMutation.isPending}
-              size="sm"
-            >
-              {refreshAnalysisMutation.isPending ? (
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+      <div className="px-4 py-6 space-y-6">
+        {/* En-tête avec style glassmorphisme */}
+        <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 border border-white/20 shadow-2xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">Tableau de bord SEO</h1>
+              <p className="text-white/80">
+                Analyse complète de {selectedWebsite?.name || 'votre site'}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <WebsiteSelector
+                selectedWebsiteId={selectedWebsiteId}
+                onWebsiteChange={setSelectedWebsiteId}
+              />
+              <Button 
+                onClick={() => refreshAnalysisMutation.mutate()} 
+                disabled={refreshAnalysisMutation.isPending}
+                className="bg-white/20 hover:bg-white/30 text-white border-white/20 backdrop-blur-sm"
+                size="sm"
+              >
+                {refreshAnalysisMutation.isPending ? (
                 <>
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                   Analyse...
@@ -209,12 +211,13 @@ export default function DashboardComplete() {
                 </>
               )}
             </Button>
+            </div>
           </div>
         </div>
 
-        {/* Métriques principales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="soft-card">
+        {/* Métriques principales avec style coloré */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
