@@ -41,14 +41,14 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
       toast({
-        title: "Success",
-        description: "Website deleted successfully",
+        title: "Succès",
+        description: "Site web supprimé avec succès",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete website",
+        title: "Erreur",
+        description: error.message || "Impossible de supprimer le site web",
         variant: "destructive",
       });
     },
@@ -62,14 +62,14 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
       toast({
-        title: "Success",
-        description: "Website analysis completed successfully",
+        title: "Succès",
+        description: "Analyse du site web terminée avec succès",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to analyze website",
+        title: "Erreur",
+        description: error.message || "Impossible d'analyser le site web",
         variant: "destructive",
       });
     },
@@ -88,25 +88,25 @@ export default function Settings() {
       <MobileHeader />
 
       <main className="px-4 py-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Paramètres</h1>
 
         <div className="space-y-4">
-          {/* Appearance */}
+          {/* Apparence */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 {theme === "dark" ? <Moon className="w-5 h-5 mr-2" /> : <Sun className="w-5 h-5 mr-2" />}
-                Appearance
+                Apparence
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="dark-mode" className="text-sm font-medium">
-                    Dark Mode
+                    Mode sombre
                   </Label>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Toggle between light and dark themes
+                    Basculer entre les thèmes clair et sombre
                   </p>
                 </div>
                 <Switch
@@ -130,10 +130,10 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="notifications" className="text-sm font-medium">
-                    Push Notifications
+                    Notifications push
                   </Label>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Receive notifications about SEO changes
+                    Recevoir des notifications sur les changements SEO
                   </p>
                 </div>
                 <Switch
@@ -146,10 +146,10 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="auto-analysis" className="text-sm font-medium">
-                    Auto Analysis
+                    Analyse automatique
                   </Label>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Automatically analyze websites weekly
+                    Analyser automatiquement les sites web chaque semaine
                   </p>
                 </div>
                 <Switch
@@ -161,10 +161,10 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* Websites Management */}
+          {/* Gestion des sites web */}
           <Card>
             <CardHeader>
-              <CardTitle>Manage Websites</CardTitle>
+              <CardTitle>Gérer les sites web</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -193,26 +193,26 @@ export default function Settings() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-seo-error hover:text-seo-error"
+                            className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Website</AlertDialogTitle>
+                            <AlertDialogTitle>Supprimer le site web</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete "{website.name}"? 
-                              This action cannot be undone and will remove all associated SEO data.
+                              Êtes-vous sûr de vouloir supprimer "{website.name}" ? 
+                              Cette action ne peut pas être annulée et supprimera toutes les données SEO associées.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDeleteWebsite(website.id)}
-                              className="bg-seo-error hover:bg-seo-error/90"
+                              className="bg-red-600 hover:bg-red-700"
                             >
-                              Delete
+                              Supprimer
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -223,17 +223,17 @@ export default function Settings() {
                 
                 {(!websites || websites.length === 0) && (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    No websites added yet. Add your first website from the dashboard.
+                    Aucun site web ajouté pour le moment. Ajoutez votre premier site depuis le tableau de bord.
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* About */}
+          {/* À propos */}
           <Card>
             <CardHeader>
-              <CardTitle>About</CardTitle>
+              <CardTitle>À propos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
@@ -242,8 +242,8 @@ export default function Settings() {
                   <span className="font-medium">1.0.0</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Last Updated</span>
-                  <span className="font-medium">June 2025</span>
+                  <span className="text-gray-600 dark:text-gray-400">Dernière mise à jour</span>
+                  <span className="font-medium">Juin 2025</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Build</span>
