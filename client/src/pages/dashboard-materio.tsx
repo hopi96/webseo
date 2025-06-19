@@ -102,13 +102,13 @@ export default function DashboardMaterio() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+      <div className="min-h-screen bg-white">
         <div className="px-6 py-8">
           <div className="animate-pulse space-y-6">
-            <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 h-32"></div>
+            <div className="bg-gray-200 rounded-3xl p-6 h-32"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white/20 backdrop-blur-sm rounded-2xl h-32"></div>
+                <div key={i} className="bg-gray-200 rounded-2xl h-32"></div>
               ))}
             </div>
           </div>
@@ -119,15 +119,15 @@ export default function DashboardMaterio() {
 
   if (!seoAnalysis) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+      <div className="min-h-screen bg-white">
         <div className="px-6 py-8">
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold text-white">Aucune analyse disponible</h2>
-            <p className="text-white/80">Cliquez sur "Actualiser l'analyse" pour générer une nouvelle analyse SEO.</p>
+            <h2 className="text-2xl font-bold text-gray-800">Aucune analyse disponible</h2>
+            <p className="text-gray-600">Cliquez sur "Actualiser l'analyse" pour générer une nouvelle analyse SEO.</p>
             <Button 
               onClick={() => refreshAnalysis.mutate()} 
               disabled={refreshAnalysis.isPending}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/20 backdrop-blur-sm"
+              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
             >
               {refreshAnalysis.isPending ? (
                 <>
@@ -148,25 +148,25 @@ export default function DashboardMaterio() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+    <div className="min-h-screen bg-white">
       <div className="px-6 py-8 space-y-8">
-        {/* En-tête avec félicitations */}
-        <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-2xl">
+        {/* En-tête */}
+        <div className="bg-blue-600 rounded-lg p-6 shadow-lg">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-2xl">
-                <Trophy className="h-8 w-8 text-white" />
+              <div className="bg-blue-700 p-3 rounded-lg">
+                <Trophy className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white mb-1">
-                  Félicitations {selectedWebsite?.name || 'Site'} ! 🎉
+                <h1 className="text-2xl font-bold text-white mb-1">
+                  Tableau de bord SEO - {selectedWebsite?.name || 'Site'}
                 </h1>
-                <p className="text-white/80 text-lg">
-                  Meilleur vendeur du mois
+                <p className="text-blue-100 text-base">
+                  Analyse complète de performance
                 </p>
                 <div className="mt-2">
-                  <span className="text-4xl font-bold text-white">{seoAnalysis?.organicTraffic || 0}</span>
-                  <span className="text-white/80 ml-2">visiteurs/mois</span>
+                  <span className="text-2xl font-bold text-white">{seoAnalysis?.organicTraffic || 0}</span>
+                  <span className="text-blue-100 ml-2">visiteurs/mois</span>
                 </div>
               </div>
             </div>
@@ -178,7 +178,7 @@ export default function DashboardMaterio() {
               <Button 
                 onClick={() => refreshAnalysis.mutate()} 
                 disabled={refreshAnalysis.isPending}
-                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-lg px-6"
+                className="bg-blue-700 hover:bg-blue-800 text-white border-0 px-4"
               >
                 {refreshAnalysis.isPending ? (
                   <>
@@ -196,191 +196,178 @@ export default function DashboardMaterio() {
           </div>
         </div>
 
-        {/* Cartes de statistiques colorées */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Cartes de statistiques */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Score SEO */}
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-2xl overflow-hidden relative">
+          <Card className="bg-purple-500 text-white border-0 shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <BarChart3 className="h-6 w-6" />
+                <div className="bg-purple-600 p-2 rounded">
+                  <BarChart3 className="h-5 w-5" />
                 </div>
-                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                <Badge className="bg-purple-600 text-white border-0">
                   +12%
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p className="text-white/80 text-sm font-medium">Score SEO Global</p>
-                <p className="text-3xl font-bold">{seoAnalysis?.overallScore || 0}</p>
-                <div className="flex items-center text-sm text-white/80">
+              <div className="space-y-1">
+                <p className="text-purple-100 text-sm">Score SEO Global</p>
+                <p className="text-2xl font-bold">{seoAnalysis?.overallScore || 0}</p>
+                <div className="flex items-center text-sm text-purple-100">
                   <TrendingUp className="h-4 w-4 mr-1" />
-                  Tendance positive
+                  En hausse
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Trafic Organique */}
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-2xl overflow-hidden">
+          <Card className="bg-green-500 text-white border-0 shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <Users className="h-6 w-6" />
+                <div className="bg-green-600 p-2 rounded">
+                  <Users className="h-5 w-5" />
                 </div>
-                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                <Badge className="bg-green-600 text-white border-0">
                   +18%
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p className="text-white/80 text-sm font-medium">Trafic Organique</p>
-                <p className="text-3xl font-bold">{seoAnalysis?.organicTraffic || 0}</p>
-                <p className="text-white/80 text-sm">visiteurs/mois</p>
+              <div className="space-y-1">
+                <p className="text-green-100 text-sm">Trafic Organique</p>
+                <p className="text-2xl font-bold">{seoAnalysis?.organicTraffic || 0}</p>
+                <p className="text-green-100 text-sm">visiteurs/mois</p>
               </div>
             </CardContent>
           </Card>
 
           {/* Mots-clés */}
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-2xl overflow-hidden">
+          <Card className="bg-orange-500 text-white border-0 shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <Search className="h-6 w-6" />
+                <div className="bg-orange-600 p-2 rounded">
+                  <Search className="h-5 w-5" />
                 </div>
-                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                <Badge className="bg-orange-600 text-white border-0">
                   Stable
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p className="text-white/80 text-sm font-medium">Mots-clés Classés</p>
-                <p className="text-3xl font-bold">{seoAnalysis?.keywordsRanking || 0}</p>
-                <p className="text-white/80 text-sm">positions suivies</p>
+              <div className="space-y-1">
+                <p className="text-orange-100 text-sm">Mots-clés Classés</p>
+                <p className="text-2xl font-bold">{seoAnalysis?.keywordsRanking || 0}</p>
+                <p className="text-orange-100 text-sm">positions suivies</p>
               </div>
             </CardContent>
           </Card>
 
           {/* Vitesse Page */}
-          <Card className="bg-gradient-to-br from-cyan-500 to-cyan-600 text-white border-0 shadow-2xl overflow-hidden">
+          <Card className="bg-blue-500 text-white border-0 shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <Zap className="h-6 w-6" />
+                <div className="bg-blue-600 p-2 rounded">
+                  <Zap className="h-5 w-5" />
                 </div>
-                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                <Badge className="bg-blue-600 text-white border-0">
                   Bon
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p className="text-white/80 text-sm font-medium">Vitesse Page</p>
-                <p className="text-3xl font-bold">{seoAnalysis?.pageSpeed || 0}</p>
-                <p className="text-white/80 text-sm">score PageSpeed</p>
+              <div className="space-y-1">
+                <p className="text-blue-100 text-sm">Vitesse Page</p>
+                <p className="text-2xl font-bold">{seoAnalysis?.pageSpeed || 0}</p>
+                <p className="text-blue-100 text-sm">score PageSpeed</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Graphiques et Recommandations */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Vue d'ensemble hebdomadaire */}
-          <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+        {/* Statistiques détaillées */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Performance générale */}
+          <Card className="bg-white border border-gray-300 shadow-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-800">
-                <BarChart3 className="h-5 w-5" />
-                Vue d'ensemble hebdomadaire
+              <CardTitle className="flex items-center gap-2 text-gray-700">
+                <BarChart3 className="h-5 w-5 text-gray-600" />
+                Performance SEO
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Performance de vos ventes à 45%</span>
-                  <Badge variant="outline" className="text-green-600 border-green-200">
-                    Mieux comparé au mois dernier
+                  <span className="text-gray-600">Score global</span>
+                  <Badge className="bg-gray-100 text-gray-800">
+                    {seoAnalysis?.overallScore || 0}/100
                   </Badge>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>45%</span>
-                  </div>
-                  <Progress value={45} className="h-3" />
+                  <Progress value={seoAnalysis?.overallScore || 0} className="h-2" />
                 </div>
-                <Button className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white">
-                  DÉTAILS
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Voir les détails
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Gain total */}
-          <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+          {/* Métriques clés */}
+          <Card className="bg-white border border-gray-300 shadow-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-800">
-                <Target className="h-5 w-5" />
-                Gain total
+              <CardTitle className="flex items-center gap-2 text-gray-700">
+                <Target className="h-5 w-5 text-gray-600" />
+                Métriques principales
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-3xl font-bold text-gray-800">€24,895</span>
-                  <Badge className="bg-green-100 text-green-800 border-0">
-                    +10%
-                  </Badge>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Trafic organique</span>
+                  <span className="font-semibold text-gray-800">{seoAnalysis?.organicTraffic || 0}</span>
                 </div>
-                <p className="text-gray-600 text-sm">Comparé à €84,325 l'année dernière</p>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Zipcar</span>
-                    </div>
-                    <span className="font-semibold">€24,895.65</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Bitbank</span>
-                    </div>
-                    <span className="font-semibold">€8,650.20</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Aviato</span>
-                    </div>
-                    <span className="font-semibold">€1,245.80</span>
-                  </div>
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Mots-clés positionnés</span>
+                  <span className="font-semibold text-gray-800">{seoAnalysis?.keywordsRanking || 0}</span>
                 </div>
-              </div>
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Score PageSpeed</span>
+                  <span className="font-semibold text-gray-800">{seoAnalysis?.pageSpeed || 0}</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-gray-600">Backlinks</span>
+                  <span className="font-semibold text-gray-800">{seoAnalysis?.backlinks || 0}</span>
+                </div>
+              </div>  
             </CardContent>
           </Card>
         </div>
 
         {/* Recommandations SEO */}
-        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+        <Card className="bg-white border border-gray-300 shadow-md">
           <CardHeader>
-            <CardTitle className="text-gray-800">Recommandations prioritaires</CardTitle>
+            <CardTitle className="text-gray-700">Recommandations prioritaires</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
+            <div className="space-y-3">
               {seoAnalysis?.recommendations?.slice(0, 3).map((rec: any, index: number) => (
-                <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-                  <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-lg flex-shrink-0">
+                <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded">
+                  <div className="bg-blue-600 p-2 rounded flex-shrink-0">
                     <Target className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-800 mb-1">{rec.title}</h4>
-                    <p className="text-gray-600 text-sm">{rec.description}</p>
+                    <h4 className="font-medium text-gray-800 mb-1">{rec.title}</h4>
+                    <p className="text-gray-600 text-sm mb-2">{rec.description}</p>
                     <Badge 
-                      variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'}
-                      className="mt-2"
+                      className={`text-xs ${
+                        rec.priority === 'high' 
+                          ? 'bg-red-100 text-red-800' 
+                          : rec.priority === 'medium' 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
                     >
                       {rec.priority === 'high' ? 'Haute' : rec.priority === 'medium' ? 'Moyenne' : 'Basse'} priorité
                     </Badge>
