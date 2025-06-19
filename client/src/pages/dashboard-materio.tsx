@@ -257,57 +257,57 @@ export default function DashboardMaterio() {
 
         {/* Métriques principales simplifiées */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <div className="p-2 bg-gray-100 rounded">
-                  <Users className="h-5 w-5 text-gray-600" />
+                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                  <Users className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.organicTraffic || 0}</div>
-                  <div className="text-sm text-gray-600">Trafic organique</div>
+                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.organicTraffic || 0}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Trafic organique</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <div className="p-2 bg-gray-100 rounded">
-                  <Search className="h-5 w-5 text-gray-600" />
+                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                  <Search className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.keywordsRanking || 0}</div>
-                  <div className="text-sm text-gray-600">Mots-clés</div>
+                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.keywordsRanking || 0}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Mots-clés</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <div className="p-2 bg-gray-100 rounded">
-                  <Zap className="h-5 w-5 text-gray-600" />
+                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                  <Zap className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.pageSpeed || 0}</div>
-                  <div className="text-sm text-gray-600">PageSpeed</div>
+                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.pageSpeed || 0}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">PageSpeed</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <div className="p-2 bg-gray-100 rounded">
-                  <Target className="h-5 w-5 text-gray-600" />
+                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                  <Target className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 </div>
                 <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900">{seoAnalysis?.backlinks || 0}</div>
-                  <div className="text-sm text-gray-600">Backlinks</div>
+                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.backlinks || 0}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Backlinks</div>
                 </div>
               </div>
             </CardContent>
@@ -317,9 +317,9 @@ export default function DashboardMaterio() {
         {/* Graphiques basés sur les données JSON du webhook */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Graphique de trafic dans le temps */}
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700">Évolution du trafic</CardTitle>
+              <CardTitle className="text-gray-700 dark:text-gray-300">Évolution du trafic</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -356,9 +356,9 @@ export default function DashboardMaterio() {
           </Card>
 
           {/* Positions des mots-clés */}
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700">Top 5 mots-clés</CardTitle>
+              <CardTitle className="text-gray-700 dark:text-gray-300">Top 5 mots-clés</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -399,25 +399,25 @@ export default function DashboardMaterio() {
         {/* Audit technique et recommandations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Audit technique avec explications */}
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700">Audit technique SEO</CardTitle>
-              <p className="text-sm text-gray-600 mt-2">
+              <CardTitle className="text-gray-700 dark:text-gray-300">Audit technique SEO</CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 Vérifications techniques essentielles pour le référencement
               </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {technicalData.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                     <div className="flex items-center space-x-3">
                       <div 
                         className="w-4 h-4 rounded-full" 
                         style={{ backgroundColor: item.color }}
                       />
                       <div>
-                        <div className="font-medium text-gray-900">{item.name}</div>
-                        <div className="text-xs text-gray-600">
+                        <div className="font-medium text-gray-900 dark:text-white">{item.name}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
                           {item.name === 'Mobile-Friendly' && 'Site optimisé pour mobile'}
                           {item.name === 'HTTPS Secure' && 'Connexion sécurisée SSL'}
                           {item.name === 'XML Sitemap' && 'Plan du site pour moteurs de recherche'}
@@ -428,8 +428,8 @@ export default function DashboardMaterio() {
                     <div className="flex items-center">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         item.value === 100 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300' 
+                          : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300'
                       }`}>
                         {item.value === 100 ? '✓ Conforme' : '✗ À corriger'}
                       </span>
@@ -441,27 +441,27 @@ export default function DashboardMaterio() {
           </Card>
 
           {/* Recommandations simplifiées */}
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700">Recommandations prioritaires</CardTitle>
+              <CardTitle className="text-gray-700 dark:text-gray-300">Recommandations prioritaires</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {seoAnalysis?.recommendations?.slice(0, 4).map((rec: any, index: number) => (
-                  <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded">
+                  <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 text-sm mb-1">{rec.title}</h4>
-                        <p className="text-gray-600 text-xs">{rec.description}</p>
+                        <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-1">{rec.title}</h4>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs">{rec.description}</p>
                       </div>
                       <Badge 
                         variant="outline"
                         className={`ml-2 text-xs ${
                           rec.priority === 'high' 
-                            ? 'border-red-200 text-red-700' 
+                            ? 'border-red-200 dark:border-red-800 text-red-700 dark:text-red-300' 
                             : rec.priority === 'medium' 
-                            ? 'border-yellow-200 text-yellow-700' 
-                            : 'border-gray-200 text-gray-700'
+                            ? 'border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300' 
+                            : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                         }`}
                       >
                         {rec.priority === 'high' ? 'Haute' : rec.priority === 'medium' ? 'Moyenne' : 'Basse'}
@@ -469,7 +469,7 @@ export default function DashboardMaterio() {
                     </div>
                   </div>
                 )) || (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     Aucune recommandation disponible
                   </div>
                 )}
