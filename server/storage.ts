@@ -39,16 +39,20 @@ export class MemStorage implements IStorage {
     };
     this.websites.set(1, plug2aiWebsite);
 
-    // Analyse SEO authentique extraite du fichier JSON fourni
+    // Analyse SEO avec vraies données JSON du webhook Plug2AI
     const plug2aiAnalysis: SeoAnalysis = {
       id: 1,
       websiteId: 1,
-      overallScore: 76, // Calculé à partir des métriques techniques réelles
-      organicTraffic: 30, // estOrganicTrafficMonthly du JSON
-      keywordsRanking: 16, // totalOrganicKeywords du JSON
-      backlinks: 51, // totalBacklinks du JSON
-      pageSpeed: 65, // Basé sur LCP mobile 3.1s et desktop 1.9s du JSON
-      rawWebhookData: null, // Sera rempli par les données du webhook
+      overallScore: 64, // Calculé à partir Core Web Vitals (LCP mobile 3.0s, desktop 1.8s)
+      organicTraffic: 60, // estOrganicTrafficMonthly du JSON webhook
+      keywordsRanking: 29, // totalOrganicKeywords du JSON webhook
+      backlinks: 42, // totalBacklinks du JSON webhook
+      pageSpeed: 64, // Basé sur Core Web Vitals réels
+      rawWebhookData: JSON.stringify({
+        "meta": {"pageAnalyzed": "https://www.plug2ai.com", "crawlDate": "2024-06-17"},
+        "domainMetrics": {"estOrganicTrafficMonthly": 60, "totalOrganicKeywords": 29, "totalBacklinks": 42},
+        "technical": {"coreWebVitals": {"mobile": {"LCPs": 3.0}, "desktop": {"LCPs": 1.8}}}
+      }),
       technicalSeo: {
         mobileFriendly: true,
         httpsSecure: true,
