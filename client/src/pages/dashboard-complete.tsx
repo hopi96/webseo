@@ -22,7 +22,7 @@ export default function DashboardComplete() {
 
   // Requête pour récupérer l'analyse SEO avec refetch automatique
   const { data: seoAnalysis, isLoading, refetch } = useQuery({
-    queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'],
+    queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
     enabled: !!selectedWebsiteId,
     refetchInterval: 2000, // Refetch toutes les 2 secondes pour capter les nouvelles données
     refetchOnWindowFocus: true,
@@ -65,16 +65,17 @@ export default function DashboardComplete() {
       return response.json();
     },
     onSuccess: (data) => {
-      // Invalider complètement le cache et forcer le refetch
-      queryClient.removeQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
+      // Invalider complètement le cache et forcer le refetch avec la bonne clé
+      const cacheKey = [`/api/websites/${selectedWebsiteId}/seo-analysis`];
+      queryClient.removeQueries({ queryKey: cacheKey });
+      queryClient.invalidateQueries({ queryKey: cacheKey });
       
       // Attendre un peu puis forcer le refetch
       setTimeout(() => {
         refetch();
         // Force une seconde invalidation pour être sûr
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
+          queryClient.invalidateQueries({ queryKey: cacheKey });
         }, 1000);
       }, 500);
       
