@@ -165,26 +165,26 @@ export default function DashboardMaterio() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Barre de navigation supérieure */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
+      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <h1 className="text-xl font-semibold text-gray-900">SEO Dashboard</h1>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">SEO Dashboard</h1>
             <div className="flex space-x-6">
-              <Link href="/" className="flex items-center space-x-2 text-blue-600 bg-blue-50 px-3 py-2 rounded-md">
+              <Link href="/" className="flex items-center space-x-2 text-blue-600 bg-blue-50 dark:bg-blue-900 dark:text-blue-400 px-3 py-2 rounded-md">
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
               </Link>
-              <Link href="/keywords" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md">
+              <Link href="/keywords" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-md">
                 <Search className="h-4 w-4" />
                 <span>Mots-clés</span>
               </Link>
-              <Link href="/reports" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md">
+              <Link href="/reports" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-md">
                 <FileText className="h-4 w-4" />
                 <span>Rapports</span>
               </Link>
-              <Link href="/settings" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md">
+              <Link href="/settings" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-md">
                 <Settings className="h-4 w-4" />
                 <span>Paramètres</span>
               </Link>
@@ -219,20 +219,20 @@ export default function DashboardMaterio() {
 
       <div className="px-6 py-6 space-y-6">
         {/* En-tête simplifié */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-1">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">
                 {selectedWebsite?.name || 'Site web'}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 Dernière analyse: {seoAnalysis?.analyzedAt ? new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR') : 'N/A'}
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-3xl font-bold text-gray-900">{seoAnalysis?.overallScore || 0}</div>
-                <div className="text-sm text-gray-600">Score SEO global</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{seoAnalysis?.overallScore || 0}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO global</div>
               </div>
               <Button 
                 onClick={() => refreshAnalysis.mutate()} 
@@ -398,31 +398,44 @@ export default function DashboardMaterio() {
 
         {/* Audit technique et recommandations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Audit technique (graphique en secteurs) */}
+          {/* Audit technique avec explications */}
           <Card className="bg-white border border-gray-200">
             <CardHeader>
-              <CardTitle className="text-gray-700">Audit technique</CardTitle>
+              <CardTitle className="text-gray-700">Audit technique SEO</CardTitle>
+              <p className="text-sm text-gray-600 mt-2">
+                Vérifications techniques essentielles pour le référencement
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={technicalData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`}
-                    >
-                      {technicalData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="space-y-4">
+                {technicalData.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-4 h-4 rounded-full" 
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900">{item.name}</div>
+                        <div className="text-xs text-gray-600">
+                          {item.name === 'Mobile-Friendly' && 'Site optimisé pour mobile'}
+                          {item.name === 'HTTPS Secure' && 'Connexion sécurisée SSL'}
+                          {item.name === 'XML Sitemap' && 'Plan du site pour moteurs de recherche'}
+                          {item.name === 'Robots.txt' && 'Instructions pour les robots d\'indexation'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        item.value === 100 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {item.value === 100 ? '✓ Conforme' : '✗ À corriger'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
