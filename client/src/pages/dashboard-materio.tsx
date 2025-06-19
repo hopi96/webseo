@@ -229,9 +229,28 @@ export default function DashboardMaterio() {
                 Dernière analyse: {seoAnalysis?.analyzedAt ? new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR') : 'N/A'}
               </p>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-gray-900">{seoAnalysis?.overallScore || 0}</div>
-              <div className="text-sm text-gray-600">Score SEO global</div>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-3xl font-bold text-gray-900">{seoAnalysis?.overallScore || 0}</div>
+                <div className="text-sm text-gray-600">Score SEO global</div>
+              </div>
+              <Button 
+                onClick={() => refreshAnalysis.mutate()} 
+                disabled={refreshAnalysis.isPending}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {refreshAnalysis.isPending ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Analyse en cours...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Actualiser l'analyse SEO
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>
