@@ -74,9 +74,12 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['/api/websites'] });
       
       // Forcer le rechargement immédiat des données
+      queryClient.invalidateQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
+      
+      // Forcer une nouvelle requête
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
-      }, 500);
+      }, 1000);
       
       toast({
         title: "Analyse SEO terminée",
