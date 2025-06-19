@@ -101,7 +101,7 @@ export default function Dashboard() {
     },
   });
 
-  const selectedWebsite = websites.find(w => w.id === selectedWebsiteId);
+  const selectedWebsite = (websites as WebsiteType[]).find((w: WebsiteType) => w.id === selectedWebsiteId);
 
   // Fonction pour obtenir le statut des Core Web Vitals
   const getWebVitalStatus = (value: number, thresholds: { good: number, poor: number }) => {
@@ -142,7 +142,7 @@ export default function Dashboard() {
   }
 
   // Parse des données JSON du webhook si présentes
-  const webhookData = seoAnalysis.rawWebhookData ? JSON.parse(seoAnalysis.rawWebhookData) : null;
+  const webhookData = (seoAnalysis as SeoAnalysisType)?.rawWebhookData ? JSON.parse((seoAnalysis as SeoAnalysisType).rawWebhookData) : null;
 
   return (
     <div className="min-h-screen soft-background">
