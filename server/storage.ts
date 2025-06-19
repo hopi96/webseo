@@ -48,6 +48,7 @@ export class MemStorage implements IStorage {
       keywordsRanking: 16, // totalOrganicKeywords du JSON
       backlinks: 51, // totalBacklinks du JSON
       pageSpeed: 65, // Basé sur LCP mobile 3.1s et desktop 1.9s du JSON
+      rawWebhookData: null, // Sera rempli par les données du webhook
       technicalSeo: {
         mobileFriendly: true,
         httpsSecure: true,
@@ -187,7 +188,13 @@ export class MemStorage implements IStorage {
 
   async updateSeoAnalysis(websiteId: number, updateData: Partial<InsertSeoAnalysis>): Promise<SeoAnalysis | undefined> {
     const existing = await this.getSeoAnalysis(websiteId);
-    if (!existing) return undefined;
+    if (!existing) {
+      // Si aucune analyse n'existe, créer une nouvelle avec les données du webhook
+      return this.createSeoAnalysis({
+        ...updateData,
+        websiteId
+      } as InsertSeoAnalysis);
+    }
 
     const updated: SeoAnalysis = {
       ...existing,
@@ -195,6 +202,13 @@ export class MemStorage implements IStorage {
       analyzedAt: new Date()
     };
     this.seoAnalyses.set(existing.id, updated);
+    
+    // Log pour debug
+    console.log(`Updated SEO analysis for website ${websiteId} with webhook data`);
+    if (updateData.rawWebhookData && typeof updateData.rawWebhookData === 'string') {
+      console.log(`Raw webhook data saved: ${updateData.rawWebhookData.substring(0, 100)}...`);
+    }
+    
     return updated;
   }
 }

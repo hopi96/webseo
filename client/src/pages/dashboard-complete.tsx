@@ -24,8 +24,10 @@ export default function DashboardComplete() {
   const { data: seoAnalysis, isLoading, refetch } = useQuery({
     queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'],
     enabled: !!selectedWebsiteId,
-    refetchInterval: 5000, // Refetch toutes les 5 secondes
+    refetchInterval: 2000, // Refetch toutes les 2 secondes pour capter les nouvelles données
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0, // Considérer les données comme périmées immédiatement
   });
 
   type WebsiteType = {
@@ -63,15 +65,22 @@ export default function DashboardComplete() {
       return response.json();
     },
     onSuccess: (data) => {
-      // Invalider immédiatement le cache
+      // Invalider complètement le cache et forcer le refetch
+      queryClient.removeQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
       queryClient.invalidateQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
       
-      // Force un refetch immédiat
-      refetch();
+      // Attendre un peu puis forcer le refetch
+      setTimeout(() => {
+        refetch();
+        // Force une seconde invalidation pour être sûr
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/websites', selectedWebsiteId, 'seo-analysis'] });
+        }, 1000);
+      }, 500);
       
       toast({
         title: "Analyse SEO terminée",
-        description: `Nouvelle analyse reçue avec succès`,
+        description: `Le dashboard va se mettre à jour automatiquement avec les nouvelles données`,
       });
     },
     onError: (error: any) => {
