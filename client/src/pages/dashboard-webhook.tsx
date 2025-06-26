@@ -155,9 +155,9 @@ export default function DashboardWebhook() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navigation />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 animate-in fade-in duration-700">
         {/* En-tête avec sélecteur de site et boutons d'action */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500">
           <div className="flex flex-col gap-4">
             {/* Première ligne : Titre et sélecteur */}
             <div className="flex items-center justify-between">
@@ -180,9 +180,9 @@ export default function DashboardWebhook() {
                     onClick={() => setIsAddWebsiteOpen(true)}
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
                     Ajouter un site
                   </Button>
                   
@@ -190,13 +190,13 @@ export default function DashboardWebhook() {
                     onClick={() => setIsAnalysisOpen(true)}
                     variant="default"
                     size="sm"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
                     disabled={refreshAnalysisMutation.isPending}
                   >
                     {refreshAnalysisMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <RefreshCw className="h-4 w-4" />
+                      <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
                     )}
                     Actualiser l'analyse
                   </Button>
@@ -212,7 +212,7 @@ export default function DashboardWebhook() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">{website.url}</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-green-600">{webhookData?.seoScore || 'N/A'}</div>
+                  <div className="text-3xl font-bold text-green-600 transition-all duration-500 animate-in zoom-in-50">{webhookData?.seoScore || 'N/A'}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO</div>
                 </div>
               </div>
@@ -223,7 +223,7 @@ export default function DashboardWebhook() {
         {/* Métriques principales en cartes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Score SEO */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-100">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 Score SEO
@@ -246,7 +246,7 @@ export default function DashboardWebhook() {
           </Card>
 
           {/* PageSpeed */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 PageSpeed
@@ -265,7 +265,7 @@ export default function DashboardWebhook() {
           </Card>
 
           {/* Mots-clés */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 Mots-clés
@@ -284,7 +284,7 @@ export default function DashboardWebhook() {
           </Card>
 
           {/* Liens */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-[400ms]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 Liens internes
@@ -304,9 +304,9 @@ export default function DashboardWebhook() {
         </div>
 
         {/* Analyse des titres et méta-descriptions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in slide-in-from-bottom-4 duration-700 delay-500">
           {/* Balises de titre */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                 Analyse des titres
