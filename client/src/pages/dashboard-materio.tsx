@@ -166,12 +166,23 @@ export default function DashboardMaterio() {
   ];
 
   return (
+    <TooltipProvider>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Barre de navigation supérieure */}
       <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">SEO Dashboard</h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">SEO Dashboard</h1>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Tableau de bord principal affichant les métriques SEO et performances de votre site web</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="flex space-x-6">
               <Link href="/" className="flex items-center space-x-2 text-blue-600 bg-blue-50 dark:bg-blue-900 dark:text-blue-400 px-3 py-2 rounded-md">
                 <Home className="h-4 w-4" />
@@ -336,13 +347,7 @@ export default function DashboardMaterio() {
                       stroke="#6b7280"
                       fontSize={12}
                     />
-                    <RechartsTooltip 
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px'
-                      }}
-                    />
+                    <RechartsTooltip />
                     <Line 
                       type="monotone" 
                       dataKey="visitors" 
@@ -378,13 +383,7 @@ export default function DashboardMaterio() {
                       stroke="#6b7280"
                       fontSize={12}
                     />
-                    <RechartsTooltip 
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px'
-                      }}
-                    />
+                    <RechartsTooltip />
                     <Bar 
                       dataKey="position" 
                       fill="#6b7280"
@@ -482,5 +481,6 @@ export default function DashboardMaterio() {
 
       </div>
     </div>
+    </TooltipProvider>
   );
 }
