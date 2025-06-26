@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { RefreshCw, TrendingUp, Users, Search, Zap, Trophy, Target, BarChart3, Home, FileText, Settings } from "lucide-react";
+import { RefreshCw, TrendingUp, Users, Search, Zap, Trophy, Target, BarChart3, Home, FileText, Settings, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { WebsiteSelector } from "@/components/website/website-selector";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 
 export default function DashboardMaterio() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
@@ -335,7 +336,7 @@ export default function DashboardMaterio() {
                       stroke="#6b7280"
                       fontSize={12}
                     />
-                    <Tooltip 
+                    <RechartsTooltip 
                       contentStyle={{
                         backgroundColor: 'white',
                         border: '1px solid #d1d5db',
@@ -377,7 +378,7 @@ export default function DashboardMaterio() {
                       stroke="#6b7280"
                       fontSize={12}
                     />
-                    <Tooltip 
+                    <RechartsTooltip 
                       contentStyle={{
                         backgroundColor: 'white',
                         border: '1px solid #d1d5db',
