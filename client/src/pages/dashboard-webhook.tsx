@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Navigation } from "@/components/layout/navigation";
 import { 
   Globe, 
   Zap, 
@@ -96,6 +97,7 @@ export default function DashboardWebhook() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation />
       <div className="p-6 space-y-6">
         {/* En-tête avec informations du site */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
@@ -403,42 +405,112 @@ export default function DashboardWebhook() {
           </Card>
         </div>
 
-        {/* Mots-clés tendance */}
+        {/* Stratégie de contenu suggérée */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-              Mots-clés tendance
+              🎯 Stratégie de contenu suggérée
             </CardTitle>
+            <div className="flex justify-end">
+              <button className="text-sm text-blue-600 hover:text-blue-800">
+                Recevoir Single Page Report →
+              </button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {webhookData.contentStrategy?.trendingKeywords?.slice(0, 6).map((keyword: any, index: number) => (
-                <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700 rounded border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {keyword.keyword}
-                    </span>
-                    {getTrendIcon(keyword.trend)}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Volume: {keyword.searchVolume?.toLocaleString()}
-                    </div>
+            {/* Mots-clés longue traîne (Google Suggest) */}
+            <div className="mb-8">
+              <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
+                🔍 Mots-clés longue traîne (Google Suggest)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {webhookData.contentStrategy?.trendingKeywords?.slice(0, 8).map((keyword: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
                     <div className="flex items-center space-x-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${
-                          keyword.seasonality === 'high' ? 'border-red-200 text-red-700' :
-                          keyword.seasonality === 'medium' ? 'border-yellow-200 text-yellow-700' :
-                          'border-gray-200 text-gray-700'
-                        }`}
-                      >
-                        {keyword.seasonality} saisonnalité
-                      </Badge>
+                      <span className="text-sm text-gray-900 dark:text-white">
+                        {keyword.keyword}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        ({keyword.searchVolume?.toLocaleString()} vol)
+                      </span>
                     </div>
+                    <Badge variant="outline" className="text-xs bg-white">
+                      {keyword.seasonality} saison
+                    </Badge>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mots-clés sémantique longue traîne */}
+            <div className="mb-8">
+              <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
+                📚 Mots-clés sémantique longue traîne
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                {webhookData.contentStrategy?.seasonalKeywords?.slice(0, 12).map((keyword: string, index: number) => (
+                  <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+                    <span className="text-gray-700 dark:text-gray-300">{keyword}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Questions pour créer du contenu */}
+            <div className="mb-8">
+              <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded">
+                ❓ Questions pour créer du contenu
+              </h3>
+              <div className="space-y-3">
+                {[
+                  "Comment organiser un anniversaire enfant?",
+                  "Que faire lors d'un anniversaire?",
+                  "Comment préparer des activités pour enfants?",
+                  "Comment gérer un groupe d'enfants?",
+                  "Comment réussir une fête d'anniversaire?",
+                  "Quels jeux pour un anniversaire enfant?"
+                ].map((question, index) => (
+                  <div key={index} className="p-3 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800">
+                    <input 
+                      type="text" 
+                      value={question}
+                      readOnly
+                      className="w-full text-sm text-gray-700 dark:text-gray-300 bg-transparent border-none outline-none"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Opportunités locales et mots-clés longue traîne */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Opportunités locales */}
+              <div>
+                <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
+                  🗺️ Opportunités locales
+                </h3>
+                <div className="space-y-2">
+                  {webhookData.contentStrategy?.localOpportunities?.slice(0, 8).map((location: string, index: number) => (
+                    <div key={index} className="p-2 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">{location}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Mots-clés longue traîne */}
+              <div>
+                <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+                  🎯 Mots-clés longue traîne
+                </h3>
+                <div className="space-y-2">
+                  {webhookData.contentStrategy?.seasonalKeywords?.slice(0, 8).map((keyword: string, index: number) => (
+                    <div key={index} className="p-2 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">{keyword}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

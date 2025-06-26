@@ -1,29 +1,26 @@
-import { MobileHeader } from "@/components/layout/mobile-header";
-import { BottomNavigation } from "@/components/layout/bottom-navigation";
+import { Navigation } from "@/components/layout/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
 export default function Keywords() {
   return (
-    <div className="min-h-screen soft-background">
-      <MobileHeader />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation />
       
-      <div className="p-4 pb-20">
+      <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Mots-clés</h1>
-          <p className="soft-text">Analyse détaillée disponible dans le tableau de bord</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Mots-clés</h1>
+          <p className="text-gray-600 dark:text-gray-400">Analyse détaillée disponible dans le tableau de bord</p>
         </div>
 
-        <Card className="soft-card">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-12 text-center">
-            <Search className="h-16 w-16 mx-auto mb-4 text-slate-400" />
-            <p className="text-lg font-medium text-slate-600 mb-2">Consultez le tableau de bord</p>
-            <p className="text-sm soft-text">L'analyse complète des 16 mots-clés est disponible sur la page principale</p>
+            <Search className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">Consultez le tableau de bord</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">L'analyse complète des mots-clés est disponible sur la page principale</p>
           </CardContent>
         </Card>
       </div>
-
-      <BottomNavigation />
     </div>
   );
 }
