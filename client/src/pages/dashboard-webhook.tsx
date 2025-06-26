@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Navigation } from "@/components/layout/navigation";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { 
   Globe, 
   Zap, 
@@ -121,8 +122,9 @@ export default function DashboardWebhook() {
           {/* Score SEO */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 Score SEO
+                <HelpTooltip content="Score global d'optimisation SEO de votre site web, calculé sur la base de différents critères techniques et de contenu" />
               </CardTitle>
               <Globe className="h-4 w-4 text-blue-600" />
             </CardHeader>
@@ -143,8 +145,9 @@ export default function DashboardWebhook() {
           {/* PageSpeed */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 PageSpeed
+                <HelpTooltip content="Vitesse de chargement de votre site web. Un score élevé améliore l'expérience utilisateur et le classement Google" />
               </CardTitle>
               <Zap className="h-4 w-4 text-yellow-600" />
             </CardHeader>
@@ -161,8 +164,9 @@ export default function DashboardWebhook() {
           {/* Mots-clés */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 Mots-clés
+                <HelpTooltip content="Nombre total de mots-clés identifiés sur votre site web, incluant les variantes géolocalisées et saisonnières" />
               </CardTitle>
               <Search className="h-4 w-4 text-green-600" />
             </CardHeader>
@@ -179,8 +183,9 @@ export default function DashboardWebhook() {
           {/* Liens */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 Liens internes
+                <HelpTooltip content="Nombre de liens internes qui relient les pages de votre site entre elles. Améliore la navigation et le référencement" />
               </CardTitle>
               <Link className="h-4 w-4 text-purple-600" />
             </CardHeader>

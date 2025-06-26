@@ -104,6 +104,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New analyze endpoint that calls webhook
+  app.post("/api/websites/:id/analyze", async (req, res) => {
+    try {
+      const websiteId = parseInt(req.params.id);
+      const website = await storage.getWebsite(websiteId);
+      
+      if (!website) {
+        return res.status(404).json({ message: "Website not found" });
+      }
+
+      // Call webhook service to get new SEO analysis
+      const webhookAnalysisData = await requestSeoAnalysisFromWebhook(website.url);
+      
+      // Update or create SEO analysis with webhook data
+      let analysis = await storage.getSeoAnalysis(websiteId);
+      if (analysis) {
+        analysis = await storage.updateSeoAnalysis(websiteId, webhookAnalysisData);
+      } else {
+        analysis = await storage.createSeoAnalysis({
+          ...webhookAnalysisData,
+          websiteId
+        });
+      }
+
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error analyzing website:", error);
+      res.status(500).json({ message: "Failed to analyze website" });
+    }
+  });
+
   app.put("/api/websites/:id/seo-analysis", async (req, res) => {
     try {
       const websiteId = parseInt(req.params.id);
