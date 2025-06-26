@@ -71,8 +71,8 @@ export default function DashboardWebhook() {
   // Mutation pour actualiser l'analyse
   const refreshAnalysisMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest(`/api/websites/1/refresh-analysis`, 'POST');
-      return response;
+      const response = await apiRequest('POST', `/api/websites/1/refresh-analysis`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/websites'] });
