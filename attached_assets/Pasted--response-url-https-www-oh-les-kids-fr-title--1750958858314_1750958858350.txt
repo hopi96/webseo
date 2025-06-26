@@ -1,0 +1,430 @@
+[
+  {
+    "response": [
+      {
+        "url": "https://www.oh-les-kids.fr/",
+        "title": "Analyse SEO - www.oh-les-kids.fr",
+        "analysisType": "deep",
+        "seoScore": 84,
+        "pageSpeed": 85,
+        "issuesCount": 2,
+        "keywordCount": 12,
+        "internalLinks": 57,
+        "externalLinks": 0,
+        "titleTags": {
+          "title": "Accueil - Oh Les Kids",
+          "length": 21,
+          "hasKeyword": false,
+          "hasBrand": false,
+          "status": "warning",
+          "suggestions": [
+            "Allonger le titre (30-60 caractères recommandés)",
+            "Inclure le mot-clé principal dans le titre"
+          ]
+        },
+        "metaDescriptions": {
+          "description": "Activités, sorties, anniversaires, arbres de noël pour enfants. Des idées adaptées pour des moments uniques en famille. Découvrez nos offres!",
+          "length": 141,
+          "hasKeyword": false,
+          "status": "good",
+          "missingPages": [],
+          "suggestions": [
+            "Inclure des mots-clés pertinents dans la description"
+          ]
+        },
+        "headingStructure": [
+          {
+            "level": "H1",
+            "text": "Vous recherchez à organiser",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": "Des milliers",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": "+",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": "d'activités pour la famille et les enfants",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": ".",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": "INSCRIVEZ-VOUS À LA NEWSLETTER",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": "À propos",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": "Liens utiles",
+            "hasKeyword": false
+          },
+          {
+            "level": "H2",
+            "text": "Particuliers, entreprises, professionnels",
+            "hasKeyword": true
+          },
+          {
+            "level": "H3",
+            "text": "Sign In",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Le top du toppour les Kids !",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Des activités pour tous   Pour un anniversaire entre amis, en famille, le weeken...",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Nos best sellers   Découvrez les activités les plus réservés",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Atelier Slime & Expériences Scientifiques : Un Anniversaire Unique et Fun !",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Visite en tuk-tuk à Marseille – quartier de Notre-Dame de la Garde",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Atelier poterie à Marseille 6ème",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Anniversaire Reine des neiges à Marseille et Bouches du Rhône",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Anniversaire Harry Potter à Marseille et Bouches du Rhône",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Anniversaire mini boom à Marseille et Bouches du Rhône",
+            "hasKeyword": false
+          },
+          {
+            "level": "H3",
+            "text": "Confiez-nous l’organisation de votre évènement   Envie d'organiser un événement ...",
+            "hasKeyword": false
+          }
+        ],
+        "keywordAnalysis": [
+          {
+            "keyword": "les",
+            "count": 44,
+            "density": 5.37
+          },
+          {
+            "keyword": "anniversaire",
+            "count": 31,
+            "density": 3.78
+          },
+          {
+            "keyword": "marseille",
+            "count": 23,
+            "density": 2.8
+          },
+          {
+            "keyword": "enfants",
+            "count": 18,
+            "density": 2.2
+          },
+          {
+            "keyword": "kids",
+            "count": 15,
+            "density": 1.83
+          },
+          {
+            "keyword": "des",
+            "count": 15,
+            "density": 1.83
+          },
+          {
+            "keyword": "ici",
+            "count": 14,
+            "density": 1.71
+          },
+          {
+            "keyword": "vous",
+            "count": 13,
+            "density": 1.59
+          },
+          {
+            "keyword": "les kids",
+            "count": 13,
+            "density": 1.59
+          },
+          {
+            "keyword": "activités",
+            "count": 10,
+            "density": 1.22
+          },
+          {
+            "keyword": "famille",
+            "count": 8,
+            "density": 0.98
+          },
+          {
+            "keyword": "scientifiques",
+            "count": 7,
+            "density": 0.85
+          }
+        ],
+        "technicalSeo": {
+          "robotsTxt": true,
+          "xmlSitemap": true,
+          "mobileFriendly": true,
+          "https": true,
+          "compression": false,
+          "imageAltTags": false
+        },
+        "pageSpeedMetrics": {
+          "performanceScore": 85,
+          "firstContentfulPaint": 1.37,
+          "largestContentfulPaint": 2.1,
+          "cumulativeLayoutShift": 0.086,
+          "totalBlockingTime": 600
+        },
+        "linkAnalysis": {
+          "internalLinks": 57,
+          "externalLinks": 0,
+          "brokenLinks": 0,
+          "topExternalDomains": []
+        },
+        "contentStrategy": {
+          "themes": [
+            "enfants"
+          ],
+          "trendingKeywords": [
+            {
+              "keyword": "les schwab tires",
+              "searchVolume": 10330,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment les schwab tires",
+                "meilleur les schwab tires",
+                "prix les schwab tires",
+                "avis les schwab tires",
+                "où trouver les schwab tires"
+              ],
+              "seasonality": "medium"
+            },
+            {
+              "keyword": "les schwab",
+              "searchVolume": 9019,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment les schwab",
+                "meilleur les schwab",
+                "prix les schwab",
+                "avis les schwab",
+                "où trouver les schwab"
+              ],
+              "seasonality": "medium"
+            },
+            {
+              "keyword": "lesbian flag",
+              "searchVolume": 8662,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment les bian flag",
+                "meilleur les bian flag",
+                "prix les bian flag",
+                "avis les bian flag",
+                "où trouver les bian flag"
+              ],
+              "seasonality": "medium"
+            },
+            {
+              "keyword": "les schwab near me",
+              "searchVolume": 7465,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment les schwab near me",
+                "meilleur les schwab near me",
+                "prix les schwab near me",
+                "avis les schwab near me",
+                "où trouver les schwab near me"
+              ],
+              "seasonality": "medium"
+            },
+            {
+              "keyword": "leslie bibb",
+              "searchVolume": 5970,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment les lie bibb",
+                "meilleur les lie bibb",
+                "prix les lie bibb",
+                "avis les lie bibb",
+                "où trouver les lie bibb"
+              ],
+              "seasonality": "medium"
+            },
+            {
+              "keyword": "anniversaire charms",
+              "searchVolume": 4850,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment anniversaire charms",
+                "meilleur anniversaire charms",
+                "prix anniversaire charms",
+                "avis anniversaire charms",
+                "où trouver anniversaire charms"
+              ],
+              "seasonality": "high"
+            },
+            {
+              "keyword": "anniversaire in french",
+              "searchVolume": 4139,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment anniversaire in french",
+                "meilleur anniversaire in french",
+                "prix anniversaire in french",
+                "avis anniversaire in french",
+                "où trouver anniversaire in french"
+              ],
+              "seasonality": "high"
+            },
+            {
+              "keyword": "anniversaire de mariage",
+              "searchVolume": 3939,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment anniversaire de mariage",
+                "meilleur anniversaire de mariage",
+                "prix anniversaire de mariage",
+                "avis anniversaire de mariage",
+                "où trouver anniversaire de mariage"
+              ],
+              "seasonality": "high"
+            },
+            {
+              "keyword": "anniversaire in english",
+              "searchVolume": 3334,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment anniversaire in english",
+                "meilleur anniversaire in english",
+                "prix anniversaire in english",
+                "avis anniversaire in english",
+                "où trouver anniversaire in english"
+              ],
+              "seasonality": "high"
+            },
+            {
+              "keyword": "marseille soap",
+              "searchVolume": 2061,
+              "trend": "stable",
+              "relatedQueries": [
+                "comment marseille soap",
+                "meilleur marseille soap",
+                "prix marseille soap",
+                "avis marseille soap",
+                "où trouver marseille soap"
+              ],
+              "seasonality": "medium"
+            }
+          ],
+          "longTailKeywords": [
+            "les schwab",
+            "les schwab near me",
+            "leslie bibb",
+            "les schwab tires",
+            "lesbian flag",
+            "les schwab bill pay",
+            "les schwab portland",
+            "less than sign",
+            "anniversaire in french",
+            "anniversaire charms",
+            "anniversaire de mariage",
+            "anniversaire in english",
+            "anniversaire masculine or feminine",
+            "anniversaire d'une amie",
+            "anniversaire de naissance",
+            "marseille france",
+            "marseille roster",
+            "marseilles beachfront hotel",
+            "marseille airport",
+            "les pas cher"
+          ],
+          "contentQuestions": [
+            "Comment choisir le meilleur les?",
+            "Pourquoi les est-il important?",
+            "Quand utiliser les?",
+            "Où trouver les de qualité?",
+            "Combien coûte les?",
+            "Quel est le meilleur les en 2025?",
+            "Comment optimiser les?",
+            "Que faire pour améliorer les?",
+            "Comment choisir le meilleur anniversaire?",
+            "Pourquoi anniversaire est-il important?",
+            "Quand utiliser anniversaire?",
+            "Où trouver anniversaire de qualité?",
+            "Combien coûte anniversaire?",
+            "Quel est le meilleur anniversaire en 2025?",
+            "Comment optimiser anniversaire?"
+          ],
+          "localOpportunities": [
+            "les marseille",
+            "les près de marseille",
+            "les lyon",
+            "les près de lyon",
+            "les paris",
+            "les près de paris",
+            "les toulouse",
+            "les près de toulouse",
+            "les nice",
+            "les près de nice",
+            "les nantes",
+            "les près de nantes",
+            "les bordeaux",
+            "les près de bordeaux",
+            "les près de moi"
+          ],
+          "seasonalKeywords": [
+            "les été",
+            "les vacances d'été",
+            "les soleil",
+            "les plage",
+            "les outdoor",
+            "anniversaire été",
+            "anniversaire vacances d'été",
+            "anniversaire soleil",
+            "anniversaire plage",
+            "anniversaire outdoor"
+          ]
+        },
+        "id": 7,
+        "createdAt": "2025-06-26T17:12:30.471Z"
+      }
+    ]
+  }
+]
