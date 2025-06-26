@@ -17,7 +17,7 @@ export function HelpTooltip({ content, className = "" }: HelpTooltipProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <button className={`inline-flex items-center justify-center ${className}`}>
-            <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+            <HelpCircle className="h-4 w-4 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 cursor-help" />
           </button>
         </TooltipTrigger>
         <TooltipContent>

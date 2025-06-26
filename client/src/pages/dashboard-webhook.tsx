@@ -312,14 +312,14 @@ export default function DashboardWebhook() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* LCP - Largest Contentful Paint */}
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {webhookData.pageSpeedMetrics?.largestContentfulPaint || 'N/A'}s
                 </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-2">
-                  LCP (Largest Contentful Paint)
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-1">
+                  LCP
                   <HelpTooltip content="Temps nécessaire pour afficher le plus gros élément visible de la page. Une LCP rapide (≤2.5s) améliore l'expérience utilisateur." />
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500">
@@ -337,8 +337,8 @@ export default function DashboardWebhook() {
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {webhookData.pageSpeedMetrics?.cumulativeLayoutShift || 'N/A'}
                 </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-2">
-                  CLS (Cumulative Layout Shift)
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-1">
+                  CLS
                   <HelpTooltip content="Mesure la stabilité visuelle de la page. Un CLS faible (≤0.1) indique que les éléments ne bougent pas de manière inattendue pendant le chargement." />
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500">
@@ -356,8 +356,8 @@ export default function DashboardWebhook() {
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {webhookData.pageSpeedMetrics?.firstContentfulPaint || 'N/A'}s
                 </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-2">
-                  FCP (First Contentful Paint)
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-1">
+                  FCP
                   <HelpTooltip content="Temps nécessaire pour afficher le premier élément de contenu visible. Un FCP rapide (≤1.8s) indique que la page commence à se charger rapidement." />
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500">
@@ -366,6 +366,25 @@ export default function DashboardWebhook() {
                 </div>
                 <Progress 
                   value={Math.min(100, Math.max(0, (3 - (webhookData.pageSpeedMetrics?.firstContentfulPaint || 0)) / 3 * 100))} 
+                  className="mt-2"
+                />
+              </div>
+
+              {/* TBT - Total Blocking Time */}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {webhookData.pageSpeedMetrics?.totalBlockingTime || 'N/A'}ms
+                </div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-1">
+                  TBT
+                  <HelpTooltip content="Temps total de blocage des interactions utilisateur. Un TBT faible (≤200ms) garantit une page réactive aux interactions." />
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  {webhookData.pageSpeedMetrics?.totalBlockingTime <= 200 ? 'Bon' : 
+                   webhookData.pageSpeedMetrics?.totalBlockingTime <= 600 ? 'À améliorer' : 'Mauvais'}
+                </div>
+                <Progress 
+                  value={Math.min(100, Math.max(0, (600 - (webhookData.pageSpeedMetrics?.totalBlockingTime || 0)) / 600 * 100))} 
                   className="mt-2"
                 />
               </div>
