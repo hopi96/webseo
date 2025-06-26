@@ -234,16 +234,36 @@ export default function DashboardMaterio() {
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">
-                {selectedWebsite?.name || 'Site web'}
-              </h2>
+              <div className="flex items-center space-x-2 mb-1">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {selectedWebsite?.name || 'Site web'}
+                </h2>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Informations générales sur le site web analysé et date de la dernière analyse SEO</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <p className="text-gray-600 dark:text-gray-400">
                 Dernière analyse: {seoAnalysis?.analyzedAt ? new Date(seoAnalysis.analyzedAt).toLocaleDateString('fr-FR') : 'N/A'}
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">{seoAnalysis?.overallScore || 0}</div>
+                <div className="flex items-center space-x-2">
+                  <div className="text-3xl font-bold text-gray-900 dark:text-white">{seoAnalysis?.overallScore || 0}</div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Score SEO global sur 100 basé sur l'analyse technique, vitesse, contenu et optimisation</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO global</div>
               </div>
               <Button 
@@ -271,56 +291,96 @@ export default function DashboardMaterio() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
-              <div className="flex items-center">
-                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                  <Users className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    <Users className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.organicTraffic || 0}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Trafic organique</div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.organicTraffic || 0}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Trafic organique</div>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Nombre de visiteurs provenant des moteurs de recherche (non payant)</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
-              <div className="flex items-center">
-                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                  <Search className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    <Search className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.keywordsRanking || 0}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Mots-clés</div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.keywordsRanking || 0}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Mots-clés</div>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Nombre de mots-clés pour lesquels votre site est positionné dans les moteurs de recherche</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
-              <div className="flex items-center">
-                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                  <Zap className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    <Zap className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.pageSpeed || 0}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">PageSpeed</div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.pageSpeed || 0}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">PageSpeed</div>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Score de vitesse de chargement de votre site (Core Web Vitals) sur 100</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
-              <div className="flex items-center">
-                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                  <Target className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    <Target className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.backlinks || 0}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Backlinks</div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{seoAnalysis?.backlinks || 0}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Backlinks</div>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Nombre de liens externes pointant vers votre site (indicateur d'autorité)</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </CardContent>
           </Card>
@@ -331,7 +391,17 @@ export default function DashboardMaterio() {
           {/* Graphique de trafic dans le temps */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700 dark:text-gray-300">Évolution du trafic</CardTitle>
+              <div className="flex items-center space-x-2">
+                <CardTitle className="text-gray-700 dark:text-gray-300">Évolution du trafic</CardTitle>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Graphique montrant l'évolution du nombre de visiteurs sur les 30 derniers jours</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -364,7 +434,17 @@ export default function DashboardMaterio() {
           {/* Positions des mots-clés */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700 dark:text-gray-300">Top 5 mots-clés</CardTitle>
+              <div className="flex items-center space-x-2">
+                <CardTitle className="text-gray-700 dark:text-gray-300">Top 5 mots-clés</CardTitle>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Classement des 5 mots-clés les mieux positionnés avec leur position dans les résultats de recherche</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -401,7 +481,17 @@ export default function DashboardMaterio() {
           {/* Audit technique avec explications */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700 dark:text-gray-300">Audit technique SEO</CardTitle>
+              <div className="flex items-center space-x-2">
+                <CardTitle className="text-gray-700 dark:text-gray-300">Audit technique SEO</CardTitle>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Vérification des aspects techniques critiques : sécurité HTTPS, compatibilité mobile, sitemap XML et robots.txt</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 Vérifications techniques essentielles pour le référencement
               </p>
@@ -443,7 +533,17 @@ export default function DashboardMaterio() {
           {/* Recommandations simplifiées */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-700 dark:text-gray-300">Recommandations prioritaires</CardTitle>
+              <div className="flex items-center space-x-2">
+                <CardTitle className="text-gray-700 dark:text-gray-300">Recommandations prioritaires</CardTitle>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Actions prioritaires suggérées pour améliorer le référencement, classées par importance (haute, moyenne, basse)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
