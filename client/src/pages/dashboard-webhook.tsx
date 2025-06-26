@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Navigation } from "@/components/layout/navigation";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
+import { WebsiteSelector } from "@/components/website/website-selector";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -57,6 +58,7 @@ export default function DashboardWebhook() {
   const [isAddWebsiteOpen, setIsAddWebsiteOpen] = useState(false);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
   const { toast } = useToast();
 
   // Récupération des sites web
@@ -64,21 +66,28 @@ export default function DashboardWebhook() {
     queryKey: ['/api/websites'],
   });
 
-  // Récupération de l'analyse SEO pour le premier site
+  // S'assurer qu'on a un website ID valide si les sites sont chargés
+  useEffect(() => {
+    if (websites.length > 0 && !websites.find(w => w.id === selectedWebsiteId)) {
+      setSelectedWebsiteId(websites[0].id);
+    }
+  }, [websites, selectedWebsiteId]);
+
+  // Récupération de l'analyse SEO pour le site sélectionné
   const { data: seoAnalysis, isLoading } = useQuery<SeoAnalysisType>({
-    queryKey: [`/api/websites/1/seo-analysis`],
-    enabled: true,
+    queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
+    enabled: !!selectedWebsiteId,
   });
 
   // Mutation pour actualiser l'analyse
   const refreshAnalysisMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', `/api/websites/1/refresh-analysis`);
+      const response = await apiRequest('POST', `/api/websites/${selectedWebsiteId}/refresh-analysis`);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/websites'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/websites/1/seo-analysis`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`] });
       toast({
         title: "Analyse actualisée",
         description: "L'analyse SEO a été mise à jour avec succès",
@@ -125,7 +134,7 @@ export default function DashboardWebhook() {
 
   // Parse des données webhook
   const webhookData = JSON.parse(seoAnalysis.rawWebhookData);
-  const website = websites.find(w => w.id === 1);
+  const website = websites.find(w => w.id === selectedWebsiteId);
 
   // Fonction pour obtenir l'icône de tendance
   const getTrendIcon = (trend: string) => {
@@ -147,50 +156,67 @@ export default function DashboardWebhook() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navigation />
       <div className="p-6 space-y-6">
-        {/* En-tête avec informations du site et boutons d'action */}
+        {/* En-tête avec sélecteur de site et boutons d'action */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col gap-4">
+            {/* Première ligne : Titre et sélecteur */}
+            <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Analyse SEO du site web
               </h1>
-              <p className="text-lg text-blue-600 font-medium">{website?.name}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{webhookData.url}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right mr-6">
-                <div className="text-3xl font-bold text-green-600">{webhookData.seoScore}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO</div>
-              </div>
               
-              {/* Boutons d'action */}
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setIsAddWebsiteOpen(true)}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Ajouter un site
-                </Button>
+              <div className="flex items-center gap-4">
+                {/* Sélecteur de site web */}
+                <div className="min-w-64">
+                  <WebsiteSelector
+                    selectedWebsiteId={selectedWebsiteId}
+                    onWebsiteChange={setSelectedWebsiteId}
+                  />
+                </div>
                 
-                <Button
-                  onClick={() => setIsAnalysisOpen(true)}
-                  variant="default"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  disabled={refreshAnalysisMutation.isPending}
-                >
-                  {refreshAnalysisMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
-                  )}
-                  Actualiser l'analyse
-                </Button>
+                {/* Boutons d'action */}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setIsAddWebsiteOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Ajouter un site
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setIsAnalysisOpen(true)}
+                    variant="default"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    disabled={refreshAnalysisMutation.isPending}
+                  >
+                    {refreshAnalysisMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    Actualiser l'analyse
+                  </Button>
+                </div>
               </div>
             </div>
+            
+            {/* Deuxième ligne : Informations du site sélectionné */}
+            {website && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-lg text-blue-600 font-medium">{website.name}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{website.url}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-green-600">{webhookData?.seoScore || 'N/A'}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
