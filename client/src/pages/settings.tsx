@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Trash2, RefreshCw, Bell, Moon, Sun } from "lucide-react";
+import { Trash2, RefreshCw, Bell, Moon, Sun, Plus, Globe } from "lucide-react";
+import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
 import { useTheme } from "@/hooks/use-theme";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -28,6 +29,9 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState(true);
   const [autoAnalysis, setAutoAnalysis] = useState(true);
+  const [showAddWebsiteDialog, setShowAddWebsiteDialog] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyzingWebsite, setAnalyzingWebsite] = useState<string>("");
 
   const { data: websites } = useQuery<Website[]>({
     queryKey: ["/api/websites"],
@@ -55,17 +59,27 @@ export default function Settings() {
 
   const analyzeWebsiteMutation = useMutation({
     mutationFn: async (websiteId: number) => {
+      const website = websites?.find(w => w.id === websiteId);
+      if (website) {
+        setIsAnalyzing(true);
+        setAnalyzingWebsite(website.name);
+      }
       const response = await apiRequest("POST", `/api/websites/${websiteId}/analyze`);
       return response.json();
     },
     onSuccess: () => {
+      setIsAnalyzing(false);
+      setAnalyzingWebsite("");
       queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/websites", "seo-analysis"] });
       toast({
         title: "Succès",
         description: "Analyse du site web terminée avec succès",
       });
     },
     onError: (error) => {
+      setIsAnalyzing(false);
+      setAnalyzingWebsite("");
       toast({
         title: "Erreur",
         description: error.message || "Impossible d'analyser le site web",
@@ -163,9 +177,21 @@ export default function Settings() {
           {/* Gestion des sites web */}
           <Card>
             <CardHeader>
-              <CardTitle>Gérer les sites web</CardTitle>
+              <CardTitle className="flex items-center">
+                <Globe className="w-5 h-5 mr-2" />
+                Gérer les sites web
+              </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="mb-4">
+                <Button
+                  onClick={() => setShowAddWebsiteDialog(true)}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter un site web
+                </Button>
+              </div>
               <div className="space-y-3">
                 {websites?.map((website) => (
                   <div key={website.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -253,6 +279,32 @@ export default function Settings() {
           </Card>
         </div>
       </main>
+
+      {/* Dialog d'ajout de site web */}
+      <AddWebsiteDialog
+        open={showAddWebsiteDialog}
+        onOpenChange={setShowAddWebsiteDialog}
+      />
+
+      {/* Dialog d'analyse en cours */}
+      {isAnalyzing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Analyse SEO en cours
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Analyse de {analyzingWebsite} en cours...
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                Cela peut prendre quelques minutes
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
