@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Navigation } from "@/components/layout/navigation";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
@@ -55,6 +56,7 @@ type SeoAnalysisType = {
 export default function DashboardWebhook() {
   const [isAddWebsiteOpen, setIsAddWebsiteOpen] = useState(false);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const [webhookError, setWebhookError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Récupération des sites web
@@ -84,11 +86,18 @@ export default function DashboardWebhook() {
       setIsAnalysisOpen(false);
     },
     onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible d'actualiser l'analyse",
-        variant: "destructive",
-      });
+      const errorMessage = error.message || "Impossible d'actualiser l'analyse";
+      
+      // Vérifier si c'est une erreur de webhook
+      if (errorMessage.includes("webhook") || errorMessage.includes("Webhook") || errorMessage.includes("n8n")) {
+        setWebhookError(`Erreur de connexion webhook: ${errorMessage}`);
+      } else {
+        toast({
+          title: "Erreur",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
       setIsAnalysisOpen(false);
     },
   });
@@ -677,6 +686,37 @@ export default function DashboardWebhook() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialogue d'erreur webhook */}
+      <AlertDialog open={!!webhookError} onOpenChange={() => setWebhookError(null)}>
+        <AlertDialogContent className="border-red-200 dark:border-red-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+              <XCircle className="h-5 w-5" />
+              Erreur de connexion webhook
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-red-700 dark:text-red-300">
+              {webhookError}
+              <br /><br />
+              <strong>Solutions possibles :</strong>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Vérifiez que le webhook n8n est actif</li>
+                <li>Cliquez sur "Execute workflow" dans n8n</li>
+                <li>Vérifiez l'URL du webhook dans les paramètres</li>
+                <li>Contactez l'administrateur système</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => setWebhookError(null)}
+              className="bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+            >
+              Fermer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
