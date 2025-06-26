@@ -303,6 +303,73 @@ export default function DashboardWebhook() {
           </Card>
         </div>
 
+        {/* Core Web Vitals */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 animate-in slide-in-from-bottom-4 duration-700 delay-600">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              Core Web Vitals
+              <HelpTooltip content="Métriques essentielles de Google pour l'expérience utilisateur : temps de chargement, interactivité et stabilité visuelle" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* LCP - Largest Contentful Paint */}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {webhookData.pageSpeedMetrics?.largestContentfulPaint || 'N/A'}s
+                </div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  LCP (Largest Contentful Paint)
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  {webhookData.pageSpeedMetrics?.largestContentfulPaint <= 2.5 ? 'Bon' : 
+                   webhookData.pageSpeedMetrics?.largestContentfulPaint <= 4 ? 'À améliorer' : 'Mauvais'}
+                </div>
+                <Progress 
+                  value={Math.min(100, Math.max(0, (4 - (webhookData.pageSpeedMetrics?.largestContentfulPaint || 0)) / 4 * 100))} 
+                  className="mt-2"
+                />
+              </div>
+
+              {/* CLS - Cumulative Layout Shift */}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {webhookData.pageSpeedMetrics?.cumulativeLayoutShift || 'N/A'}
+                </div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  CLS (Cumulative Layout Shift)
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  {webhookData.pageSpeedMetrics?.cumulativeLayoutShift <= 0.1 ? 'Bon' : 
+                   webhookData.pageSpeedMetrics?.cumulativeLayoutShift <= 0.25 ? 'À améliorer' : 'Mauvais'}
+                </div>
+                <Progress 
+                  value={Math.min(100, Math.max(0, (0.25 - (webhookData.pageSpeedMetrics?.cumulativeLayoutShift || 0)) / 0.25 * 100))} 
+                  className="mt-2"
+                />
+              </div>
+
+              {/* FCP - First Contentful Paint */}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {webhookData.pageSpeedMetrics?.firstContentfulPaint || 'N/A'}s
+                </div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  FCP (First Contentful Paint)
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  {webhookData.pageSpeedMetrics?.firstContentfulPaint <= 1.8 ? 'Bon' : 
+                   webhookData.pageSpeedMetrics?.firstContentfulPaint <= 3 ? 'À améliorer' : 'Mauvais'}
+                </div>
+                <Progress 
+                  value={Math.min(100, Math.max(0, (3 - (webhookData.pageSpeedMetrics?.firstContentfulPaint || 0)) / 3 * 100))} 
+                  className="mt-2"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Analyse des titres et méta-descriptions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in slide-in-from-bottom-4 duration-700 delay-500">
           {/* Balises de titre */}
