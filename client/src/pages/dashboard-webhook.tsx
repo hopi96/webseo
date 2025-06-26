@@ -1,10 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Navigation } from "@/components/layout/navigation";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
+import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Globe, 
   Zap, 
@@ -17,7 +23,10 @@ import {
   TrendingDown,
   Minus,
   MapPin,
-  Calendar
+  Calendar,
+  Plus,
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 
 type WebsiteType = {
@@ -44,6 +53,10 @@ type SeoAnalysisType = {
 };
 
 export default function DashboardWebhook() {
+  const [isAddWebsiteOpen, setIsAddWebsiteOpen] = useState(false);
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const { toast } = useToast();
+
   // Récupération des sites web
   const { data: websites = [] } = useQuery<WebsiteType[]>({
     queryKey: ['/api/websites'],
@@ -53,6 +66,31 @@ export default function DashboardWebhook() {
   const { data: seoAnalysis, isLoading } = useQuery<SeoAnalysisType>({
     queryKey: [`/api/websites/1/seo-analysis`],
     enabled: true,
+  });
+
+  // Mutation pour actualiser l'analyse
+  const refreshAnalysisMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest(`/api/websites/1/refresh-analysis`, 'POST');
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/websites'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/websites/1/seo-analysis`] });
+      toast({
+        title: "Analyse actualisée",
+        description: "L'analyse SEO a été mise à jour avec succès",
+      });
+      setIsAnalysisOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible d'actualiser l'analyse",
+        variant: "destructive",
+      });
+      setIsAnalysisOpen(false);
+    },
   });
 
   if (isLoading) {
@@ -100,7 +138,7 @@ export default function DashboardWebhook() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navigation />
       <div className="p-6 space-y-6">
-        {/* En-tête avec informations du site */}
+        {/* En-tête avec informations du site et boutons d'action */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -110,9 +148,39 @@ export default function DashboardWebhook() {
               <p className="text-lg text-blue-600 font-medium">{website?.name}</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">{webhookData.url}</p>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-green-600">{webhookData.seoScore}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO</div>
+            <div className="flex items-center gap-4">
+              <div className="text-right mr-6">
+                <div className="text-3xl font-bold text-green-600">{webhookData.seoScore}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO</div>
+              </div>
+              
+              {/* Boutons d'action */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setIsAddWebsiteOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Ajouter un site
+                </Button>
+                
+                <Button
+                  onClick={() => setIsAnalysisOpen(true)}
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  disabled={refreshAnalysisMutation.isPending}
+                >
+                  {refreshAnalysisMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  Actualiser l'analyse
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -559,6 +627,56 @@ export default function DashboardWebhook() {
           </Card>
         )}
       </div>
+
+      {/* Dialogue d'ajout de site web */}
+      <AddWebsiteDialog 
+        open={isAddWebsiteOpen}
+        onOpenChange={setIsAddWebsiteOpen}
+      />
+
+      {/* Dialogue d'actualisation d'analyse */}
+      <Dialog open={isAnalysisOpen} onOpenChange={setIsAnalysisOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Actualisation de l'analyse SEO</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-6">
+            {refreshAnalysisMutation.isPending ? (
+              <>
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                <p className="text-sm text-gray-600 text-center">
+                  Actualisation en cours...
+                  <br />
+                  Récupération des dernières données SEO via webhook
+                </p>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-8 w-8 text-blue-600" />
+                <p className="text-sm text-gray-600 text-center">
+                  Voulez-vous actualiser l'analyse SEO du site ?
+                  <br />
+                  Cette action récupérera les dernières données via webhook.
+                </p>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsAnalysisOpen(false)}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={() => refreshAnalysisMutation.mutate()}
+                    disabled={refreshAnalysisMutation.isPending}
+                  >
+                    Actualiser
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
