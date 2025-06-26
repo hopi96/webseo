@@ -318,8 +318,9 @@ export default function DashboardWebhook() {
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {webhookData.pageSpeedMetrics?.largestContentfulPaint || 'N/A'}s
                 </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-2">
                   LCP (Largest Contentful Paint)
+                  <HelpTooltip content="Temps nécessaire pour afficher le plus gros élément visible de la page. Une LCP rapide (≤2.5s) améliore l'expérience utilisateur." />
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500">
                   {webhookData.pageSpeedMetrics?.largestContentfulPaint <= 2.5 ? 'Bon' : 
@@ -336,8 +337,9 @@ export default function DashboardWebhook() {
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {webhookData.pageSpeedMetrics?.cumulativeLayoutShift || 'N/A'}
                 </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-2">
                   CLS (Cumulative Layout Shift)
+                  <HelpTooltip content="Mesure la stabilité visuelle de la page. Un CLS faible (≤0.1) indique que les éléments ne bougent pas de manière inattendue pendant le chargement." />
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500">
                   {webhookData.pageSpeedMetrics?.cumulativeLayoutShift <= 0.1 ? 'Bon' : 
@@ -354,8 +356,9 @@ export default function DashboardWebhook() {
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {webhookData.pageSpeedMetrics?.firstContentfulPaint || 'N/A'}s
                 </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-2">
                   FCP (First Contentful Paint)
+                  <HelpTooltip content="Temps nécessaire pour afficher le premier élément de contenu visible. Un FCP rapide (≤1.8s) indique que la page commence à se charger rapidement." />
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500">
                   {webhookData.pageSpeedMetrics?.firstContentfulPaint <= 1.8 ? 'Bon' : 
