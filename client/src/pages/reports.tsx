@@ -130,11 +130,14 @@ export default function Reports() {
       pdf.text('MÉTRIQUES PRINCIPALES', 20, yPosition);
       yPosition += 15;
 
+      // Parse webhook data to match dashboard exactly
+      const webhookData = seoAnalysis.rawWebhookData ? JSON.parse(seoAnalysis.rawWebhookData) : {};
+      
       const metricsData = [
-        { icon: '👥', label: 'Trafic Organique', value: seoAnalysis.organicTraffic, desc: 'Visiteurs depuis moteurs de recherche' },
-        { icon: '🔍', label: 'Mots-clés Positionnés', value: seoAnalysis.keywordsRanking, desc: 'Mots-clés dans les résultats' },
-        { icon: '⚡', label: 'Score PageSpeed', value: seoAnalysis.pageSpeed, desc: 'Vitesse de chargement (Core Web Vitals)' },
-        { icon: '🎯', label: 'Backlinks', value: seoAnalysis.backlinks, desc: 'Liens externes vers le site' }
+        { icon: '🌐', label: 'Score SEO', value: webhookData.seoScore || seoAnalysis.overallScore, desc: 'Score global d\'optimisation SEO' },
+        { icon: '⚡', label: 'PageSpeed', value: webhookData.pageSpeed || seoAnalysis.pageSpeed, desc: 'Performance de chargement' },
+        { icon: '🔍', label: 'Mots-clés', value: webhookData.keywordCount || seoAnalysis.keywordsRanking, desc: 'Mots-clés analysés' },
+        { icon: '🔗', label: 'Liens internes', value: webhookData.internalLinks || seoAnalysis.backlinks, desc: 'Maillage interne du site' }
       ];
 
       metricsData.forEach((metric, index) => {
