@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Download, Users, Search, Zap, Target, TrendingUp, CheckCircle, XCircle, Home, Settings } from "lucide-react";
+import { FileText, Download, Users, Search, Zap, Target, TrendingUp, CheckCircle, XCircle } from "lucide-react";
 import { WebsiteSelector } from "@/components/website/website-selector";
+import { Navigation } from "@/components/layout/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
 import jsPDF from 'jspdf';
 
 export default function Reports() {
@@ -351,32 +351,7 @@ export default function Reports() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Barre de navigation supérieure */}
-      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">SEO Dashboard</h1>
-            <div className="flex space-x-6">
-              <Link href="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-md">
-                <Home className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
-              <Link href="/keywords" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-md">
-                <Search className="h-4 w-4" />
-                <span>Mots-clés</span>
-              </Link>
-              <Link href="/reports" className="flex items-center space-x-2 text-blue-600 bg-blue-50 dark:bg-blue-900 dark:text-blue-400 px-3 py-2 rounded-md">
-                <FileText className="h-4 w-4" />
-                <span>Rapports</span>
-              </Link>
-              <Link href="/settings" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-md">
-                <Settings className="h-4 w-4" />
-                <span>Paramètres</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       <div className="p-6 space-y-6">
         {/* En-tête */}

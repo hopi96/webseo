@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MobileHeader } from "@/components/layout/mobile-header";
-import { BottomNavigation } from "@/components/layout/bottom-navigation";
+import { Navigation } from "@/components/layout/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -84,10 +83,10 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark pb-20">
-      <MobileHeader />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation />
 
-      <main className="px-4 py-4">
+      <main className="px-6 py-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Paramètres</h1>
 
         <div className="space-y-4">
@@ -254,8 +253,6 @@ export default function Settings() {
           </Card>
         </div>
       </main>
-
-      <BottomNavigation />
     </div>
   );
 }
