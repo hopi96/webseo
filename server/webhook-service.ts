@@ -61,8 +61,16 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
         // Analyser la réponse pour donner un message plus précis
         try {
           const errorData = JSON.parse(errorText);
-          if (errorData.hint && errorData.hint.includes('Test workflow')) {
-            errorMessage = `Webhook n8n en mode test - cliquez sur 'Test workflow' puis réessayez immédiatement`;
+          if (errorData.hint && (errorData.hint.includes('Execute workflow') || errorData.hint.includes('test mode'))) {
+            errorMessage = `Le webhook n8n est en mode test. Dans votre canvas n8n :
+1. Cliquez sur 'Execute workflow' 
+2. Revenez ici et cliquez immédiatement sur 'Actualiser l'analyse'
+Note: En mode test, le webhook ne fonctionne que pour un seul appel après activation.`;
+          } else if (errorData.message && errorData.message.includes('not registered')) {
+            errorMessage = `Webhook n8n non activé. Solutions :
+1. Activez votre workflow dans n8n
+2. Ou cliquez sur 'Execute workflow' pour le mode test
+3. Puis réessayez immédiatement l'analyse`;
           }
         } catch (e) {
           // Ignorer l'erreur de parsing JSON
