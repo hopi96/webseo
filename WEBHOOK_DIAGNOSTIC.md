@@ -65,4 +65,4 @@ L'application affiche maintenant des messages spécifiques :
 - Instructions claires pour l'activation
 
 ## URL Webhook Actuelle
-https://doseit.app.n8n.cloud/webhook-test/4c07451f-11b9-4d71-8060-ac071029417d
+https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d

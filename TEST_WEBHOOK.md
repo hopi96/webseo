@@ -1,7 +1,7 @@
 # Test Webhook Integration
 
 ## Webhook URL Configuré
-- URL: https://doseit.app.n8n.cloud/webhook-test/4c07451f-11b9-4d71-8060-ac071029417d
+- URL: https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d
 
 ## Structure de Requête Attendue
 ```json
