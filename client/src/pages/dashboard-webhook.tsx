@@ -221,26 +221,7 @@ export default function DashboardWebhook() {
           </div>
         </div>
 
-        {/* Bannière d'information webhook */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-1">
-                Mode webhook n8n détecté
-              </h3>
-              <p className="text-sm text-blue-700 dark:text-blue-400 mb-2">
-                Vos données sont générées par un webhook n8n. Si vous obtenez une erreur "webhook non activé" :
-              </p>
-              <ol className="text-xs text-blue-600 dark:text-blue-400 list-decimal list-inside space-y-1">
-                <li>Allez dans votre canvas n8n</li>
-                <li>Cliquez sur "Execute workflow" (mode test)</li>
-                <li>Revenez ici et cliquez sur "Actualiser l'analyse"</li>
-                <li>Pour un usage permanent, activez votre workflow en mode production</li>
-              </ol>
-            </div>
-          </div>
-        </div>
+
 
         {/* Métriques principales en cartes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
