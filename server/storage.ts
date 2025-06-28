@@ -38,6 +38,9 @@ export class MemStorage implements IStorage {
       createdAt: new Date('2025-06-26')
     };
     this.websites.set(1, ohLesKidsWebsite);
+    
+    // Ajuster le compteur pour que les nouveaux sites commencent à 2
+    this.currentWebsiteId = 2;
 
     // Analyse SEO avec structure JSON complète du webhook Oh Les Kids
     const ohLesKidsAnalysis: SeoAnalysis = {
@@ -206,6 +209,9 @@ export class MemStorage implements IStorage {
       analyzedAt: new Date('2025-06-26')
     };
     this.seoAnalyses.set(1, ohLesKidsAnalysis);
+    
+    // Ajuster le compteur pour que les nouvelles analyses commencent à 2
+    this.currentAnalysisId = 2;
   }
 
   private generateTrafficData() {
