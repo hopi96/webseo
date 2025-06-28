@@ -225,7 +225,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Diagnostic webhook endpoint
   app.get('/api/webhook/diagnostic', async (_req, res) => {
-    const webhookUrl = 'https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d';
+    const { config } = await import('./config');
+    const webhookUrl = config.webhook.url;
     const results = {
       get: null as any,
       post: null as any

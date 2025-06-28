@@ -65,4 +65,8 @@ L'application affiche maintenant des messages spécifiques :
 - Instructions claires pour l'activation
 
 ## URL Webhook Actuelle
-https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d
+Configuration centralisée dans `server/config.ts`
+URL : https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d
+
+### Modification de l'URL
+Pour changer l'URL du webhook, modifiez uniquement le fichier `server/config.ts`

@@ -1,7 +1,11 @@
 # Test Webhook Integration
 
 ## Webhook URL Configuré
-- URL: https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d
+- Configuration centralisée dans : `server/config.ts`
+- URL actuelle : https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d
+
+### Modification de l'URL
+Pour changer l'URL du webhook, modifiez uniquement le fichier `server/config.ts` :
 
 ## Structure de Requête Attendue
 ```json
