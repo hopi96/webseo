@@ -209,10 +209,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? "Le webhook n8n est en mode test. Cliquez sur 'Test workflow' dans votre canvas n8n puis réessayez immédiatement."
           : "Le webhook doit être activé en mode test dans n8n. Cliquez sur 'Test workflow' dans votre canvas n8n puis réessayez.";
           
+        const { config } = await import('./config');
         return res.status(503).json({ 
           message: "Webhook n8n requis",
           error: errorMessage,
-          webhookUrl: "https://doseit.app.n8n.cloud/webhook-test/4c07451f-11b9-4d71-8060-ac071029417d"
+          webhookUrl: config.webhook.url
         });
       }
       
