@@ -1,6 +1,6 @@
 import type { InsertSeoAnalysis } from "@shared/schema";
 
-const WEBHOOK_URL = "https://doseit.app.n8n.cloud/webhook-test/4c07451f-11b9-4d71-8060-ac071029417d";
+const WEBHOOK_URL = "https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d";
 
 export interface WebhookSeoResponse {
   overallScore: number;
