@@ -17,7 +17,8 @@ import {
   Globe, 
   Zap, 
   Search, 
-  Link, 
+  Link,
+  Info, 
   CheckCircle, 
   XCircle, 
   AlertTriangle,
@@ -217,6 +218,27 @@ export default function DashboardWebhook() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Bannière d'information webhook */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-1">
+                Mode webhook n8n détecté
+              </h3>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-2">
+                Vos données sont générées par un webhook n8n. Si vous obtenez une erreur "webhook non activé" :
+              </p>
+              <ol className="text-xs text-blue-600 dark:text-blue-400 list-decimal list-inside space-y-1">
+                <li>Allez dans votre canvas n8n</li>
+                <li>Cliquez sur "Execute workflow" (mode test)</li>
+                <li>Revenez ici et cliquez sur "Actualiser l'analyse"</li>
+                <li>Pour un usage permanent, activez votre workflow en mode production</li>
+              </ol>
+            </div>
           </div>
         </div>
 
@@ -813,16 +835,49 @@ export default function DashboardWebhook() {
             <AlertDialogDescription className="text-red-700 dark:text-red-300">
               {webhookError}
               <br /><br />
-              <strong>Solutions possibles :</strong>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Vérifiez que le webhook n8n est actif</li>
-                <li>Cliquez sur "Execute workflow" dans n8n</li>
-                <li>Vérifiez l'URL du webhook dans les paramètres</li>
-                <li>Contactez l'administrateur système</li>
-              </ul>
+              {webhookError?.includes('mode test') ? (
+                <>
+                  <strong>📋 Instructions pour le mode test n8n :</strong>
+                  <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li><strong>Allez dans votre canvas n8n</strong></li>
+                      <li><strong>Cliquez sur "Execute workflow"</strong></li>
+                      <li><strong>Revenez ici immédiatement</strong></li>
+                      <li><strong>Cliquez sur "Actualiser l'analyse"</strong></li>
+                    </ol>
+                    <p className="text-xs mt-2 text-yellow-800 dark:text-yellow-200">
+                      ⚠️ Important : En mode test, le webhook ne fonctionne que pour un seul appel après activation.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <strong>Solutions possibles :</strong>
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>Activez votre workflow dans n8n (mode production)</li>
+                    <li>Ou cliquez sur "Execute workflow" pour le mode test</li>
+                    <li>Vérifiez l'URL du webhook dans les paramètres</li>
+                    <li>Contactez l'administrateur système si le problème persiste</li>
+                  </ul>
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            {webhookError?.includes('mode test') && (
+              <AlertDialogAction 
+                onClick={() => {
+                  setWebhookError(null);
+                  // Attendre un peu puis relancer automatiquement
+                  setTimeout(() => {
+                    setIsAnalysisOpen(true);
+                  }, 500);
+                }}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white mr-2"
+              >
+                J'ai activé n8n, relancer
+              </AlertDialogAction>
+            )}
             <AlertDialogAction 
               onClick={() => setWebhookError(null)}
               className="bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
