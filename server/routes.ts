@@ -332,6 +332,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint pour diagnostiquer Airtable
+  app.get("/api/test-airtable", async (req, res) => {
+    try {
+      const { airtableService } = await import('./airtable-service');
+      
+      // Test de la configuration
+      const hasApiKey = !!process.env.AIRTABLE_API_KEY;
+      const hasBaseId = !!process.env.AIRTABLE_BASE_ID;
+      
+      console.log('🔧 Test Airtable Config:', {
+        hasApiKey,
+        hasBaseId,
+        apiKeyLength: process.env.AIRTABLE_API_KEY?.length || 0,
+        baseIdPrefix: process.env.AIRTABLE_BASE_ID?.substring(0, 4) || 'none'
+      });
+
+      if (!hasApiKey || !hasBaseId) {
+        return res.status(500).json({
+          success: false,
+          message: "Configuration Airtable manquante",
+          config: { hasApiKey, hasBaseId }
+        });
+      }
+
+      // Test de connexion
+      const isConnected = await airtableService.testConnection();
+      
+      if (isConnected) {
+        const content = await airtableService.getAllContent();
+        res.json({
+          success: true,
+          message: "Connexion Airtable réussie",
+          contentCount: content.length,
+          firstContent: content[0] || null
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Échec de la connexion Airtable"
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur test Airtable:', error.message);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors du test Airtable",
+        error: error.message,
+        errorType: error.constructor.name
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
