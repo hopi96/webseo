@@ -1,4 +1,14 @@
-import { websites, seoAnalyses, type Website, type InsertWebsite, type SeoAnalysis, type InsertSeoAnalysis } from "@shared/schema";
+import { 
+  websites, 
+  seoAnalyses, 
+  editorialContent,
+  type Website, 
+  type InsertWebsite, 
+  type SeoAnalysis, 
+  type InsertSeoAnalysis,
+  type EditorialContent,
+  type InsertEditorialContent
+} from "@shared/schema";
 
 export interface IStorage {
   // Website operations
@@ -11,19 +21,30 @@ export interface IStorage {
   getSeoAnalysis(websiteId: number): Promise<SeoAnalysis | undefined>;
   createSeoAnalysis(analysis: InsertSeoAnalysis): Promise<SeoAnalysis>;
   updateSeoAnalysis(websiteId: number, analysis: Partial<InsertSeoAnalysis>): Promise<SeoAnalysis | undefined>;
+
+  // Editorial Content operations
+  getEditorialContent(siteId?: number): Promise<EditorialContent[]>;
+  getEditorialContentByDate(date: Date, siteId?: number): Promise<EditorialContent[]>;
+  createEditorialContent(content: InsertEditorialContent): Promise<EditorialContent>;
+  updateEditorialContent(id: number, content: Partial<InsertEditorialContent>): Promise<EditorialContent | undefined>;
+  deleteEditorialContent(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private websites: Map<number, Website>;
   private seoAnalyses: Map<number, SeoAnalysis>;
+  private editorialContents: Map<number, EditorialContent>;
   private currentWebsiteId: number;
   private currentAnalysisId: number;
+  private currentContentId: number;
 
   constructor() {
     this.websites = new Map();
     this.seoAnalyses = new Map();
+    this.editorialContents = new Map();
     this.currentWebsiteId = 1;
     this.currentAnalysisId = 1;
+    this.currentContentId = 1;
     
     // Initialize with sample data
     this.initializeSampleData();
@@ -212,6 +233,9 @@ export class MemStorage implements IStorage {
     
     // Ajuster le compteur pour que les nouvelles analyses commencent à 2
     this.currentAnalysisId = 2;
+
+    // Initialiser les contenus éditoriaux basés sur la table Airtable
+    this.initializeEditorialContent();
   }
 
   private generateTrafficData() {
@@ -255,6 +279,180 @@ export class MemStorage implements IStorage {
       });
     }
     return data;
+  }
+
+  private async initializeEditorialContent() {
+    // Contenus éditoriaux basés sur la table Airtable affichée
+    const editorialData: EditorialContent[] = [
+      {
+        id: 1,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'L\'influence du design Le Corbusier dans l\'architecture moderne',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-06-29'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 2,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Astuces pour organiser un anniversaire à...',
+        hasImage: true,
+        statut: 'à réviser',
+        dateDePublication: new Date('2025-07-05'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 3,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Top 5 des accessoires indispensables pour...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-06'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 4,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Tendances 2025 : Décoration de fête magn...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-02'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 5,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Comment décorer une table d\'anniversaire...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-01'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 6,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Les couleurs tendance pour la décoration...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-03'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 7,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'DIY : Fabriquer des décorations Le Corbu...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-04'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 8,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Idées déco pour un anniversaire réussi en...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-07'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 9,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Organisation d\'événement : l\'art du détail...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-08'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 10,
+        idSite: 3,
+        typeContent: 'twitter',
+        contentText: 'Décorer sa maison pour une fête d\'anniv...',
+        hasImage: false,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-09'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 11,
+        idSite: 3,
+        typeContent: 'instagram',
+        contentText: 'Tendances 2025 en décoration d\'annivers...',
+        hasImage: true,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-10'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 12,
+        idSite: 3,
+        typeContent: 'instagram',
+        contentText: 'DIY : Créer une guirlande d\'anniversaire p...',
+        hasImage: true,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-11'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 13,
+        idSite: 3,
+        typeContent: 'instagram',
+        contentText: 'Anniversaire Adulte Minimaliste façon Le...',
+        hasImage: true,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-12'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 14,
+        idSite: 3,
+        typeContent: 'instagram',
+        contentText: 'Idées de décoration pour un anniversaire...',
+        hasImage: true,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-13'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 15,
+        idSite: 3,
+        typeContent: 'instagram',
+        contentText: 'Décoration de table d\'occasion pour anniv...',
+        hasImage: true,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-14'),
+        createdAt: new Date('2025-06-25')
+      },
+      {
+        id: 16,
+        idSite: 3,
+        typeContent: 'instagram',
+        contentText: 'Recettes de gâteaux d\'anniversaire frança...',
+        hasImage: true,
+        statut: 'en attente',
+        dateDePublication: new Date('2025-07-15'),
+        createdAt: new Date('2025-06-25')
+      }
+    ];
+
+    // Ajouter les contenus au stockage
+    editorialData.forEach(content => {
+      this.editorialContents.set(content.id, content);
+    });
+
+    // Ajuster le compteur pour que les nouveaux contenus commencent après
+    this.currentContentId = editorialData.length + 1;
   }
 
   async getWebsites(): Promise<Website[]> {
