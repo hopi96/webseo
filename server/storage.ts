@@ -525,6 +525,57 @@ export class MemStorage implements IStorage {
     
     return updated;
   }
+
+  // Editorial Content operations
+  async getEditorialContent(siteId?: number): Promise<EditorialContent[]> {
+    const allContent = Array.from(this.editorialContents.values());
+    if (siteId) {
+      return allContent.filter(content => content.idSite === siteId);
+    }
+    return allContent;
+  }
+
+  async getEditorialContentByDate(date: Date, siteId?: number): Promise<EditorialContent[]> {
+    const dateStr = date.toISOString().split('T')[0];
+    const allContent = Array.from(this.editorialContents.values());
+    
+    return allContent.filter(content => {
+      const contentDateStr = content.dateDePublication.toISOString().split('T')[0];
+      const matchesDate = contentDateStr === dateStr;
+      const matchesSite = siteId ? content.idSite === siteId : true;
+      return matchesDate && matchesSite;
+    });
+  }
+
+  async createEditorialContent(insertContent: InsertEditorialContent): Promise<EditorialContent> {
+    const id = this.currentContentId++;
+    const content: EditorialContent = {
+      ...insertContent,
+      id,
+      hasImage: insertContent.hasImage ?? false,
+      createdAt: new Date()
+    };
+    this.editorialContents.set(id, content);
+    return content;
+  }
+
+  async updateEditorialContent(id: number, updateData: Partial<InsertEditorialContent>): Promise<EditorialContent | undefined> {
+    const existing = this.editorialContents.get(id);
+    if (!existing) {
+      return undefined;
+    }
+
+    const updated: EditorialContent = {
+      ...existing,
+      ...updateData
+    };
+    this.editorialContents.set(id, updated);
+    return updated;
+  }
+
+  async deleteEditorialContent(id: number): Promise<boolean> {
+    return this.editorialContents.delete(id);
+  }
 }
 
 export const storage = new MemStorage();

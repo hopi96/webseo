@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,50 +14,47 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import type { EditorialContent } from "@shared/schema";
 
-// Types pour le calendrier éditorial
+// Types pour le calendrier éditorial (basé sur le schéma de la base de données)
 interface EditorialEvent {
-  id: string;
+  id: number;
   title: string;
   description: string;
   date: Date;
-  type: 'article' | 'social' | 'newsletter' | 'video';
-  status: 'planned' | 'draft' | 'review' | 'published';
-  tags: string[];
+  type: string; // twitter, instagram, article, newsletter
+  status: string; // en attente, à réviser, en cours, publié
+  hasImage: boolean;
+  siteId: number;
 }
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [events] = useState<EditorialEvent[]>([
-    {
-      id: '1',
-      title: 'Article SEO été 2025',
-      description: 'Guide complet pour optimiser son référencement en été',
-      date: new Date(2025, 5, 30), // 30 juin 2025
-      type: 'article',
-      status: 'planned',
-      tags: ['SEO', 'été', 'guide']
-    },
-    {
-      id: '2',
-      title: 'Post LinkedIn - Tendances SEO',
-      description: 'Partager les dernières tendances SEO 2025',
-      date: new Date(2025, 6, 2), // 2 juillet 2025
-      type: 'social',
-      status: 'draft',
-      tags: ['LinkedIn', 'tendances', 'SEO']
-    },
-    {
-      id: '3',
-      title: 'Newsletter mensuelle',
-      description: 'Récap des actualités SEO du mois',
-      date: new Date(2025, 6, 15), // 15 juillet 2025
-      type: 'newsletter',
-      status: 'planned',
-      tags: ['newsletter', 'actualités']
+
+  // Récupérer les contenus éditoriaux depuis l'API
+  const { data: editorialContent = [], isLoading } = useQuery({
+    queryKey: ['/api/editorial-content'],
+    queryFn: async (): Promise<EditorialContent[]> => {
+      const response = await fetch('/api/editorial-content');
+      if (!response.ok) {
+        throw new Error('Failed to fetch editorial content');
+      }
+      return response.json();
     }
-  ]);
+  });
+
+  // Transformer les données de l'API en format pour le calendrier
+  const events: EditorialEvent[] = editorialContent.map(content => ({
+    id: content.id,
+    title: content.contentText.length > 50 ? content.contentText.substring(0, 50) + '...' : content.contentText,
+    description: content.contentText,
+    date: new Date(content.dateDePublication),
+    type: content.typeContent,
+    status: content.statut,
+    hasImage: content.hasImage || false,
+    siteId: content.idSite
+  }));
 
   // Fonction pour obtenir les jours du mois
   const getDaysInMonth = (date: Date) => {
@@ -266,12 +264,12 @@ export default function Calendar() {
                           <Badge className={getStatusColor(event.status)}>
                             {event.status}
                           </Badge>
-                          {event.tags.map(tag => (
-                            <Badge key={tag} variant="outline" className="text-xs">
+                          {event.hasImage && (
+                            <Badge variant="outline" className="text-xs">
                               <Tag className="h-3 w-3 mr-1" />
-                              {tag}
+                              Image
                             </Badge>
-                          ))}
+                          )}
                         </div>
                       </div>
                     ))}

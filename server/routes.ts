@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertWebsiteSchema, insertSeoAnalysisSchema } from "@shared/schema";
+import { insertWebsiteSchema, insertSeoAnalysisSchema, insertEditorialContentSchema } from "@shared/schema";
 import { requestSeoAnalysisFromWebhook } from "./webhook-service";
 import { z } from "zod";
 
@@ -269,6 +269,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
                      results.get.status === 200 ? 'GET fonctionne' : 
                      'Aucune méthode ne fonctionne - vérifiez la configuration n8n'
     });
+  });
+
+  // Editorial Content routes
+  app.get("/api/editorial-content", async (req, res) => {
+    try {
+      const siteId = req.query.siteId ? parseInt(req.query.siteId as string) : undefined;
+      const content = await storage.getEditorialContent(siteId);
+      res.json(content);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch editorial content" });
+    }
+  });
+
+  app.get("/api/editorial-content/date/:date", async (req, res) => {
+    try {
+      const date = new Date(req.params.date);
+      const siteId = req.query.siteId ? parseInt(req.query.siteId as string) : undefined;
+      const content = await storage.getEditorialContentByDate(date, siteId);
+      res.json(content);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch editorial content by date" });
+    }
+  });
+
+  app.post("/api/editorial-content", async (req, res) => {
+    try {
+      const validatedData = insertEditorialContentSchema.parse(req.body);
+      const content = await storage.createEditorialContent(validatedData);
+      res.status(201).json(content);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create editorial content" });
+    }
+  });
+
+  app.put("/api/editorial-content/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const content = await storage.updateEditorialContent(id, req.body);
+      if (!content) {
+        return res.status(404).json({ message: "Editorial content not found" });
+      }
+      res.json(content);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update editorial content" });
+    }
+  });
+
+  app.delete("/api/editorial-content/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteEditorialContent(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Editorial content not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete editorial content" });
+    }
   });
 
   const httpServer = createServer(app);
