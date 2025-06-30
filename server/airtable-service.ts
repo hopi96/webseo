@@ -1,7 +1,11 @@
 import Airtable from 'airtable';
 import type { EditorialContent, InsertEditorialContent } from '@shared/schema';
 
-// Configuration Airtable
+// Configuration Airtable avec validation
+if (!process.env.AIRTABLE_API_KEY || !process.env.AIRTABLE_BASE_ID) {
+  console.warn('⚠️ Variables d\'environnement Airtable manquantes. Utilisation des données locales.');
+}
+
 const airtable = new Airtable({
   apiKey: process.env.AIRTABLE_API_KEY
 });
@@ -9,14 +13,16 @@ const airtable = new Airtable({
 const base = airtable.base(process.env.AIRTABLE_BASE_ID!);
 const table = base('content'); // Nom de votre table
 
+// Interface pour les données Airtable (plus flexible)
 export interface AirtableContentRecord {
-  ID_contenu: number;
-  ID_SITE: number;
-  type_contenu: string;
-  contenu_text: string;
-  image: boolean;
-  statut: string;
-  date_de_publication: string;
+  [key: string]: any;
+  ID_contenu?: number;
+  ID_SITE?: number;
+  type_contenu?: string;
+  contenu_text?: string;
+  image?: boolean;
+  statut?: string;
+  date_de_publication?: string;
 }
 
 export class AirtableService {
@@ -31,16 +37,16 @@ export class AirtableService {
       }).all();
 
       return records.map(record => {
-        const fields = record.fields as AirtableContentRecord;
+        const fields = record.fields as any; // Utilisation d'any pour éviter les conflits de type Airtable
         
         return {
-          id: fields.ID_contenu,
-          idSite: fields.ID_SITE,
-          typeContent: fields.type_contenu,
-          contentText: fields.contenu_text,
-          hasImage: fields.image,
-          statut: fields.statut,
-          dateDePublication: new Date(fields.date_de_publication),
+          id: fields.ID_contenu || 0,
+          idSite: fields.ID_SITE || 1,
+          typeContent: fields.type_contenu || 'twitter',
+          contentText: fields.contenu_text || '',
+          hasImage: fields.image || false,
+          statut: fields.statut || 'en attente',
+          dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date() // Date de synchronisation
         } as EditorialContent;
       });
@@ -62,16 +68,16 @@ export class AirtableService {
       }).all();
 
       return records.map(record => {
-        const fields = record.fields as AirtableContentRecord;
+        const fields = record.fields as any;
         
         return {
-          id: fields.ID_contenu,
-          idSite: fields.ID_SITE,
-          typeContent: fields.type_contenu,
-          contentText: fields.contenu_text,
-          hasImage: fields.image,
-          statut: fields.statut,
-          dateDePublication: new Date(fields.date_de_publication),
+          id: fields.ID_contenu || 0,
+          idSite: fields.ID_SITE || 1,
+          typeContent: fields.type_contenu || 'twitter',
+          contentText: fields.contenu_text || '',
+          hasImage: fields.image || false,
+          statut: fields.statut || 'en attente',
+          dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
         } as EditorialContent;
       });
