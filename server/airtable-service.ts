@@ -124,20 +124,36 @@ export class AirtableService {
       console.log('🔧 Test connexion Airtable...');
       console.log('API Key présente:', !!process.env.AIRTABLE_API_KEY);
       console.log('Base ID présente:', !!process.env.AIRTABLE_BASE_ID);
+      console.log('Base ID:', process.env.AIRTABLE_BASE_ID);
       console.log('Longueur API Key:', process.env.AIRTABLE_API_KEY?.length || 0);
       
-      // Teste en récupérant un seul enregistrement
-      const records = await table.select({
-        maxRecords: 1
-      }).all();
+      // Test avec différents noms de table possibles
+      const possibleTableNames = ['content', 'Content', 'CONTENT'];
       
-      console.log('✅ Connexion Airtable réussie, enregistrements trouvés:', records.length);
-      if (records.length > 0) {
-        console.log('Premier enregistrement:', JSON.stringify(records[0].fields, null, 2));
+      for (const tableName of possibleTableNames) {
+        try {
+          console.log(`Test avec le nom de table: "${tableName}"`);
+          const testTable = base(tableName);
+          const records = await testTable.select({
+            maxRecords: 1
+          }).all();
+          
+          console.log('✅ Connexion Airtable réussie avec table:', tableName);
+          console.log('Enregistrements trouvés:', records.length);
+          if (records.length > 0) {
+            console.log('Premier enregistrement:', JSON.stringify(records[0].fields, null, 2));
+          }
+          return true;
+        } catch (tableError: any) {
+          console.log(`❌ Échec avec "${tableName}":`, tableError.error || tableError.message);
+        }
       }
-      return true;
+      
+      // Si aucun nom de table ne fonctionne
+      console.error('❌ Aucun nom de table valide trouvé');
+      return false;
     } catch (error: any) {
-      console.error('❌ Erreur de connexion Airtable:', {
+      console.error('❌ Erreur générale de connexion Airtable:', {
         message: error.message,
         error: error.error,
         statusCode: error.statusCode,
