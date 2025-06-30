@@ -108,6 +108,7 @@ Changelog:
 - June 26, 2025. Updated dashboard with new Oh Les Kids data including geolocalized keywords (Paris, Lyon, Marseille, Nice, Nantes, Bordeaux) and seasonal keywords (été, vacances, outdoor, plage, soleil) from authentic JSON analysis
 - June 26, 2025. Enhanced reports page with navigation menu and professional PDF generation matching dashboard structure exactly
 - June 26, 2025. Added complete website management system: add/delete websites, real-time webhook analysis with progress dialog, help tooltips for all metrics, unified navigation across all pages, and enhanced PDF reports with authentic webhook data
+- June 30, 2025. Project cleanup - removed unused dashboard pages (dashboard-complete, dashboard-materio, dashboard-new, dashboard.tsx), renamed dashboard-webhook to dashboard, and created comprehensive editorial calendar page with monthly view, event management, and content planning features
 
 ## User Preferences
 
