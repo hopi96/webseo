@@ -1,0 +1,132 @@
+import Airtable from 'airtable';
+import type { EditorialContent, InsertEditorialContent } from '@shared/schema';
+
+// Configuration Airtable
+const airtable = new Airtable({
+  apiKey: process.env.AIRTABLE_API_KEY
+});
+
+const base = airtable.base(process.env.AIRTABLE_BASE_ID!);
+const table = base('content'); // Nom de votre table
+
+export interface AirtableContentRecord {
+  ID_contenu: number;
+  ID_SITE: number;
+  type_contenu: string;
+  contenu_text: string;
+  image: boolean;
+  statut: string;
+  date_de_publication: string;
+}
+
+export class AirtableService {
+  /**
+   * Récupère tous les contenus éditoriaux depuis Airtable
+   */
+  async getAllContent(): Promise<EditorialContent[]> {
+    try {
+      const records = await table.select({
+        // Optionnel: filtrer par statut ou date
+        // filterByFormula: "NOT({statut} = 'publié')"
+      }).all();
+
+      return records.map(record => {
+        const fields = record.fields as AirtableContentRecord;
+        
+        return {
+          id: fields.ID_contenu,
+          idSite: fields.ID_SITE,
+          typeContent: fields.type_contenu,
+          contentText: fields.contenu_text,
+          hasImage: fields.image,
+          statut: fields.statut,
+          dateDePublication: new Date(fields.date_de_publication),
+          createdAt: new Date() // Date de synchronisation
+        } as EditorialContent;
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des contenus Airtable:', error);
+      throw new Error('Impossible de récupérer les contenus depuis Airtable');
+    }
+  }
+
+  /**
+   * Récupère les contenus pour une date spécifique
+   */
+  async getContentByDate(date: Date): Promise<EditorialContent[]> {
+    try {
+      const dateStr = date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+      
+      const records = await table.select({
+        filterByFormula: `IS_SAME({date_de_publication}, DATETIME_PARSE("${dateStr}", "YYYY-MM-DD"), "day")`
+      }).all();
+
+      return records.map(record => {
+        const fields = record.fields as AirtableContentRecord;
+        
+        return {
+          id: fields.ID_contenu,
+          idSite: fields.ID_SITE,
+          typeContent: fields.type_contenu,
+          contentText: fields.contenu_text,
+          hasImage: fields.image,
+          statut: fields.statut,
+          dateDePublication: new Date(fields.date_de_publication),
+          createdAt: new Date()
+        } as EditorialContent;
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération par date:', error);
+      throw new Error('Impossible de récupérer les contenus pour cette date');
+    }
+  }
+
+  /**
+   * Récupère les contenus pour un site spécifique
+   */
+  async getContentBySite(siteId: number): Promise<EditorialContent[]> {
+    try {
+      const records = await table.select({
+        filterByFormula: `{ID_SITE} = ${siteId}`
+      }).all();
+
+      return records.map(record => {
+        const fields = record.fields as AirtableContentRecord;
+        
+        return {
+          id: fields.ID_contenu,
+          idSite: fields.ID_SITE,
+          typeContent: fields.type_contenu,
+          contentText: fields.contenu_text,
+          hasImage: fields.image,
+          statut: fields.statut,
+          dateDePublication: new Date(fields.date_de_publication),
+          createdAt: new Date()
+        } as EditorialContent;
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération par site:', error);
+      throw new Error('Impossible de récupérer les contenus pour ce site');
+    }
+  }
+
+  /**
+   * Teste la connexion Airtable
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      // Teste en récupérant un seul enregistrement
+      const records = await table.select({
+        maxRecords: 1
+      }).all();
+      
+      console.log('✅ Connexion Airtable réussie');
+      return true;
+    } catch (error) {
+      console.error('❌ Erreur de connexion Airtable:', error);
+      return false;
+    }
+  }
+}
+
+export const airtableService = new AirtableService();

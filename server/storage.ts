@@ -9,6 +9,7 @@ import {
   type EditorialContent,
   type InsertEditorialContent
 } from "@shared/schema";
+import { airtableService } from './airtable-service';
 
 export interface IStorage {
   // Website operations
@@ -528,11 +529,20 @@ export class MemStorage implements IStorage {
 
   // Editorial Content operations
   async getEditorialContent(siteId?: number): Promise<EditorialContent[]> {
-    const allContent = Array.from(this.editorialContents.values());
-    if (siteId) {
-      return allContent.filter(content => content.idSite === siteId);
+    try {
+      if (siteId) {
+        return await airtableService.getContentBySite(siteId);
+      }
+      return await airtableService.getAllContent();
+    } catch (error) {
+      console.error('Erreur lors de la récupération des contenus éditoriaux:', error);
+      // Fallback vers les données locales en cas d'erreur
+      const allContent = Array.from(this.editorialContents.values());
+      if (siteId) {
+        return allContent.filter(content => content.idSite === siteId);
+      }
+      return allContent;
     }
-    return allContent;
   }
 
   async getEditorialContentByDate(date: Date, siteId?: number): Promise<EditorialContent[]> {
