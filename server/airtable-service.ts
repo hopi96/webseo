@@ -97,16 +97,16 @@ export class AirtableService {
       }).all();
 
       return records.map(record => {
-        const fields = record.fields as AirtableContentRecord;
+        const fields = record.fields as any;
         
         return {
-          id: fields.ID_contenu,
-          idSite: fields.ID_SITE,
-          typeContent: fields.type_contenu,
-          contentText: fields.contenu_text,
-          hasImage: fields.image,
-          statut: fields.statut,
-          dateDePublication: new Date(fields.date_de_publication),
+          id: fields.ID_contenu || 0,
+          idSite: fields.ID_SITE || 1,
+          typeContent: fields.type_contenu || 'twitter',
+          contentText: fields.contenu_text || '',
+          hasImage: fields.image || false,
+          statut: fields.statut || 'en attente',
+          dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
         } as EditorialContent;
       });
@@ -121,15 +121,28 @@ export class AirtableService {
    */
   async testConnection(): Promise<boolean> {
     try {
+      console.log('🔧 Test connexion Airtable...');
+      console.log('API Key présente:', !!process.env.AIRTABLE_API_KEY);
+      console.log('Base ID présente:', !!process.env.AIRTABLE_BASE_ID);
+      console.log('Longueur API Key:', process.env.AIRTABLE_API_KEY?.length || 0);
+      
       // Teste en récupérant un seul enregistrement
       const records = await table.select({
         maxRecords: 1
       }).all();
       
-      console.log('✅ Connexion Airtable réussie');
+      console.log('✅ Connexion Airtable réussie, enregistrements trouvés:', records.length);
+      if (records.length > 0) {
+        console.log('Premier enregistrement:', JSON.stringify(records[0].fields, null, 2));
+      }
       return true;
-    } catch (error) {
-      console.error('❌ Erreur de connexion Airtable:', error);
+    } catch (error: any) {
+      console.error('❌ Erreur de connexion Airtable:', {
+        message: error.message,
+        error: error.error,
+        statusCode: error.statusCode,
+        type: error.constructor.name
+      });
       return false;
     }
   }
