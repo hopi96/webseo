@@ -4,7 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "./hooks/use-theme";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Dashboard from "@/pages/dashboard-webhook";
+import Dashboard from "@/pages/dashboard";
 import Keywords from "@/pages/keywords";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
