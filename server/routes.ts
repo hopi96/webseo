@@ -349,7 +349,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Base ID:', baseId);
       console.log('API Key length:', apiKey.length);
 
-      // Test direct avec l'API REST Airtable
+      // D'abord, testons la base et listons les tables
+      const metaResponse = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables`, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (metaResponse.ok) {
+        const metaData = await metaResponse.json();
+        console.log('✅ Meta API réussie - Tables disponibles:', metaData.tables?.map((t: any) => t.name));
+        
+        // Cherchons la table "content" dans la liste
+        const contentTable = metaData.tables?.find((t: any) => 
+          t.name.toLowerCase() === 'content' || t.name === 'content'
+        );
+        
+        if (contentTable) {
+          console.log('✅ Table "content" trouvée:', contentTable.name);
+          
+          // Maintenant testons l'accès aux données
+          const response = await fetch(`https://api.airtable.com/v0/${baseId}/${contentTable.name}?maxRecords=1`, {
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            return res.json({
+              success: true,
+              message: "Connexion Airtable réussie",
+              tableName: contentTable.name,
+              contentCount: data.records?.length || 0,
+              firstRecord: data.records?.[0] || null,
+              availableTables: metaData.tables?.map((t: any) => t.name)
+            });
+          } else {
+            return res.status(response.status).json({
+              success: false,
+              message: "Erreur d'accès aux données",
+              error: data,
+              tableName: contentTable.name
+            });
+          }
+        } else {
+          return res.status(404).json({
+            success: false,
+            message: "Table 'content' non trouvée",
+            availableTables: metaData.tables?.map((t: any) => t.name)
+          });
+        }
+      }
+
+      // Si meta API échoue, essayons l'accès direct
       const response = await fetch(`https://api.airtable.com/v0/${baseId}/content?maxRecords=1`, {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
