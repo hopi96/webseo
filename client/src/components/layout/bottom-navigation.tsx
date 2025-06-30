@@ -26,13 +26,13 @@ export function BottomNavigation() {
           
           return (
             <Link key={item.id} href={item.href}>
-              <div className={`flex flex-col items-center justify-center h-full px-2 transition-colors ${
+              <div className={`flex flex-col items-center justify-center h-full px-1 transition-colors ${
                 active 
                   ? "text-blue-600 bg-blue-50" 
                   : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
               }`}>
-                <Icon className="h-5 w-5 mb-1" />
-                <span className="text-xs font-medium truncate">{item.label}</span>
+                <Icon className="h-4 w-4 mb-1" />
+                <span className="text-[10px] font-medium truncate w-full text-center">{item.label}</span>
               </div>
             </Link>
           );
