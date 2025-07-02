@@ -1,17 +1,28 @@
 import Airtable from 'airtable';
 import type { EditorialContent, InsertEditorialContent } from '@shared/schema';
 
-// Configuration Airtable avec validation
-if (!process.env.AIRTABLE_API_KEY || !process.env.AIRTABLE_BASE_ID) {
-  console.warn('⚠️ Variables d\'environnement Airtable manquantes. Utilisation des données locales.');
+// Configuration Airtable avec initialisation paresseuse
+let base: any = null;
+let table: any = null;
+
+function initializeAirtable() {
+  if (!base) {
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    // Utilisation du bon Base ID directement (temporaire)
+    const baseId = 'app9L4iAzg6Nms9Qq';
+    
+    if (!apiKey) {
+      throw new Error('Token API Airtable manquant');
+    }
+    
+    const airtable = new Airtable({ apiKey });
+    base = airtable.base(baseId);
+    table = base('content');
+    
+    console.log('✅ Configuration Airtable initialisée avec Base ID:', baseId);
+  }
+  return { base, table };
 }
-
-const airtable = new Airtable({
-  apiKey: process.env.AIRTABLE_API_KEY
-});
-
-const base = airtable.base(process.env.AIRTABLE_BASE_ID!);
-const table = base('content'); // Nom de votre table
 
 // Interface pour les données Airtable (plus flexible)
 export interface AirtableContentRecord {
@@ -31,13 +42,16 @@ export class AirtableService {
    */
   async getAllContent(): Promise<EditorialContent[]> {
     try {
+      const { table } = initializeAirtable();
       const records = await table.select({
-        // Optionnel: filtrer par statut ou date
+        // Optionnel: filtrer par statut ou date  
         // filterByFormula: "NOT({statut} = 'publié')"
       }).all();
 
-      return records.map(record => {
-        const fields = record.fields as any; // Utilisation d'any pour éviter les conflits de type Airtable
+      console.log(`✅ ${records.length} contenus récupérés depuis Airtable`);
+
+      return records.map((record: any) => {
+        const fields = record.fields as any;
         
         return {
           id: fields.ID_contenu || 0,
@@ -47,7 +61,7 @@ export class AirtableService {
           hasImage: fields.image || false,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
-          createdAt: new Date() // Date de synchronisation
+          createdAt: new Date()
         } as EditorialContent;
       });
     } catch (error) {
@@ -61,13 +75,21 @@ export class AirtableService {
    */
   async getContentByDate(date: Date): Promise<EditorialContent[]> {
     try {
-      const dateStr = date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+      const { table } = initializeAirtable();
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
       
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
       const records = await table.select({
-        filterByFormula: `IS_SAME({date_de_publication}, DATETIME_PARSE("${dateStr}", "YYYY-MM-DD"), "day")`
+        filterByFormula: `AND(
+          IS_AFTER({date_de_publication}, '${startOfDay.toISOString().split('T')[0]}'),
+          IS_BEFORE({date_de_publication}, '${endOfDay.toISOString().split('T')[0]}')
+        )`
       }).all();
 
-      return records.map(record => {
+      return records.map((record: any) => {
         const fields = record.fields as any;
         
         return {
@@ -82,7 +104,7 @@ export class AirtableService {
         } as EditorialContent;
       });
     } catch (error) {
-      console.error('Erreur lors de la récupération par date:', error);
+      console.error('Erreur lors de la récupération des contenus par date:', error);
       throw new Error('Impossible de récupérer les contenus pour cette date');
     }
   }
@@ -92,11 +114,12 @@ export class AirtableService {
    */
   async getContentBySite(siteId: number): Promise<EditorialContent[]> {
     try {
+      const { table } = initializeAirtable();
       const records = await table.select({
         filterByFormula: `{ID_SITE} = ${siteId}`
       }).all();
 
-      return records.map(record => {
+      return records.map((record: any) => {
         const fields = record.fields as any;
         
         return {
@@ -111,7 +134,7 @@ export class AirtableService {
         } as EditorialContent;
       });
     } catch (error) {
-      console.error('Erreur lors de la récupération par site:', error);
+      console.error('Erreur lors de la récupération des contenus par site:', error);
       throw new Error('Impossible de récupérer les contenus pour ce site');
     }
   }
@@ -122,38 +145,20 @@ export class AirtableService {
   async testConnection(): Promise<boolean> {
     try {
       console.log('🔧 Test connexion Airtable...');
-      console.log('API Key présente:', !!process.env.AIRTABLE_API_KEY);
-      console.log('Base ID présente:', !!process.env.AIRTABLE_BASE_ID);
-      console.log('Base ID:', process.env.AIRTABLE_BASE_ID);
-      console.log('Longueur API Key:', process.env.AIRTABLE_API_KEY?.length || 0);
+      const { table } = initializeAirtable();
       
-      // Test avec différents noms de table possibles
-      const possibleTableNames = ['content', 'Content', 'CONTENT'];
+      // Teste en récupérant un seul enregistrement
+      const records = await table.select({
+        maxRecords: 1
+      }).all();
       
-      for (const tableName of possibleTableNames) {
-        try {
-          console.log(`Test avec le nom de table: "${tableName}"`);
-          const testTable = base(tableName);
-          const records = await testTable.select({
-            maxRecords: 1
-          }).all();
-          
-          console.log('✅ Connexion Airtable réussie avec table:', tableName);
-          console.log('Enregistrements trouvés:', records.length);
-          if (records.length > 0) {
-            console.log('Premier enregistrement:', JSON.stringify(records[0].fields, null, 2));
-          }
-          return true;
-        } catch (tableError: any) {
-          console.log(`❌ Échec avec "${tableName}":`, tableError.error || tableError.message);
-        }
+      console.log('✅ Connexion Airtable réussie, enregistrements trouvés:', records.length);
+      if (records.length > 0) {
+        console.log('Premier enregistrement:', JSON.stringify(records[0].fields, null, 2));
       }
-      
-      // Si aucun nom de table ne fonctionne
-      console.error('❌ Aucun nom de table valide trouvé');
-      return false;
+      return true;
     } catch (error: any) {
-      console.error('❌ Erreur générale de connexion Airtable:', {
+      console.error('❌ Erreur de connexion Airtable:', {
         message: error.message,
         error: error.error,
         statusCode: error.statusCode,

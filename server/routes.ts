@@ -349,8 +349,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Base ID:', baseId);
       console.log('API Key length:', apiKey.length);
 
-      // D'abord, testons la base et listons les tables
-      const metaResponse = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables`, {
+      // Utilisation du bon Base ID pour tous les tests
+      const correctBaseId = 'app9L4iAzg6Nms9Qq';
+      const metaResponse = await fetch(`https://api.airtable.com/v0/meta/bases/${correctBaseId}/tables`, {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
@@ -370,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('✅ Table "content" trouvée:', contentTable.name);
           
           // Maintenant testons l'accès aux données
-          const response = await fetch(`https://api.airtable.com/v0/${baseId}/${contentTable.name}?maxRecords=1`, {
+          const response = await fetch(`https://api.airtable.com/v0/${correctBaseId}/${contentTable.name}?maxRecords=1`, {
             headers: {
               'Authorization': `Bearer ${apiKey}`,
               'Content-Type': 'application/json'
@@ -406,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Si meta API échoue, essayons l'accès direct
-      const response = await fetch(`https://api.airtable.com/v0/${baseId}/content?maxRecords=1`, {
+      const response = await fetch(`https://api.airtable.com/v0/${correctBaseId}/content?maxRecords=1`, {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
