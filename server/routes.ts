@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertWebsiteSchema, insertSeoAnalysisSchema, insertEditorialContentSchema } from "@shared/schema";
 import { requestSeoAnalysisFromWebhook } from "./webhook-service";
+import { airtableService } from "./airtable-service";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
