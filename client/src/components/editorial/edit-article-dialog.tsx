@@ -77,7 +77,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   const updateArticleMutation = useMutation({
     mutationFn: async (data: EditArticleFormData) => {
-      const response = await apiRequest(`/api/editorial-content/${article.id}`, {
+      const response = await apiRequest(`/api/editorial-content/${encodeURIComponent(article.id)}`, {
         method: 'PUT',
         body: JSON.stringify({
           ...data,

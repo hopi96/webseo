@@ -308,8 +308,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/editorial-content/:id", async (req, res) => {
     try {
-      const airtableId = req.params.id; // L'ID est maintenant l'ID Airtable
+      const airtableId = decodeURIComponent(req.params.id); // Décoder l'ID Airtable
       const updateData = req.body;
+      
+      console.log(`Mise à jour du contenu Airtable ID: ${airtableId}`);
       
       // Mettre à jour directement dans Airtable
       const updatedContent = await airtableService.updateContent(airtableId, updateData);

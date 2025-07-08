@@ -149,6 +149,26 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction erreur HTTP de validation (20h04)
+
+### ❌ Erreur détectée
+- **Problème** : `Failed to execute 'fetch' on 'Window': '/api/editorial-content/recLzStI8XDhQ3jT' is not a valid HTTP method`
+- **Cause** : ID Airtable contenant des caractères spéciaux non encodés dans l'URL
+- **Impact** : Impossible de valider les modifications d'articles
+
+### ✅ Solutions appliquées
+1. **Encodage URL côté client** : Utilisation de `encodeURIComponent(article.id)` dans la requête
+2. **Décodage URL côté serveur** : Utilisation de `decodeURIComponent(req.params.id)` dans la route
+3. **Amélioration des logs** : Ajout de logs détaillés pour le debugging
+4. **Gestion d'erreurs renforcée** : Meilleure gestion des erreurs dans le service Airtable
+
+### ✅ Résultat
+- Encodage/décodage correct des ID Airtable dans les URL
+- Requêtes PUT fonctionnelles vers l'API
+- Synchronisation Airtable opérationnelle
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
