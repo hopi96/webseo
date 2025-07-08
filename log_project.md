@@ -115,6 +115,20 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction d'erreur (19h55)
+
+### ❌ Erreur détectée
+- **Problème** : `TypeError: article.dateDePublication.toISOString is not a function`
+- **Cause** : La date provenant d'Airtable est une chaîne de caractères, pas un objet Date
+- **Localisation** : `client/src/components/editorial/edit-article-dialog.tsx:63`
+
+### ✅ Solution appliquée
+- **Correction** : Conversion explicite en objet Date avec `new Date(article.dateDePublication)`
+- **Ligne corrigée** : `dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0]`
+- **Statut** : Erreur résolue, système d'édition fonctionnel
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
