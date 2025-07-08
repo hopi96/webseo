@@ -53,13 +53,24 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  // Normaliser les valeurs pour s'assurer qu'elles correspondent aux options du Select
+  const normalizeStatut = (statut: string): "en attente" | "à réviser" | "en cours" | "publié" => {
+    const validStatuts = ["en attente", "à réviser", "en cours", "publié"];
+    return validStatuts.includes(statut) ? statut as any : "en attente";
+  };
+  
+  const normalizeTypeContent = (type: string): "twitter" | "instagram" | "article" | "newsletter" => {
+    const validTypes = ["twitter", "instagram", "article", "newsletter"];
+    return validTypes.includes(type) ? type as any : "twitter";
+  };
+  
   const form = useForm<EditArticleFormData>({
     resolver: zodResolver(editArticleSchema),
     defaultValues: {
-      contentText: article.contentText,
-      statut: article.statut as "en attente" | "à réviser" | "en cours" | "publié",
-      typeContent: article.typeContent as "twitter" | "instagram" | "article" | "newsletter",
-      hasImage: article.hasImage,
+      contentText: article.contentText || "",
+      statut: normalizeStatut(article.statut),
+      typeContent: normalizeTypeContent(article.typeContent),
+      hasImage: article.hasImage || false,
       dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0]
     }
   });
@@ -151,7 +162,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type de contenu</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Choisir le type" />
@@ -175,7 +186,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Statut</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Choisir le statut" />

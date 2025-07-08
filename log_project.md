@@ -129,6 +129,26 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction affichage Select (20h00)
+
+### ❌ Problème détecté
+- **Symptôme** : Le type de contenu ne s'affiche pas correctement dans le formulaire
+- **Cause** : Utilisation de `defaultValue` au lieu de `value` dans les composants Select
+- **Impact** : Valeurs par défaut non affichées dans les champs Select
+
+### ✅ Solutions appliquées
+1. **Remplacement de defaultValue par value** dans les Select typeContent et statut
+2. **Ajout de fonctions de normalisation** pour valider les valeurs Airtable
+3. **Validation des valeurs par défaut** avec fallback sécurisé
+4. **Amélioration de la robustesse** du formulaire
+
+### ✅ Résultat
+- Affichage correct des valeurs par défaut dans les Select
+- Validation des données entrantes d'Airtable
+- Formulaire plus robuste et fiable
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
