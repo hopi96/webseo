@@ -147,20 +147,23 @@ export class AirtableService {
    */
   async updateContent(airtableId: string, updateData: Partial<EditorialContent>): Promise<EditorialContent> {
     try {
+      console.log(`🔄 Mise à jour du contenu Airtable ID: ${airtableId}`);
+      console.log('Données à mettre à jour:', updateData);
+      
       const { table } = initializeAirtable();
       
       // Préparer les données pour Airtable
       const fieldsToUpdate: any = {};
       
-      if (updateData.contentText) {
+      if (updateData.contentText !== undefined) {
         fieldsToUpdate.contenu_text = updateData.contentText;
       }
       
-      if (updateData.statut) {
+      if (updateData.statut !== undefined) {
         fieldsToUpdate.statut = updateData.statut;
       }
       
-      if (updateData.typeContent) {
+      if (updateData.typeContent !== undefined) {
         fieldsToUpdate.type_contenu = updateData.typeContent;
       }
       
@@ -168,9 +171,11 @@ export class AirtableService {
         fieldsToUpdate.image = updateData.hasImage;
       }
       
-      if (updateData.dateDePublication) {
+      if (updateData.dateDePublication !== undefined) {
         fieldsToUpdate.date_de_publication = updateData.dateDePublication.toISOString().split('T')[0];
       }
+      
+      console.log('Champs à mettre à jour dans Airtable:', fieldsToUpdate);
       
       // Mettre à jour l'enregistrement
       const updatedRecord = await table.update([
@@ -201,9 +206,13 @@ export class AirtableService {
         createdAt: new Date()
       } as EditorialContent;
       
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du contenu:', error);
-      throw new Error('Impossible de mettre à jour le contenu dans Airtable');
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la mise à jour du contenu:', {
+        airtableId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw new Error(`Impossible de mettre à jour le contenu dans Airtable: ${error.message}`);
     }
   }
 
