@@ -54,7 +54,8 @@ export class AirtableService {
         const fields = record.fields as any;
         
         return {
-          id: fields.ID_contenu || 0,
+          id: record.id, // Utilisation de l'ID Airtable unique
+          airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
           typeContent: fields.type_contenu || 'twitter',
           contentText: fields.contenu_text || '',
@@ -93,7 +94,8 @@ export class AirtableService {
         const fields = record.fields as any;
         
         return {
-          id: fields.ID_contenu || 0,
+          id: record.id, // Utilisation de l'ID Airtable unique
+          airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
           typeContent: fields.type_contenu || 'twitter',
           contentText: fields.contenu_text || '',
@@ -123,7 +125,8 @@ export class AirtableService {
         const fields = record.fields as any;
         
         return {
-          id: fields.ID_contenu || 0,
+          id: record.id, // Utilisation de l'ID Airtable unique
+          airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
           typeContent: fields.type_contenu || 'twitter',
           contentText: fields.contenu_text || '',
@@ -136,6 +139,71 @@ export class AirtableService {
     } catch (error) {
       console.error('Erreur lors de la récupération des contenus par site:', error);
       throw new Error('Impossible de récupérer les contenus pour ce site');
+    }
+  }
+
+  /**
+   * Met à jour un contenu dans Airtable
+   */
+  async updateContent(airtableId: string, updateData: Partial<EditorialContent>): Promise<EditorialContent> {
+    try {
+      const { table } = initializeAirtable();
+      
+      // Préparer les données pour Airtable
+      const fieldsToUpdate: any = {};
+      
+      if (updateData.contentText) {
+        fieldsToUpdate.contenu_text = updateData.contentText;
+      }
+      
+      if (updateData.statut) {
+        fieldsToUpdate.statut = updateData.statut;
+      }
+      
+      if (updateData.typeContent) {
+        fieldsToUpdate.type_contenu = updateData.typeContent;
+      }
+      
+      if (updateData.hasImage !== undefined) {
+        fieldsToUpdate.image = updateData.hasImage;
+      }
+      
+      if (updateData.dateDePublication) {
+        fieldsToUpdate.date_de_publication = updateData.dateDePublication.toISOString().split('T')[0];
+      }
+      
+      // Mettre à jour l'enregistrement
+      const updatedRecord = await table.update([
+        {
+          id: airtableId,
+          fields: fieldsToUpdate
+        }
+      ]);
+      
+      if (updatedRecord.length === 0) {
+        throw new Error('Aucun enregistrement mis à jour');
+      }
+      
+      const record = updatedRecord[0];
+      const fields = record.fields as any;
+      
+      console.log(`✅ Contenu ${airtableId} mis à jour dans Airtable`);
+      
+      return {
+        id: record.id,
+        airtableId: record.id,
+        idSite: fields.ID_SITE || 1,
+        typeContent: fields.type_contenu || 'twitter',
+        contentText: fields.contenu_text || '',
+        hasImage: fields.image || false,
+        statut: fields.statut || 'en attente',
+        dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
+        createdAt: new Date()
+      } as EditorialContent;
+      
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du contenu:', error);
+      throw new Error('Impossible de mettre à jour le contenu dans Airtable');
     }
   }
 
