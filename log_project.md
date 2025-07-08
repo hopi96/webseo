@@ -169,6 +169,25 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction signature apiRequest (20h26)
+
+### ❌ Erreur persistante
+- **Problème** : Même erreur HTTP malgré l'encodage URL
+- **Cause** : Signature incorrecte de la fonction `apiRequest(method, url, data)` 
+- **Erreur** : Paramètres dans le mauvais ordre (URL passée comme method)
+
+### ✅ Solution appliquée
+- **Correction** : Réorganisation des paramètres `apiRequest('PUT', url, data)`
+- **Avant** : `apiRequest(url, {method: 'PUT', body: data})`
+- **Après** : `apiRequest('PUT', url, data)`
+
+### ✅ Résultat
+- Signature correcte respectée
+- Requêtes PUT fonctionnelles
+- Système d'édition entièrement opérationnel
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
