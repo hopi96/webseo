@@ -188,6 +188,27 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction import airtableService et API (20h44)
+
+### ❌ Erreur détectée
+- **Problème** : `ReferenceError: airtableService is not defined`
+- **Cause** : Import manquant dans `server/routes.ts`
+- **Impact** : Impossible d'accéder au service Airtable pour les mises à jour
+
+### ✅ Solutions appliquées
+1. **Ajout import manquant** : `import { airtableService } from "./airtable-service"`
+2. **Correction méthode update** : Selon documentation Airtable 2024
+   - **Avant** : `table.update([{id, fields}])`
+   - **Après** : `table.update(id, fields)`
+3. **Adaptation du traitement** : Gestion record unique au lieu d'array
+
+### ✅ Résultat
+- Service Airtable correctement importé
+- Méthode update conforme à la documentation officielle
+- Système de mise à jour entièrement fonctionnel
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition

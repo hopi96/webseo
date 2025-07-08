@@ -177,19 +177,14 @@ export class AirtableService {
       
       console.log('Champs à mettre à jour dans Airtable:', fieldsToUpdate);
       
-      // Mettre à jour l'enregistrement
-      const updatedRecord = await table.update([
-        {
-          id: airtableId,
-          fields: fieldsToUpdate
-        }
-      ]);
+      // Mettre à jour l'enregistrement (selon la documentation Airtable 2024)
+      const updatedRecord = await table.update(airtableId, fieldsToUpdate);
       
-      if (updatedRecord.length === 0) {
+      if (!updatedRecord) {
         throw new Error('Aucun enregistrement mis à jour');
       }
       
-      const record = updatedRecord[0];
+      const record = updatedRecord;
       const fields = record.fields as any;
       
       console.log(`✅ Contenu ${airtableId} mis à jour dans Airtable`);
