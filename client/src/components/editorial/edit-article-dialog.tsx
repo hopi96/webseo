@@ -77,13 +77,14 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   const updateArticleMutation = useMutation({
     mutationFn: async (data: EditArticleFormData) => {
-      const response = await apiRequest(`/api/editorial-content/${encodeURIComponent(article.id)}`, {
-        method: 'PUT',
-        body: JSON.stringify({
+      const response = await apiRequest(
+        'PUT',
+        `/api/editorial-content/${encodeURIComponent(article.id)}`,
+        {
           ...data,
           dateDePublication: new Date(data.dateDePublication)
-        })
-      });
+        }
+      );
       return response;
     },
     onSuccess: () => {
