@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
+import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -31,6 +32,8 @@ interface EditorialEvent {
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [editingArticle, setEditingArticle] = useState<EditorialContent | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Récupérer les contenus éditoriaux depuis l'API
   const { data: editorialContent = [], isLoading } = useQuery({
@@ -85,6 +88,20 @@ export default function Calendar() {
     return events.filter(event => 
       event.date.toDateString() === date.toDateString()
     );
+  };
+
+  const handleEditArticle = (event: EditorialEvent) => {
+    // Trouver le contenu éditorial correspondant
+    const content = editorialContent.find(c => c.id === event.id);
+    if (content) {
+      setEditingArticle(content);
+      setIsEditDialogOpen(true);
+    }
+  };
+
+  const handleCloseEditDialog = () => {
+    setIsEditDialogOpen(false);
+    setEditingArticle(null);
   };
 
   // Fonction pour obtenir la couleur selon le type
@@ -250,7 +267,12 @@ export default function Calendar() {
                           <h4 className="font-medium text-gray-900 dark:text-white">
                             {event.title}
                           </h4>
-                          <Button variant="ghost" size="sm" className="p-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="p-1"
+                            onClick={() => handleEditArticle(event)}
+                          >
                             <Edit3 className="h-3 w-3" />
                           </Button>
                         </div>
@@ -352,6 +374,15 @@ export default function Calendar() {
           </div>
         </div>
       </main>
+
+      {/* Dialog d'édition d'article */}
+      {editingArticle && (
+        <EditArticleDialog
+          open={isEditDialogOpen}
+          onOpenChange={handleCloseEditDialog}
+          article={editingArticle}
+        />
+      )}
 
       <BottomNavigation />
     </div>

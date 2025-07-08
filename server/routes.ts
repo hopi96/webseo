@@ -308,13 +308,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/editorial-content/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const content = await storage.updateEditorialContent(id, req.body);
-      if (!content) {
-        return res.status(404).json({ message: "Editorial content not found" });
-      }
-      res.json(content);
+      const airtableId = req.params.id; // L'ID est maintenant l'ID Airtable
+      const updateData = req.body;
+      
+      // Mettre à jour directement dans Airtable
+      const updatedContent = await airtableService.updateContent(airtableId, updateData);
+      
+      res.json(updatedContent);
     } catch (error) {
+      console.error('Erreur lors de la mise à jour du contenu éditorial:', error);
       res.status(500).json({ message: "Failed to update editorial content" });
     }
   });

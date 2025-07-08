@@ -46,6 +46,7 @@ export const seoAnalyses = pgTable("seo_analyses", {
 
 export const editorialContent = pgTable("editorial_content", {
   id: serial("id").primaryKey(),
+  airtableId: text("airtable_id"), // ID Airtable pour synchronisation
   idSite: integer("id_site").notNull(),
   typeContent: text("type_content").notNull(), // twitter, instagram, article, newsletter
   contentText: text("content_text").notNull(),
