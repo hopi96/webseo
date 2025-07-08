@@ -60,7 +60,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       statut: article.statut as "en attente" | "à réviser" | "en cours" | "publié",
       typeContent: article.typeContent as "twitter" | "instagram" | "article" | "newsletter",
       hasImage: article.hasImage,
-      dateDePublication: article.dateDePublication.toISOString().split('T')[0]
+      dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0]
     }
   });
 
