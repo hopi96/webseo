@@ -50,21 +50,14 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
   const createMutation = useMutation({
     mutationFn: async (data: AddArticleFormData) => {
-      const response = await apiRequest("/api/editorial-content", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await apiRequest(
+        "POST",
+        "/api/editorial-content",
+        {
           ...data,
           dateDePublication: new Date(data.dateDePublication).toISOString()
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erreur lors de la création du contenu");
-      }
+        }
+      );
 
       return response.json();
     },
