@@ -309,6 +309,25 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction erreur HTTP POST (18h16)
+
+### ❌ Erreur détectée
+- **Problème** : `'fetch' on 'Window': '/api/editorial-content' is not a valid HTTP method`
+- **Cause** : Signature `apiRequest` modifiée - paramètres dans le mauvais ordre
+- **Fichier** : `client/src/components/editorial/add-article-dialog.tsx`
+
+### ✅ Corrections appliquées
+1. **Nouvelle signature** : `apiRequest(method, url, data)` au lieu de `apiRequest(url, options)`
+2. **Paramètres corrigés** : `apiRequest("POST", "/api/editorial-content", data)`
+3. **Simplification** : Suppression des headers redondants (gérés automatiquement)
+
+### ✅ Résultat
+- Appel API POST corrigé avec la bonne signature
+- Création d'articles fonctionnelle
+- Gestion d'erreurs simplifiée et efficace
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
