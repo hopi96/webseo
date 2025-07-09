@@ -148,6 +148,62 @@ export class AirtableService {
   }
 
   /**
+   * Crée un nouveau contenu dans Airtable
+   */
+  async createContent(contentData: Omit<EditorialContent, 'id' | 'airtableId'>): Promise<EditorialContent> {
+    console.log('🔄 Création d\'un nouveau contenu dans Airtable');
+    console.log('Données à créer:', contentData);
+
+    try {
+      const table = airtable.base(config.airtable.baseId)('content');
+      
+      // Préparer les champs pour Airtable
+      const fieldsToCreate: Record<string, any> = {
+        ID_SITE: contentData.siteId,
+        type_contenu: contentData.typeContent,
+        contenu_text: contentData.contentText,
+        statut: contentData.statut || 'brouillon',
+        image: contentData.hasImage || false
+      };
+
+      // Formater la date pour Airtable (YYYY-MM-DD)
+      if (contentData.dateDePublication) {
+        const date = new Date(contentData.dateDePublication);
+        fieldsToCreate.date_de_publication = date.toISOString().split('T')[0];
+      }
+
+      console.log('Champs à créer dans Airtable:', fieldsToCreate);
+
+      // Créer l'enregistrement
+      const record = await table.create(fieldsToCreate);
+      
+      console.log('✅ Contenu créé dans Airtable avec ID:', record.id);
+
+      // Retourner l'objet EditorialContent
+      const createdContent: EditorialContent = {
+        id: record.id,
+        airtableId: record.id,
+        siteId: record.fields.ID_SITE as number,
+        typeContent: normalizeContentType(record.fields.type_contenu as string),
+        contentText: record.fields.contenu_text as string,
+        statut: record.fields.statut as string,
+        hasImage: record.fields.image as boolean,
+        dateDePublication: record.fields.date_de_publication 
+          ? new Date(record.fields.date_de_publication as string).toISOString()
+          : new Date().toISOString()
+      };
+
+      return createdContent;
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la création du contenu:', {
+        error: error.message,
+        stack: error.stack
+      });
+      throw new Error(`Impossible de créer le contenu dans Airtable: ${error.message}`);
+    }
+  }
+
+  /**
    * Met à jour un contenu dans Airtable
    */
   async updateContent(airtableId: string, updateData: Partial<EditorialContent>): Promise<EditorialContent> {

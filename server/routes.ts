@@ -296,14 +296,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/editorial-content", async (req, res) => {
     try {
-      const validatedData = insertEditorialContentSchema.parse(req.body);
-      const content = await storage.createEditorialContent(validatedData);
-      res.status(201).json(content);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      console.log('🔄 Création d\'un nouveau contenu éditorial');
+      console.log('Données reçues:', req.body);
+
+      // Validation des données
+      const contentData = {
+        siteId: req.body.siteId || 1, // Site par défaut
+        typeContent: req.body.typeContent || 'xtwitter',
+        contentText: req.body.contentText,
+        statut: req.body.statut || 'brouillon',
+        hasImage: req.body.hasImage || false,
+        dateDePublication: req.body.dateDePublication || new Date().toISOString()
+      };
+
+      // Validation des champs requis
+      if (!contentData.contentText) {
+        return res.status(400).json({ message: 'Le contenu texte est requis' });
       }
-      res.status(500).json({ message: "Failed to create editorial content" });
+
+      // Créer le contenu via Airtable
+      const createdContent = await airtableService.createContent(contentData);
+      
+      console.log('✅ Contenu créé avec succès:', createdContent.id);
+      res.status(201).json(createdContent);
+    } catch (error) {
+      console.error('Erreur lors de la création du contenu éditorial:', error);
+      res.status(500).json({ message: 'Failed to create editorial content' });
     }
   });
 

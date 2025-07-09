@@ -274,6 +274,41 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Implémentation ajout de nouveau contenu (14h07)
+
+### ✅ Fonctionnalités implémentées
+
+#### 1. **Service Airtable**
+- **Méthode `createContent()`** : Création d'enregistrements via `table.create()`
+- **Mapping des champs** : ID_SITE, type_contenu, contenu_text, statut, date_de_publication, image
+- **Validation** : Champs requis et formatage automatique des dates
+- **Gestion d'erreurs** : Logs détaillés et messages d'erreur explicites
+
+#### 2. **API Backend**
+- **Route POST `/api/editorial-content`** : Création via service Airtable
+- **Validation** : Champs requis et valeurs par défaut
+- **Intégration** : Remplace le storage local par le service Airtable
+
+#### 3. **Interface Frontend**
+- **Composant `AddArticleDialog`** : Formulaire complet d'ajout
+- **Validation** : React Hook Form + Zod avec gestion d'erreurs
+- **Champs** : Contenu, type, statut, date, image
+- **Intégration** : Mutation TanStack Query avec invalidation du cache
+
+#### 4. **Calendrier éditorial**
+- **Bouton principal** : "Nouveau contenu" dans l'en-tête
+- **Boutons contextuels** : "+" discret au survol de chaque jour
+- **Bouton date vide** : "Ajouter du contenu" quand aucun événement
+- **Pré-remplissage** : Date automatique selon la sélection
+
+### ✅ Résultat
+- Ajout complet de nouveau contenu dans Airtable
+- Interface utilisateur intuitive avec multiples points d'accès
+- Synchronisation bidirectionnelle totale (lecture/écriture)
+- Validation complète côté client et serveur
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
