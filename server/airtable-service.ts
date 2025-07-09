@@ -159,12 +159,17 @@ export class AirtableService {
       
       // Préparer les champs pour Airtable
       const fieldsToCreate: Record<string, any> = {
-        ID_SITE: contentData.siteId,
+        // Essayer d'omettre ID_SITE d'abord (peut être auto-généré)
         type_contenu: contentData.typeContent,
         contenu_text: contentData.contentText,
         statut: contentData.statut || 'brouillon',
         image: contentData.hasImage || false
       };
+
+      // Ajouter ID_SITE seulement si nécessaire
+      if (contentData.siteId) {
+        fieldsToCreate.ID_SITE = contentData.siteId;
+      }
 
       // Formater la date pour Airtable (YYYY-MM-DD)
       if (contentData.dateDePublication) {
