@@ -347,6 +347,35 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Implémentation système de suppression d'articles (19h19)
+
+### 🎯 Objectif
+Ajouter la possibilité de supprimer des articles du calendrier éditorial avec synchronisation Airtable
+
+### ✅ Étapes réalisées
+1. **Service Airtable** : Méthode `deleteContent(airtableId)` avec gestion d'erreurs
+2. **API Backend** : Route `DELETE /api/editorial-content/:id` avec décodage d'URL
+3. **Composant UI** : `DeleteArticleDialog` avec AlertDialog et confirmation
+4. **Calendrier** : Boutons de suppression avec icône Trash2 et hover rouge
+5. **Gestion d'état** : States et handlers pour la suppression
+6. **Invalidation cache** : Actualisation automatique après suppression
+
+### ✅ Fonctionnalités
+- Bouton suppression avec icône rouge dans le panneau latéral
+- Dialog de confirmation avec détails de l'article
+- Suppression directe dans Airtable via API
+- Invalidation cache TanStack Query
+- Gestion d'erreurs avec toast notifications
+- States de chargement pendant la suppression
+
+### ✅ Résultat
+- Système complet CRUD pour articles éditoriaux
+- Synchronisation bidirectionnelle avec Airtable
+- Interface utilisateur cohérente avec édition/ajout
+- Gestion robuste des erreurs et états
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
