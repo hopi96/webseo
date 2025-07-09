@@ -209,6 +209,27 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction conversion date ISO (07h47)
+
+### ❌ Erreur détectée
+- **Problème** : `updateData.dateDePublication.toISOString is not a function`
+- **Cause** : La date arrive déjà sous forme de chaîne ISO depuis le client
+- **Impact** : Impossible de convertir une chaîne avec toISOString()
+
+### ✅ Solution appliquée
+- **Gestion flexible des types** : Détection automatique du type de date
+- **Conversion conditionnelle** : 
+  - Si chaîne : `new Date(updateData.dateDePublication)`
+  - Si objet Date : utilisation directe
+- **Formatage uniforme** : `date.toISOString().split('T')[0]`
+
+### ✅ Résultat
+- Gestion robuste des dates string et Date
+- Conversion automatique selon le type
+- Système d'édition entièrement fonctionnel
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
