@@ -35,9 +35,10 @@ export interface AirtableContentRecord {
   date_de_publication?: string;
 }
 
-// Fonction utilitaire pour convertir les anciens types
+// Fonction utilitaire pour normaliser les types de contenu
 function normalizeContentType(type: string): string {
-  return type === 'twitter' ? 'xtwitter' : type;
+  // Garder xxtwitter tel quel puisque c'est la valeur autorisée en base
+  return type || 'xxtwitter';
 }
 
 export class AirtableService {
@@ -61,7 +62,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+          typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
           statut: fields.statut || 'en attente',
@@ -101,7 +102,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+          typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
           statut: fields.statut || 'en attente',
@@ -132,7 +133,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+          typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
           statut: fields.statut || 'en attente',
@@ -168,8 +169,8 @@ export class AirtableService {
       }
       
       if (updateData.typeContent !== undefined) {
-        // Convertir xtwitter vers twitter pour l'enregistrement en base
-        fieldsToUpdate.type_contenu = updateData.typeContent === 'xtwitter' ? 'twitter' : updateData.typeContent;
+        // Garder xxtwitter comme valeur pour l'enregistrement en base
+        fieldsToUpdate.type_contenu = updateData.typeContent;
       }
       
       if (updateData.hasImage !== undefined) {
@@ -202,7 +203,7 @@ export class AirtableService {
         id: record.id,
         airtableId: record.id,
         idSite: fields.ID_SITE || 1,
-        typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+        typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
         contentText: fields.contenu_text || '',
         hasImage: fields.image || false,
         statut: fields.statut || 'en attente',

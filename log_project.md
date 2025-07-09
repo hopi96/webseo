@@ -254,6 +254,26 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction valeur Airtable "xtwitter" (08h00)
+
+### ❌ Erreur détectée
+- **Problème** : `Insufficient permissions to create new select option "twitter"`
+- **Cause** : Service tentait d'enregistrer "twitter" au lieu de "xtwitter"
+- **Clarification** : Seule la valeur "xtwitter" est autorisée en base Airtable
+
+### ✅ Corrections appliquées
+1. **Suppression conversion inverse** : Plus de conversion "xtwitter" → "twitter" 
+2. **Maintien valeur originale** : `fieldsToUpdate.type_contenu = updateData.typeContent`
+3. **Normalisation simplifiée** : Fonction retourne directement le type sans conversion
+4. **Valeur par défaut** : "xtwitter" comme valeur par défaut partout
+
+### ✅ Résultat
+- Enregistrement direct "xtwitter" dans Airtable
+- Compatibilité totale avec les contraintes de la base
+- Système d'édition fonctionnel sans erreur de permissions
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
