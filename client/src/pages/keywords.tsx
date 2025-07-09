@@ -1,11 +1,11 @@
-import { Navigation } from "@/components/layout/navigation";
+import { UnifiedHeader } from "@/components/layout/unified-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
 export default function Keywords() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+      <UnifiedHeader />
       
       <div className="p-6">
         <div className="mb-6">

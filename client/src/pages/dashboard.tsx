@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Navigation } from "@/components/layout/navigation";
+import { UnifiedHeader } from "@/components/layout/unified-header";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
 import { WebsiteSelector } from "@/components/website/website-selector";
@@ -155,7 +155,7 @@ export default function DashboardWebhook() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+      <UnifiedHeader />
       <div className="p-6 space-y-6 animate-in fade-in duration-700">
         {/* En-tête avec sélecteur de site et boutons d'action */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500">

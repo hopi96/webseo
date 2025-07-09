@@ -376,6 +376,37 @@ Ajouter la possibilité de supprimer des articles du calendrier éditorial avec 
 
 ---
 
+## Uniformisation barre de menu (19h44)
+
+### 🎯 Objectif
+Uniformiser la barre de navigation sur toutes les pages pour une expérience utilisateur cohérente
+
+### ❌ Problème identifié
+- Dashboard et Reports utilisaient `Navigation` (desktop)
+- Calendar utilisait `MobileHeader` (mobile simple)
+- Design incohérent entre les pages
+
+### ✅ Solution implémentée
+1. **Composant UnifiedHeader** : Navigation responsive qui s'adapte aux écrans
+2. **Version Desktop** : Navigation complète avec tous les liens
+3. **Version Mobile** : En-tête avec nom de page + menu hamburger
+4. **Menu Mobile** : Dropdown avec tous les liens de navigation
+5. **Indicateur actuel** : Icône et nom de la page courante sur mobile
+
+### ✅ Modifications
+- **Nouveau composant** : `UnifiedHeader` avec logique responsive
+- **Pages mises à jour** : Dashboard, Calendar, Reports, Keywords, Settings
+- **Remplacement complet** : Navigation et MobileHeader → UnifiedHeader
+- **Style unifié** : Même design sur toutes les pages
+
+### ✅ Résultat
+- Navigation cohérente sur toutes les pages
+- Expérience utilisateur uniforme desktop/mobile
+- Menu responsive avec indicateur de page active
+- Transitions fluides et design moderne
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition

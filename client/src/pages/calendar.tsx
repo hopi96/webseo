@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MobileHeader } from "@/components/layout/mobile-header";
+import { UnifiedHeader } from "@/components/layout/unified-header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
@@ -173,7 +173,7 @@ export default function Calendar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-      <MobileHeader />
+      <UnifiedHeader />
       
       <main className="container mx-auto px-4 pt-20 pb-20 max-w-7xl">
         {/* En-tête */}
