@@ -1,0 +1,78 @@
+Mise à jour du contenu Airtable ID: recCfwdDExc0c2GMk
+🔄 Mise à jour du contenu Airtable ID: recCfwdDExc0c2GMk
+Données à mettre à jour: {
+  contentText: 'Organisation d’événement : l’art du détail dans la déco : L’arts du détail fait toute la différence en déco événementielle : chaque texture, chaque lumière, chaque petit accessoire transforme votre ambiance et éblouit vos invités ✨ Quels détails déco ont marqué votre dernier événement ? Partagez vos secrets !',
+  statut: 'en attente',
+  typeContent: 'twitter',
+  hasImage: false,
+  dateDePublication: '2025-07-09T00:00:00.000Z'
+}
+❌ Erreur lors de la mise à jour du contenu: {
+  airtableId: 'recCfwdDExc0c2GMk',
+  error: 'updateData.dateDePublication.toISOString is not a function',
+  stack: 'TypeError: updateData.dateDePublication.toISOString is not a function\n' +
+    '    at AirtableService.updateContent (/home/runner/workspace/server/airtable-service.ts:175:75)\n' +
+    '    at <anonymous> (/home/runner/workspace/server/routes.ts:318:52)\n' +
+    '    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)\n' +
+    '    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15\n' +
+    '    at param (/home/runner/workspace/node_modules/express/lib/router/index.js:365:14)\n' +
+    '    at param (/home/runner/workspace/node_modules/express/lib/router/index.js:376:14)\n' +
+    '    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:421:3)\n' +
+    '    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at <anonymous> (/home/runner/workspace/server/index.ts:36:3)\n' +
+    '    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n' +
+    '    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n' +
+    '    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at urlencodedParser (/home/runner/workspace/node_modules/body-parser/lib/types/urlencoded.js:85:7)\n' +
+    '    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n' +
+    '    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n' +
+    '    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at /home/runner/workspace/node_modules/body-parser/lib/read.js:137:5\n' +
+    '    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)\n' +
+    '    at invokeCallback (/home/runner/workspace/node_modules/raw-body/index.js:238:16)\n' +
+    '    at done (/home/runner/workspace/node_modules/raw-body/index.js:227:7)\n' +
+    '    at IncomingMessage.onEnd (/home/runner/workspace/node_modules/raw-body/index.js:287:7)\n' +
+    '    at IncomingMessage.emit (node:events:518:28)\n' +
+    '    at endReadableNT (node:internal/streams/readable:1698:12)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)'
+}
+Erreur lors de la mise à jour du contenu éditorial: Error: Impossible de mettre à jour le contenu dans Airtable: updateData.dateDePublication.toISOString is not a function
+    at AirtableService.updateContent (/home/runner/workspace/server/airtable-service.ts:210:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:318:52)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at param (/home/runner/workspace/node_modules/express/lib/router/index.js:365:14)
+    at param (/home/runner/workspace/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:421:3)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at <anonymous> (/home/runner/workspace/server/index.ts:36:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at urlencodedParser (/home/runner/workspace/node_modules/body-parser/lib/types/urlencoded.js:85:7)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at /home/runner/workspace/node_modules/body-parser/lib/read.js:137:5
+    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+    at invokeCallback (/home/runner/workspace/node_modules/raw-body/index.js:238:16)
+    at done (/home/runner/workspace/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/home/runner/workspace/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:518:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+7:46:40 AM [express] PUT /api/editorial-content/recCfwdDExc0c2GMk 500 in 15ms :: {"message":"Failed …

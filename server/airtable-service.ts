@@ -172,7 +172,11 @@ export class AirtableService {
       }
       
       if (updateData.dateDePublication !== undefined) {
-        fieldsToUpdate.date_de_publication = updateData.dateDePublication.toISOString().split('T')[0];
+        // Gérer le cas où dateDePublication peut être une chaîne ISO ou un objet Date
+        const date = typeof updateData.dateDePublication === 'string' 
+          ? new Date(updateData.dateDePublication) 
+          : updateData.dateDePublication;
+        fieldsToUpdate.date_de_publication = date.toISOString().split('T')[0];
       }
       
       console.log('Champs à mettre à jour dans Airtable:', fieldsToUpdate);
