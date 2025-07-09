@@ -230,6 +230,30 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Migration vers "xtwitter" (07h56)
+
+### ✅ Changement demandé
+- **Demande utilisateur** : Remplacer "twitter" par "xtwitter" dans les sélections
+- **Impact** : Mise à jour de l'interface et synchronisation Airtable
+
+### ✅ Modifications appliquées
+1. **Interface utilisateur** :
+   - Schema Zod : `z.enum(["xtwitter", "instagram", "article", "newsletter"])`
+   - Sélecteur : `<SelectItem value="xtwitter">X (Twitter)</SelectItem>`
+   - Normalisation : Fonctions pour valider les valeurs "xtwitter"
+
+2. **Service Airtable** :
+   - Conversion automatique "twitter" → "xtwitter" lors de la lecture
+   - Conversion inverse "xtwitter" → "twitter" lors de l'écriture
+   - Fonction `normalizeContentType()` pour la compatibilité
+
+### ✅ Résultat
+- Interface affiche "X (Twitter)" au lieu de "Twitter"
+- Compatibilité totale avec les données Airtable existantes
+- Conversion bidirectionnelle transparente
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
