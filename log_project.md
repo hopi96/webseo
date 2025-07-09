@@ -407,6 +407,28 @@ Uniformiser la barre de navigation sur toutes les pages pour une expérience uti
 
 ---
 
+## Suppression barre navigation bas - Calendrier (20h40)
+
+### 🎯 Objectif
+Supprimer la barre de navigation en bas de la page calendrier éditorial pour avoir une interface plus propre
+
+### ❌ Problème identifié
+- Page calendrier avait une barre de navigation en bas (BottomNavigation)
+- Incohérence avec les autres pages qui utilisent seulement UnifiedHeader
+- Interface encombrée avec deux navigations
+
+### ✅ Solution implémentée
+- Suppression de l'import `BottomNavigation` 
+- Suppression du composant `<BottomNavigation />` du render
+- Conservation uniquement du `UnifiedHeader` en haut
+
+### ✅ Résultat
+- Interface propre avec navigation unifiée uniquement en haut
+- Cohérence parfaite avec toutes les autres pages
+- Expérience utilisateur simplifiée et épurée
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition

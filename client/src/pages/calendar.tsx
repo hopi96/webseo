@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UnifiedHeader } from "@/components/layout/unified-header";
-import { BottomNavigation } from "@/components/layout/bottom-navigation";
+
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
 import { DeleteArticleDialog } from "@/components/editorial/delete-article-dialog";
@@ -463,7 +463,7 @@ export default function Calendar() {
         />
       )}
 
-      <BottomNavigation />
+
     </div>
   );
 }
