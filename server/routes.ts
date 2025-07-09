@@ -344,14 +344,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/editorial-content/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteEditorialContent(id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Editorial content not found" });
+      const airtableId = decodeURIComponent(req.params.id); // Décoder l'ID Airtable
+      
+      console.log(`🗑️ Suppression du contenu éditorial ID: ${airtableId}`);
+      
+      // Supprimer directement dans Airtable
+      const success = await airtableService.deleteContent(airtableId);
+      
+      if (success) {
+        console.log('✅ Contenu supprimé avec succès');
+        res.json({ message: 'Content deleted successfully', id: airtableId });
+      } else {
+        res.status(404).json({ message: 'Content not found' });
       }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete editorial content" });
+    } catch (error: any) {
+      console.error('Erreur lors de la suppression du contenu éditorial:', error.message);
+      res.status(500).json({ message: 'Failed to delete editorial content', error: error.message });
     }
   });
 

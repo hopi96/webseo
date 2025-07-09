@@ -205,6 +205,29 @@ export class AirtableService {
   }
 
   /**
+   * Supprime un contenu dans Airtable
+   */
+  async deleteContent(airtableId: string): Promise<boolean> {
+    console.log(`🗑️ Suppression du contenu Airtable ID: ${airtableId}`);
+    
+    try {
+      const { table } = initializeAirtable();
+      
+      // Supprimer l'enregistrement
+      await table.destroy(airtableId);
+      
+      console.log('✅ Contenu supprimé avec succès de Airtable');
+      return true;
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la suppression du contenu:', {
+        error: error.message,
+        airtableId
+      });
+      throw new Error(`Impossible de supprimer le contenu: ${error.message}`);
+    }
+  }
+
+  /**
    * Met à jour un contenu dans Airtable
    */
   async updateContent(airtableId: string, updateData: Partial<EditorialContent>): Promise<EditorialContent> {

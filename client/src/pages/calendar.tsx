@@ -7,6 +7,7 @@ import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
+import { DeleteArticleDialog } from "@/components/editorial/delete-article-dialog";
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -14,7 +15,8 @@ import {
   Clock, 
   Tag,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Trash2
 } from "lucide-react";
 import type { EditorialContent } from "@shared/schema";
 
@@ -34,8 +36,10 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [editingArticle, setEditingArticle] = useState<EditorialContent | null>(null);
+  const [deletingArticle, setDeletingArticle] = useState<EditorialContent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [addDialogDate, setAddDialogDate] = useState<string>("");
 
   // Récupérer les contenus éditoriaux depuis l'API
@@ -102,6 +106,15 @@ export default function Calendar() {
     }
   };
 
+  const handleDeleteArticle = (event: EditorialEvent) => {
+    // Trouver le contenu éditorial correspondant
+    const content = editorialContent.find(c => c.id === event.id);
+    if (content) {
+      setDeletingArticle(content);
+      setIsDeleteDialogOpen(true);
+    }
+  };
+
   const handleCloseEditDialog = () => {
     setIsEditDialogOpen(false);
     setEditingArticle(null);
@@ -116,6 +129,11 @@ export default function Calendar() {
   const handleCloseAddDialog = () => {
     setIsAddDialogOpen(false);
     setAddDialogDate("");
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setDeletingArticle(null);
   };
 
   // Fonction pour obtenir la couleur selon le type
@@ -297,14 +315,24 @@ export default function Calendar() {
                           <h4 className="font-medium text-gray-900 dark:text-white">
                             {event.title}
                           </h4>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="p-1"
-                            onClick={() => handleEditArticle(event)}
-                          >
-                            <Edit3 className="h-3 w-3" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                              onClick={() => handleEditArticle(event)}
+                            >
+                              <Edit3 className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20"
+                              onClick={() => handleDeleteArticle(event)}
+                            >
+                              <Trash2 className="h-3 w-3 text-red-500" />
+                            </Button>
+                          </div>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                           {event.description}
@@ -425,6 +453,15 @@ export default function Calendar() {
         onOpenChange={handleCloseAddDialog}
         defaultDate={addDialogDate}
       />
+
+      {/* Dialog de suppression d'article */}
+      {deletingArticle && (
+        <DeleteArticleDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={handleCloseDeleteDialog}
+          article={deletingArticle}
+        />
+      )}
 
       <BottomNavigation />
     </div>
