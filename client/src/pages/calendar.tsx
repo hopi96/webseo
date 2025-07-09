@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
+import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -34,6 +35,8 @@ export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [editingArticle, setEditingArticle] = useState<EditorialContent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [addDialogDate, setAddDialogDate] = useState<string>("");
 
   // Récupérer les contenus éditoriaux depuis l'API
   const { data: editorialContent = [], isLoading } = useQuery({
@@ -104,6 +107,17 @@ export default function Calendar() {
     setEditingArticle(null);
   };
 
+  const handleAddArticle = (date?: Date) => {
+    const selectedDateString = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    setAddDialogDate(selectedDateString);
+    setIsAddDialogOpen(true);
+  };
+
+  const handleCloseAddDialog = () => {
+    setIsAddDialogOpen(false);
+    setAddDialogDate("");
+  };
+
   // Fonction pour obtenir la couleur selon le type
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -155,7 +169,10 @@ export default function Calendar() {
                 Planifiez et organisez votre contenu SEO
               </p>
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button 
+              onClick={() => handleAddArticle()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nouveau contenu
             </Button>
@@ -206,7 +223,7 @@ export default function Calendar() {
                     <div
                       key={index}
                       className={`
-                        min-h-[80px] p-1 border border-gray-100 dark:border-gray-700 rounded-lg
+                        min-h-[80px] p-1 border border-gray-100 dark:border-gray-700 rounded-lg group
                         ${day ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''}
                         ${selectedDate && day && selectedDate.toDateString() === day.toDateString() 
                           ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' 
@@ -217,8 +234,21 @@ export default function Calendar() {
                     >
                       {day && (
                         <>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                            {day.getDate()}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {day.getDate()}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddArticle(day);
+                              }}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
                           </div>
                           <div className="space-y-1">
                             {getEventsForDate(day).slice(0, 2).map(event => (
@@ -300,7 +330,12 @@ export default function Calendar() {
                       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                         <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>Aucun contenu prévu pour cette date</p>
-                        <Button variant="outline" size="sm" className="mt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-3"
+                          onClick={() => handleAddArticle(selectedDate)}
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           Ajouter du contenu
                         </Button>
@@ -383,6 +418,13 @@ export default function Calendar() {
           article={editingArticle}
         />
       )}
+
+      {/* Dialog d'ajout d'article */}
+      <AddArticleDialog
+        open={isAddDialogOpen}
+        onOpenChange={handleCloseAddDialog}
+        defaultDate={addDialogDate}
+      />
 
       <BottomNavigation />
     </div>
