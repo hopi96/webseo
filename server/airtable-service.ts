@@ -37,8 +37,8 @@ export interface AirtableContentRecord {
 
 // Fonction utilitaire pour normaliser les types de contenu
 function normalizeContentType(type: string): string {
-  // Garder xxtwitter tel quel puisque c'est la valeur autorisée en base
-  return type || 'xxtwitter';
+  // Garder xtwitter tel quel puisque c'est la valeur autorisée en base
+  return type || 'xtwitter';
 }
 
 export class AirtableService {
@@ -155,7 +155,7 @@ export class AirtableService {
     console.log('Données à créer:', contentData);
 
     try {
-      const table = airtable.base(config.airtable.baseId)('content');
+      const { table } = initializeAirtable();
       
       // Préparer les champs pour Airtable
       const fieldsToCreate: Record<string, any> = {
