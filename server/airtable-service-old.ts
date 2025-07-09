@@ -1,6 +1,7 @@
 import Airtable from 'airtable';
-import { EditorialContent } from '@shared/schema';
+import type { EditorialContent, InsertEditorialContent } from '@shared/schema';
 
+// Configuration Airtable avec initialisation paresseuse
 let base: any = null;
 let table: any = null;
 
@@ -61,7 +62,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+          typeContent: fields.type_contenu || 'twitter',
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
           statut: fields.statut || 'en attente',
@@ -101,7 +102,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+          typeContent: fields.type_contenu || 'twitter',
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
           statut: fields.statut || 'en attente',
@@ -132,7 +133,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: fields.ID_SITE || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+          typeContent: fields.type_contenu || 'twitter',
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
           statut: fields.statut || 'en attente',
@@ -168,8 +169,7 @@ export class AirtableService {
       }
       
       if (updateData.typeContent !== undefined) {
-        // Convertir xtwitter vers twitter pour l'enregistrement en base
-        fieldsToUpdate.type_contenu = updateData.typeContent === 'xtwitter' ? 'twitter' : updateData.typeContent;
+        fieldsToUpdate.type_contenu = updateData.typeContent;
       }
       
       if (updateData.hasImage !== undefined) {
@@ -202,7 +202,7 @@ export class AirtableService {
         id: record.id,
         airtableId: record.id,
         idSite: fields.ID_SITE || 1,
-        typeContent: normalizeContentType(fields.type_contenu || 'twitter'),
+        typeContent: fields.type_contenu === 'twitter' ? 'xtwitter' : fields.type_contenu || 'xtwitter',
         contentText: fields.contenu_text || '',
         hasImage: fields.image || false,
         statut: fields.statut || 'en attente',
@@ -225,12 +225,26 @@ export class AirtableService {
    */
   async testConnection(): Promise<boolean> {
     try {
+      console.log('🔧 Test connexion Airtable...');
       const { table } = initializeAirtable();
+      
       // Teste en récupérant un seul enregistrement
-      await table.select({ maxRecords: 1 }).all();
+      const records = await table.select({
+        maxRecords: 1
+      }).all();
+      
+      console.log('✅ Connexion Airtable réussie, enregistrements trouvés:', records.length);
+      if (records.length > 0) {
+        console.log('Premier enregistrement:', JSON.stringify(records[0].fields, null, 2));
+      }
       return true;
-    } catch (error) {
-      console.error('Erreur de connexion Airtable:', error);
+    } catch (error: any) {
+      console.error('❌ Erreur de connexion Airtable:', {
+        message: error.message,
+        error: error.error,
+        statusCode: error.statusCode,
+        type: error.constructor.name
+      });
       return false;
     }
   }

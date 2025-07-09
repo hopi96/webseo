@@ -42,7 +42,7 @@ interface EditArticleDialogProps {
 const editArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est obligatoire"),
   statut: z.enum(["en attente", "à réviser", "en cours", "publié"]),
-  typeContent: z.enum(["twitter", "instagram", "article", "newsletter"]),
+  typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter"]),
   hasImage: z.boolean(),
   dateDePublication: z.string().min(1, "La date de publication est obligatoire")
 });
@@ -59,9 +59,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     return validStatuts.includes(statut) ? statut as any : "en attente";
   };
   
-  const normalizeTypeContent = (type: string): "twitter" | "instagram" | "article" | "newsletter" => {
-    const validTypes = ["twitter", "instagram", "article", "newsletter"];
-    return validTypes.includes(type) ? type as any : "twitter";
+  const normalizeTypeContent = (type: string): "xtwitter" | "instagram" | "article" | "newsletter" => {
+    const validTypes = ["xtwitter", "instagram", "article", "newsletter"];
+    return validTypes.includes(type) ? type as any : "xtwitter";
   };
   
   const form = useForm<EditArticleFormData>({
@@ -111,7 +111,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'twitter': return 'Twitter';
+      case 'xtwitter': return 'X (Twitter)';
       case 'instagram': return 'Instagram';
       case 'article': return 'Article';
       case 'newsletter': return 'Newsletter';
@@ -170,7 +170,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="twitter">Twitter</SelectItem>
+                        <SelectItem value="xtwitter">X (Twitter)</SelectItem>
                         <SelectItem value="instagram">Instagram</SelectItem>
                         <SelectItem value="article">Article</SelectItem>
                         <SelectItem value="newsletter">Newsletter</SelectItem>
