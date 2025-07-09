@@ -328,6 +328,25 @@ Implémenter un système d'édition d'articles avec synchronisation bidirectionn
 
 ---
 
+## Correction variable Airtable non définie (18h53)
+
+### ❌ Erreur détectée
+- **Problème** : `airtable is not defined` dans la méthode `createContent()`
+- **Cause** : Utilisation directe de `airtable.base()` au lieu de `initializeAirtable()`
+- **Fichier** : `server/airtable-service.ts` ligne 158
+
+### ✅ Corrections appliquées
+1. **Méthode corrigée** : `const { table } = initializeAirtable();` au lieu de `airtable.base()`
+2. **Cohérence** : Utilisation du même pattern que les autres méthodes
+3. **Normalisation** : Correction "xxtwitter" → "xtwitter" dans la fonction utilitaire
+
+### ✅ Résultat
+- Variable Airtable correctement initialisée
+- Création d'articles fonctionnelle dans Airtable
+- Cohérence du code avec les autres méthodes du service
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition
