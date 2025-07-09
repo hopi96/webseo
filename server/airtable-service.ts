@@ -157,19 +157,15 @@ export class AirtableService {
     try {
       const { table } = initializeAirtable();
       
-      // Préparer les champs pour Airtable
+      // Préparer les champs pour Airtable (omission complète d'ID_SITE)
       const fieldsToCreate: Record<string, any> = {
-        // Essayer d'omettre ID_SITE d'abord (peut être auto-généré)
         type_contenu: contentData.typeContent,
         contenu_text: contentData.contentText,
         statut: contentData.statut || 'brouillon',
         image: contentData.hasImage || false
       };
 
-      // Ajouter ID_SITE seulement si nécessaire
-      if (contentData.siteId) {
-        fieldsToCreate.ID_SITE = contentData.siteId;
-      }
+      // ID_SITE complètement omis - peut être auto-généré ou lié à une autre table
 
       // Formater la date pour Airtable (YYYY-MM-DD)
       if (contentData.dateDePublication) {
@@ -188,7 +184,7 @@ export class AirtableService {
       const createdContent: EditorialContent = {
         id: record.id,
         airtableId: record.id,
-        siteId: record.fields.ID_SITE as number,
+        siteId: record.fields.ID_SITE as number || contentData.siteId || 1,
         typeContent: normalizeContentType(record.fields.type_contenu as string),
         contentText: record.fields.contenu_text as string,
         statut: record.fields.statut as string,
