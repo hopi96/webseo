@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { FileText, Download, Users, Search, Zap, Target, TrendingUp, CheckCircle, XCircle } from "lucide-react";
 import { WebsiteSelector } from "@/components/website/website-selector";
-import { Navigation } from "@/components/layout/navigation";
+import { UnifiedHeader } from "@/components/layout/unified-header";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
 
@@ -354,7 +354,7 @@ export default function Reports() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+      <UnifiedHeader />
 
       <div className="p-6 space-y-6">
         {/* En-tête */}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
+import { UnifiedHeader } from "@/components/layout/unified-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -98,7 +98,7 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+      <UnifiedHeader />
 
       <main className="px-6 py-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Paramètres</h1>
