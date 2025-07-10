@@ -32,6 +32,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { EditorialContent } from "@shared/schema";
+import { Sparkles, Loader2 } from "lucide-react";
 
 interface EditArticleDialogProps {
   open: boolean;
@@ -52,6 +53,7 @@ type EditArticleFormData = z.infer<typeof editArticleSchema>;
 export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isGenerating, setIsGenerating] = useState(false);
   
   // Normaliser les valeurs pour s'assurer qu'elles correspondent aux options du Select
   const normalizeStatut = (statut: string): "en attente" | "à réviser" | "en cours" | "publié" => {
@@ -105,6 +107,41 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     }
   });
 
+  const generateArticle = async () => {
+    setIsGenerating(true);
+    try {
+      const currentContent = form.getValues('contentText');
+      const currentType = form.getValues('typeContent');
+      
+      const response = await apiRequest('POST', '/api/generate-article', {
+        keywords: ["enfants", "activités", "parents"], // Mots-clés de base
+        contentType: currentType,
+        existingContent: currentContent,
+        targetAudience: "parents",
+        tone: "engageant et informatif"
+      });
+
+      const generatedArticle = await response.json();
+      
+      // Mettre à jour le contenu dans le formulaire
+      form.setValue('contentText', generatedArticle.content);
+      
+      toast({
+        title: "Article généré avec succès",
+        description: "Le contenu a été optimisé par GPT-4o",
+        variant: "default"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur de génération",
+        description: error.message || "Impossible de générer l'article",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const onSubmit = (data: EditArticleFormData) => {
     updateArticleMutation.mutate(data);
   };
@@ -143,7 +180,24 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
               name="contentText"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contenu</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Contenu</FormLabel>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={generateArticle}
+                      disabled={isGenerating}
+                      className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                    >
+                      {isGenerating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-4 w-4" />
+                      )}
+                      {isGenerating ? "Génération..." : "Générer avec GPT-4o"}
+                    </Button>
+                  </div>
                   <FormControl>
                     <Textarea
                       {...field}
