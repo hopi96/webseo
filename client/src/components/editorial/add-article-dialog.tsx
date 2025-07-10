@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Plus, X, Sparkles, Loader2 } from "lucide-react";
+import { Calendar, Plus, X, Sparkles } from "lucide-react";
+import { AIGenerationDialog } from "./ai-generation-dialog";
 
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
@@ -35,7 +36,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [showAIDialog, setShowAIDialog] = useState(false);
 
   const form = useForm<AddArticleFormData>({
     resolver: zodResolver(addArticleSchema),
@@ -80,39 +81,8 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
     }
   });
 
-  const generateArticle = async () => {
-    setIsGenerating(true);
-    try {
-      const currentContent = form.watch("contentText");
-      const currentType = form.watch("typeContent");
-      
-      const response = await apiRequest('POST', '/api/generate-article', {
-        keywords: ["enfants", "activités", "parents"],
-        contentType: currentType,
-        existingContent: currentContent,
-        targetAudience: "parents",
-        tone: "engageant et informatif"
-      });
-
-      const generatedArticle = await response.json();
-      
-      // Mettre à jour le contenu dans le formulaire
-      form.setValue('contentText', generatedArticle.content);
-      
-      toast({
-        title: "Article généré avec succès",
-        description: "Le contenu a été créé par GPT-4o",
-        variant: "default"
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erreur de génération",
-        description: error.message || "Impossible de générer l'article",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleAIGeneration = (generatedContent: string) => {
+    form.setValue('contentText', generatedContent);
   };
 
   const onSubmit = (data: AddArticleFormData) => {
@@ -154,16 +124,11 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={generateArticle}
-                  disabled={isGenerating}
+                  onClick={() => setShowAIDialog(true)}
                   className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
                 >
-                  {isGenerating ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4" />
-                  )}
-                  {isGenerating ? "Génération..." : "Générer avec GPT-4o"}
+                  <Sparkles className="h-4 w-4" />
+                  Générer avec GPT-4o
                 </Button>
               </div>
               <Textarea
@@ -272,6 +237,14 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
           </DialogFooter>
         </form>
       </DialogContent>
+      
+      <AIGenerationDialog
+        open={showAIDialog}
+        onOpenChange={setShowAIDialog}
+        contentType={form.watch('typeContent')}
+        existingContent={form.watch('contentText')}
+        onGenerated={handleAIGeneration}
+      />
     </Dialog>
   );
 }
