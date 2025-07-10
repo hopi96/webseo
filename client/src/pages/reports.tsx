@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Download, Users, Search, Zap, Target, TrendingUp, CheckCircle, XCircle } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { FileText, Download, Users, Search, Zap, Target, TrendingUp, TrendingDown, Minus, CheckCircle, XCircle, Globe, Link, MapPin, Calendar } from "lucide-react";
 import { WebsiteSelector } from "@/components/website/website-selector";
 import { UnifiedHeader } from "@/components/layout/unified-header";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function Reports() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
@@ -44,6 +48,13 @@ export default function Reports() {
     queryKey: ['/api/websites'],
   });
 
+  // S'assurer qu'on a un website ID valide si les sites sont chargés
+  useEffect(() => {
+    if (websites.length > 0 && !websites.find(w => w.id === selectedWebsiteId)) {
+      setSelectedWebsiteId(websites[0].id);
+    }
+  }, [websites, selectedWebsiteId]);
+
   // Récupération de l'analyse SEO
   const { data: seoAnalysis, isLoading } = useQuery<SeoAnalysisType>({
     queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
@@ -51,6 +62,31 @@ export default function Reports() {
   });
 
   const selectedWebsite = (websites as WebsiteType[]).find((w: WebsiteType) => w.id === selectedWebsiteId);
+
+  // Parse des données webhook pour obtenir les vraies données
+  const webhookData = seoAnalysis?.rawWebhookData ? JSON.parse(seoAnalysis.rawWebhookData) : {};
+
+  // Fonction pour obtenir l'icône de tendance
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'up': return <TrendingUp className="h-4 w-4 text-green-600" />;
+      case 'down': return <TrendingDown className="h-4 w-4 text-red-600" />;
+      default: return <Minus className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  // Préparation des données pour les graphiques
+  const keywordDensityData = webhookData.keywordAnalysis?.map((kw: any) => ({
+    keyword: kw.keyword,
+    density: kw.density,
+    count: kw.count
+  })).slice(0, 6) || [];
+
+  const coreWebVitalsData = [
+    { name: 'LCP', value: webhookData.pageSpeedMetrics?.largestContentfulPaint || 0, target: 2.5, unit: 's' },
+    { name: 'CLS', value: webhookData.pageSpeedMetrics?.cumulativeLayoutShift || 0, target: 0.1, unit: '' },
+    { name: 'FCP', value: webhookData.pageSpeedMetrics?.firstContentfulPaint || 0, target: 1.8, unit: 's' }
+  ];
 
   // Fonction pour générer le PDF structuré comme le dashboard
   const generatePDF = async () => {
@@ -404,144 +440,385 @@ export default function Reports() {
           )}
         </div>
 
-        {/* Aperçu du rapport */}
-        {seoAnalysis && selectedWebsite && (
+        {/* Données manquantes ou erreur */}
+        {!seoAnalysis || !seoAnalysis.rawWebhookData ? (
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Aperçu du rapport</h2>
-            
-            {/* Score global */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Score SEO Global</h3>
-              <div className="flex items-center space-x-4">
-                <div className="text-4xl font-bold text-gray-900 dark:text-white">{seoAnalysis.overallScore}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">/100</div>
-                <Badge 
-                  variant="outline"
-                  className={
-                    seoAnalysis.overallScore >= 70 ? 'border-green-200 text-green-700 dark:border-green-800 dark:text-green-300' :
-                    seoAnalysis.overallScore >= 40 ? 'border-yellow-200 text-yellow-700 dark:border-yellow-800 dark:text-yellow-300' :
-                    'border-red-200 text-red-700 dark:border-red-800 dark:text-red-300'
-                  }
-                >
-                  {seoAnalysis.overallScore >= 70 ? 'Excellent' : seoAnalysis.overallScore >= 40 ? 'Moyen' : 'À améliorer'}
-                </Badge>
-              </div>
+            <div className="text-center py-12">
+              <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Aucune donnée d'analyse disponible</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Veuillez d'abord effectuer une analyse SEO sur le dashboard pour générer ce rapport.
+              </p>
             </div>
-
-            <Separator className="my-6" />
-
-            {/* Métriques principales */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Métriques Principales</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center space-x-3">
-                  <Users className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">{seoAnalysis.organicTraffic}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Trafic organique</div>
-                  </div>
+          </div>
+        ) : (
+          <>
+            {/* Informations du site sélectionné */}
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-blue-600 mb-2">{selectedWebsite?.name}</h2>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedWebsite?.url}</p>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Search className="h-5 w-5 text-green-600" />
-                  <div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">{seoAnalysis.keywordsRanking}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Mots-clés</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Zap className="h-5 w-5 text-yellow-600" />
-                  <div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">{seoAnalysis.pageSpeed}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">PageSpeed</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Target className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">{seoAnalysis.backlinks}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Backlinks</div>
-                  </div>
+                <div className="text-right">
+                  <div className="text-4xl font-bold text-green-600">{webhookData?.seoScore || 'N/A'}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO</div>
                 </div>
               </div>
             </div>
 
-            <Separator className="my-6" />
-
-            {/* Audit technique */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Audit Technique</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { name: 'Compatible Mobile', status: seoAnalysis.technicalSeo?.mobileFriendly },
-                  { name: 'HTTPS Sécurisé', status: seoAnalysis.technicalSeo?.httpsSecure },
-                  { name: 'XML Sitemap', status: seoAnalysis.technicalSeo?.xmlSitemap },
-                  { name: 'Robots.txt', status: seoAnalysis.technicalSeo?.robotsTxt }
-                ].map((check, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                    {check.status ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-600" />
-                    )}
-                    <span className="text-gray-900 dark:text-white">{check.name}</span>
-                    <span className={`text-sm ${check.status ? 'text-green-600' : 'text-red-600'}`}>
-                      {check.status ? 'Conforme' : 'À corriger'}
+            {/* Métriques principales en cartes - identiques au dashboard */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              {/* Score SEO */}
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                    Score SEO
+                    <HelpTooltip content="Score global d'optimisation SEO de votre site web, calculé sur la base de différents critères techniques et de contenu" />
+                  </CardTitle>
+                  <Globe className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {webhookData.seoScore}
+                  </div>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Progress value={webhookData.seoScore} className="flex-1" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {webhookData.seoScore >= 80 ? 'Excellent' : 
+                       webhookData.seoScore >= 60 ? 'Bon' : 'À améliorer'}
                     </span>
                   </div>
-                ))}
-              </div>
+                </CardContent>
+              </Card>
+
+              {/* PageSpeed */}
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                    PageSpeed
+                    <HelpTooltip content="Vitesse de chargement de votre site web. Un score élevé améliore l'expérience utilisateur et le classement Google" />
+                  </CardTitle>
+                  <Zap className="h-4 w-4 text-yellow-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {webhookData.pageSpeed}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    Performance: {webhookData.pageSpeedMetrics?.performanceScore || 'N/A'}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Mots-clés */}
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                    Mots-clés
+                    <HelpTooltip content="Nombre total de mots-clés identifiés sur votre site web, incluant les variantes géolocalisées et saisonnières" />
+                  </CardTitle>
+                  <Search className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {webhookData.keywordCount}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    Mots-clés analysés
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Liens */}
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                    Liens internes
+                    <HelpTooltip content="Nombre de liens internes qui relient les pages de votre site entre elles. Améliore la navigation et le référencement" />
+                  </CardTitle>
+                  <Link className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {webhookData.internalLinks}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {webhookData.externalLinks} liens externes
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <Separator className="my-6" />
-
-            {/* Top mots-clés */}
-            {seoAnalysis.keywords && seoAnalysis.keywords.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Top 5 Mots-clés</h3>
-                <div className="space-y-2">
-                  {seoAnalysis.keywords.slice(0, 5).map((keyword: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                      <span className="font-medium text-gray-900 dark:text-white">{keyword.keyword}</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Position: {keyword.position}</span>
-                        {keyword.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-600" />}
-                        {keyword.trend === 'down' && <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />}
-                      </div>
+            {/* Core Web Vitals - identique au dashboard */}
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  Core Web Vitals
+                  <HelpTooltip content="Métriques essentielles de Google pour l'expérience utilisateur : temps de chargement, interactivité et stabilité visuelle" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* LCP */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {webhookData.pageSpeedMetrics?.largestContentfulPaint || 'N/A'}s
                     </div>
-                  ))}
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-1">
+                      LCP
+                      <HelpTooltip content="Temps nécessaire pour afficher le plus gros élément visible de la page. Une LCP rapide (≤2.5s) améliore l'expérience utilisateur." />
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                      {webhookData.pageSpeedMetrics?.largestContentfulPaint <= 2.5 ? 'Bon' : 
+                       webhookData.pageSpeedMetrics?.largestContentfulPaint <= 4 ? 'À améliorer' : 'Mauvais'}
+                    </div>
+                    <Progress 
+                      value={Math.min(100, Math.max(0, (4 - (webhookData.pageSpeedMetrics?.largestContentfulPaint || 0)) / 4 * 100))} 
+                      className="mt-2"
+                    />
+                  </div>
+
+                  {/* CLS */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {webhookData.pageSpeedMetrics?.cumulativeLayoutShift || 'N/A'}
+                    </div>
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-1">
+                      CLS
+                      <HelpTooltip content="Mesure la stabilité visuelle de la page. Un CLS faible (≤0.1) indique que les éléments ne bougent pas de manière inattendue pendant le chargement." />
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                      {webhookData.pageSpeedMetrics?.cumulativeLayoutShift <= 0.1 ? 'Bon' : 
+                       webhookData.pageSpeedMetrics?.cumulativeLayoutShift <= 0.25 ? 'À améliorer' : 'Mauvais'}
+                    </div>
+                    <Progress 
+                      value={Math.min(100, Math.max(0, (0.25 - (webhookData.pageSpeedMetrics?.cumulativeLayoutShift || 0)) / 0.25 * 100))} 
+                      className="mt-2"
+                    />
+                  </div>
+
+                  {/* FCP */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {webhookData.pageSpeedMetrics?.firstContentfulPaint || 'N/A'}s
+                    </div>
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-center gap-1">
+                      FCP
+                      <HelpTooltip content="Temps nécessaire pour afficher le premier élément de contenu visible. Un FCP rapide (≤1.8s) indique que la page commence à se charger rapidement." />
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                      {webhookData.pageSpeedMetrics?.firstContentfulPaint <= 1.8 ? 'Bon' : 
+                       webhookData.pageSpeedMetrics?.firstContentfulPaint <= 3 ? 'À améliorer' : 'Mauvais'}
+                    </div>
+                    <Progress 
+                      value={Math.min(100, Math.max(0, (3 - (webhookData.pageSpeedMetrics?.firstContentfulPaint || 0)) / 3 * 100))} 
+                      className="mt-2"
+                    />
+                  </div>
+
+                  {/* Performance globale */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {webhookData.pageSpeedMetrics?.performanceScore || 'N/A'}
+                    </div>
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Performance
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                      Score global
+                    </div>
+                    <Progress 
+                      value={webhookData.pageSpeedMetrics?.performanceScore || 0} 
+                      className="mt-2"
+                    />
+                  </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+
+            {/* Graphiques en grille */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Graphique des mots-clés par densité */}
+              {keywordDensityData.length > 0 && (
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Densité des Mots-clés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={keywordDensityData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="keyword" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          fontSize={12}
+                        />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="density" fill="#3b82f6" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Core Web Vitals en graphique */}
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Core Web Vitals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={coreWebVitalsData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value, name) => [`${value}${name === 'value' ? coreWebVitalsData.find(d => d.name === name)?.unit || '' : ''}`, 'Valeur']}
+                      />
+                      <Bar dataKey="value" fill="#10b981" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recommandations SEO - identiques au dashboard */}
+            {webhookData.recommendations && webhookData.recommendations.length > 0 && (
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    Recommandations SEO
+                    <HelpTooltip content="Suggestions d'amélioration prioritaires basées sur l'analyse technique de votre site web" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {webhookData.recommendations.slice(0, 5).map((rec: any, index: number) => (
+                      <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className={`w-2 h-12 rounded-full ${
+                          rec.priority === 'high' ? 'bg-red-500' : 
+                          rec.priority === 'medium' ? 'bg-yellow-500' : 'bg-gray-400'
+                        }`}></div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 dark:text-white">{rec.title}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{rec.description}</p>
+                          <div className="flex items-center mt-2 space-x-2">
+                            <Badge 
+                              variant="outline"
+                              className={
+                                rec.priority === 'high' ? 'border-red-200 text-red-700' :
+                                rec.priority === 'medium' ? 'border-yellow-200 text-yellow-700' :
+                                'border-gray-200 text-gray-700'
+                              }
+                            >
+                              Priorité {rec.priority === 'high' ? 'Haute' : rec.priority === 'medium' ? 'Moyenne' : 'Basse'}
+                            </Badge>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{rec.category}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
-            {/* Recommandations */}
-            {seoAnalysis.recommendations && seoAnalysis.recommendations.length > 0 && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recommandations Prioritaires</h3>
-                <div className="space-y-4">
-                  {seoAnalysis.recommendations.slice(0, 3).map((rec: any, index: number) => (
-                    <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-gray-900 dark:text-white">{rec.title}</h4>
-                        <Badge 
-                          variant="outline"
-                          className={`ml-2 text-xs ${
-                            rec.priority === 'high' 
-                              ? 'border-red-200 dark:border-red-800 text-red-700 dark:text-red-300' 
-                              : rec.priority === 'medium' 
-                              ? 'border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300' 
-                              : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          {rec.priority === 'high' ? 'Haute' : rec.priority === 'medium' ? 'Moyenne' : 'Basse'}
-                        </Badge>
+            {/* Audit technique SEO */}
+            {webhookData.technicalSeo && (
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    Audit Technique SEO
+                    <HelpTooltip content="Vérifications techniques essentielles pour le référencement de votre site web" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-3">
+                      {webhookData.technicalSeo.mobileFriendly ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">Mobile-Friendly</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Optimisation mobile</div>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{rec.description}</p>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="flex items-center space-x-3">
+                      {webhookData.technicalSeo.httpsSecure ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">HTTPS Secure</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Connexion sécurisée</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      {webhookData.technicalSeo.xmlSitemap ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">XML Sitemap</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Plan du site</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      {webhookData.technicalSeo.robotsTxt ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">Robots.txt</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Instructions robots</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </div>
+
+            {/* Top Mots-clés */}
+            {webhookData.keywords && webhookData.keywords.length > 0 && (
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    Top Mots-clés
+                    <HelpTooltip content="Classement des mots-clés les mieux positionnés avec leur tendance d'évolution" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {webhookData.keywords.slice(0, 10).map((keyword: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <Badge variant="outline">#{keyword.position}</Badge>
+                          <span className="font-medium text-gray-900 dark:text-white">{keyword.keyword}</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{keyword.volume} recherches/mois</span>
+                          {getTrendIcon(keyword.trend)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
     </div>
