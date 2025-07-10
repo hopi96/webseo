@@ -429,6 +429,39 @@ Supprimer la barre de navigation en bas de la page calendrier éditorial pour av
 
 ---
 
+## Questions dynamiques pour contenu (17h06)
+
+### 🎯 Objectif
+Remplacer la section statique "Questions pour créer du contenu" par une version dynamique utilisant les vraies données SEO
+
+### ❌ Problème identifié
+- Section "Questions pour créer du contenu" utilisait un tableau statique codé en dur
+- Questions génériques non pertinentes pour chaque site analysé
+- Ne s'adaptait pas aux données SEO réelles du site
+
+### ✅ Solution implémentée
+**Fonction dynamique generateContentQuestions()** qui génère des questions basées sur :
+
+1. **Mots-clés principaux** : "Comment optimiser son contenu pour [keyword]?"
+2. **Opportunités locales** : "Comment cibler les clients [ville]?"
+3. **Mots-clés saisonniers** : "Comment planifier du contenu pour [keyword]?"
+4. **Recommandations SEO** : Questions sur titres, contenu, images selon les recommandations
+5. **Domaine d'activité** : Questions spécifiques selon l'URL (enfants, etc.)
+
+### ✅ Modifications techniques
+- Ajout fonction `generateContentQuestions(webhookData)`
+- Remplacement tableau statique par `contentQuestions.map()`
+- Analyse dynamique des données webhook
+- Génération de 6 questions uniques et pertinentes
+
+### ✅ Résultat
+- Questions personnalisées pour chaque site analysé
+- Contenu pertinent basé sur les vraies données SEO
+- Suggestions d'amélioration spécifiques au site
+- Valeur ajoutée réelle pour la stratégie de contenu
+
+---
+
 ## Phase 2: Implémentation du système d'édition (19h41)
 
 ### Action 2.1: Création du composant d'édition

@@ -153,6 +153,57 @@ export default function DashboardWebhook() {
     count: kw.count
   })).slice(0, 6) || [];
 
+  // Génération dynamique des questions basées sur les données SEO
+  const generateContentQuestions = (webhookData: any) => {
+    const questions = [];
+    
+    // Questions basées sur les mots-clés principaux
+    const topKeywords = webhookData.keywordAnalysis?.slice(0, 3) || [];
+    topKeywords.forEach((kw: any) => {
+      questions.push(`Comment optimiser son contenu pour "${kw.keyword}"?`);
+      questions.push(`Quels sont les meilleures pratiques pour "${kw.keyword}"?`);
+    });
+
+    // Questions basées sur les opportunités locales
+    const localOpportunities = webhookData.contentStrategy?.localOpportunities?.slice(0, 2) || [];
+    localOpportunities.forEach((location: string) => {
+      questions.push(`Comment cibler les clients ${location}?`);
+      questions.push(`Quelles sont les spécificités du marché ${location}?`);
+    });
+
+    // Questions basées sur les mots-clés saisonniers
+    const seasonalKeywords = webhookData.contentStrategy?.seasonalKeywords?.slice(0, 2) || [];
+    seasonalKeywords.forEach((keyword: string) => {
+      questions.push(`Comment planifier du contenu pour "${keyword}"?`);
+    });
+
+    // Questions basées sur les recommandations SEO
+    const recommendations = webhookData.recommendations?.slice(0, 2) || [];
+    recommendations.forEach((rec: any) => {
+      if (rec.title.includes('titre')) {
+        questions.push(`Comment améliorer les balises titre pour le SEO?`);
+      }
+      if (rec.title.includes('contenu')) {
+        questions.push(`Comment créer du contenu optimisé SEO?`);
+      }
+      if (rec.title.includes('image')) {
+        questions.push(`Comment optimiser les images pour le référencement?`);
+      }
+    });
+
+    // Questions génériques basées sur le domaine d'activité
+    const websiteUrl = website?.url || '';
+    if (websiteUrl.includes('enfant') || websiteUrl.includes('kids')) {
+      questions.push(`Comment engager les parents dans votre contenu?`);
+      questions.push(`Quelles activités proposer selon les âges?`);
+    }
+
+    // Retourner les 6 premières questions uniques
+    return [...new Set(questions)].slice(0, 6);
+  };
+
+  const contentQuestions = generateContentQuestions(webhookData);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <UnifiedHeader />
@@ -662,14 +713,7 @@ export default function DashboardWebhook() {
                 ❓ Questions pour créer du contenu
               </h3>
               <div className="space-y-3">
-                {[
-                  "Comment organiser un anniversaire enfant?",
-                  "Que faire lors d'un anniversaire?",
-                  "Comment préparer des activités pour enfants?",
-                  "Comment gérer un groupe d'enfants?",
-                  "Comment réussir une fête d'anniversaire?",
-                  "Quels jeux pour un anniversaire enfant?"
-                ].map((question, index) => (
+                {contentQuestions.map((question, index) => (
                   <div key={index} className="p-3 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800">
                     <input 
                       type="text" 
