@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertWebsiteSchema, insertSeoAnalysisSchema, insertEditorialContentSchema } from "@shared/schema";
 import { requestSeoAnalysisFromWebhook } from "./webhook-service";
 import { airtableService } from "./airtable-service";
+import { openaiService } from "./openai-service";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -473,6 +474,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: "Erreur lors du test Airtable",
         error: error.message
+      });
+    }
+  });
+
+  // OpenAI article generation routes
+  app.post("/api/generate-article", async (req, res) => {
+    try {
+      const { keywords, topic, contentType, targetAudience, tone, existingContent } = req.body;
+      
+      console.log('🤖 Génération d\'article avec OpenAI GPT-4o');
+      console.log('Paramètres:', { keywords, topic, contentType, existingContent: !!existingContent });
+      
+      const generatedArticle = await openaiService.generateArticle({
+        keywords: keywords || [],
+        topic,
+        contentType: contentType || 'xtwitter',
+        targetAudience,
+        tone,
+        existingContent
+      });
+      
+      console.log('✅ Article généré avec succès');
+      res.json(generatedArticle);
+    } catch (error) {
+      console.error('Erreur lors de la génération d\'article:', error);
+      res.status(500).json({ 
+        message: "Failed to generate article",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post("/api/suggest-keywords", async (req, res) => {
+    try {
+      const { topic, contentType } = req.body;
+      
+      console.log('🔍 Suggestion de mots-clés avec OpenAI');
+      console.log('Paramètres:', { topic, contentType });
+      
+      const keywords = await openaiService.suggestKeywords(topic || '', contentType || 'xtwitter');
+      
+      console.log('✅ Mots-clés suggérés:', keywords.length);
+      res.json({ keywords });
+    } catch (error) {
+      console.error('Erreur lors de la suggestion de mots-clés:', error);
+      res.status(500).json({ 
+        message: "Failed to suggest keywords",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get("/api/openai/test", async (req, res) => {
+    try {
+      const isConnected = await openaiService.testConnection();
+      res.json({ connected: isConnected });
+    } catch (error) {
+      res.status(500).json({ 
+        connected: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
   });
