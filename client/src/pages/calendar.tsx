@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import '@n8n/chat/style.css';
+import { createChat } from '@n8n/chat';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +43,28 @@ export default function Calendar() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [addDialogDate, setAddDialogDate] = useState<string>("");
+
+  // Initialiser le chatbot n8n
+  useEffect(() => {
+    createChat({
+      webhookUrl: 'https://doseit.app.n8n.cloud/webhook/7682526e-bf2c-4be3-8a9c-161ea2c7098a/chat',
+      mode: 'window',
+      defaultLanguage: 'en',
+      initialMessages: [
+        'Bonjour ! 👋',
+        'Je suis votre assistant IA pour le calendrier éditorial. Comment puis-je vous aider aujourd\'hui ?'
+      ],
+      i18n: {
+        en: {
+          title: 'Assistant IA Éditorial',
+          subtitle: 'Créez du contenu SEO optimisé avec l\'aide de l\'IA',
+          footer: '',
+          getStarted: 'Nouvelle conversation',
+          inputPlaceholder: 'Tapez votre question...',
+        },
+      },
+    });
+  }, []);
 
   // Récupérer les contenus éditoriaux depuis l'API
   const { data: editorialContent = [], isLoading } = useQuery({
@@ -463,7 +487,8 @@ export default function Calendar() {
         />
       )}
 
-
+      {/* Conteneur pour le chatbot n8n */}
+      <div id="n8n-chat"></div>
     </div>
   );
 }
