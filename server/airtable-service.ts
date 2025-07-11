@@ -157,15 +157,14 @@ export class AirtableService {
     try {
       const { table } = initializeAirtable();
       
-      // Préparer les champs pour Airtable (omission complète d'ID_SITE)
+      // Préparer les champs pour Airtable avec ID_SITE
       const fieldsToCreate: Record<string, any> = {
         type_contenu: contentData.typeContent,
         contenu_text: contentData.contentText,
         statut: contentData.statut || 'brouillon',
-        image: contentData.hasImage || false
+        image: contentData.hasImage || false,
+        ID_SITE: contentData.idSite || 1  // Utiliser l'ID du site sélectionné
       };
-
-      // ID_SITE complètement omis - peut être auto-généré ou lié à une autre table
 
       // Formater la date pour Airtable (YYYY-MM-DD)
       if (contentData.dateDePublication) {
@@ -255,6 +254,10 @@ export class AirtableService {
       
       if (updateData.hasImage !== undefined) {
         fieldsToUpdate.image = updateData.hasImage;
+      }
+      
+      if (updateData.idSite !== undefined) {
+        fieldsToUpdate.ID_SITE = updateData.idSite;
       }
       
       if (updateData.dateDePublication !== undefined) {
