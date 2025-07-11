@@ -18,6 +18,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nouvelle route pour récupérer les sites depuis la table analyse SEO d'Airtable
+  app.get("/api/sites-airtable", async (req, res) => {
+    try {
+      console.log('🔍 Récupération des sites depuis la table analyse SEO...');
+      const sites = await airtableService.getAllSites();
+      console.log('✅ Sites récupérés:', sites);
+      res.json(sites);
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des sites Airtable:', error);
+      res.status(500).json({ message: "Failed to fetch sites from Airtable", error: error.message });
+    }
+  });
+
   app.get("/api/websites/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
