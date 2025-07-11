@@ -75,7 +75,7 @@ export default function DashboardWebhook() {
   }, [websites, selectedWebsiteId]);
 
   // Récupération de l'analyse SEO pour le site sélectionné
-  const { data: seoAnalysis, isLoading } = useQuery<SeoAnalysisType>({
+  const { data: seoAnalysis, isLoading, error: seoError } = useQuery<SeoAnalysisType>({
     queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
     enabled: !!selectedWebsiteId,
   });
@@ -112,30 +112,20 @@ export default function DashboardWebhook() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement de l'analyse...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!seoAnalysis || !seoAnalysis.rawWebhookData) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400">Aucune donnée d'analyse disponible</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Parse des données webhook
-  const webhookData = JSON.parse(seoAnalysis.rawWebhookData);
+  const hasAnalysisError = seoError || !seoAnalysis || !seoAnalysis.rawWebhookData;
   const website = websites.find(w => w.id === selectedWebsiteId);
+
+  // Traiter les données webhook seulement si disponibles
+  let webhookData: any = null;
+  if (seoAnalysis?.rawWebhookData) {
+    try {
+      webhookData = JSON.parse(seoAnalysis.rawWebhookData);
+    } catch (e) {
+      console.error('Erreur lors du parsing des données webhook:', e);
+    }
+  }
+
+
 
   // Fonction pour obtenir l'icône de tendance
   const getTrendIcon = (trend: string) => {
@@ -147,13 +137,25 @@ export default function DashboardWebhook() {
   };
 
   // Préparation des données pour le graphique de densité des mots-clés
-  const keywordDensityData = webhookData.keywordAnalysis?.map((kw: any) => ({
+  const keywordDensityData = webhookData?.keywordAnalysis?.map((kw: any) => ({
     keyword: kw.keyword,
     density: kw.density,
     count: kw.count
   })).slice(0, 6) || [];
 
-
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <UnifiedHeader />
+        <div className="p-6 space-y-6">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement de l'analyse...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -223,9 +225,46 @@ export default function DashboardWebhook() {
           </div>
         </div>
 
+        {/* Message d'erreur si l'analyse échoue */}
+        {hasAnalysisError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
+                  Analyse SEO indisponible
+                </h3>
+                <p className="text-red-700 dark:text-red-300 mt-1">
+                  Les données d'analyse pour ce site ne sont pas disponibles. Cela peut être dû à :
+                </p>
+                <ul className="text-red-700 dark:text-red-300 mt-2 ml-4 list-disc">
+                  <li>Une erreur de connexion au service d'analyse</li>
+                  <li>Un problème temporaire avec le webhook</li>
+                  <li>Une analyse qui n'a pas encore été effectuée</li>
+                </ul>
+              </div>
+              <Button
+                onClick={() => setIsAnalysisOpen(true)}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 border-red-300 text-red-700 hover:bg-red-100 dark:border-red-600 dark:text-red-300 dark:hover:bg-red-900/30"
+                disabled={refreshAnalysisMutation.isPending}
+              >
+                {refreshAnalysisMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                Réessayer l'analyse
+              </Button>
+            </div>
+          </div>
+        )}
 
-
-        {/* Métriques principales en cartes */}
+        {/* Contenu de l'analyse - affiché seulement si les données sont disponibles */}
+        {!hasAnalysisError && webhookData && (
+          <>
+            {/* Métriques principales en cartes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Score SEO */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-100">
@@ -730,6 +769,8 @@ export default function DashboardWebhook() {
               </div>
             </CardContent>
           </Card>
+        )}
+          </>
         )}
       </div>
 

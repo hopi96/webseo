@@ -51,7 +51,8 @@ export class AirtableService {
       const analyseSeoTable = base('analyse SEO');
       
       const records = await analyseSeoTable.select({
-        fields: ['ID site', 'Nom_site_web', 'URL']
+        fields: ['ID site', 'Nom_site_web', 'URL'],
+        sort: [{ field: 'ID site', direction: 'desc' }] // Trier par ID décroissant (plus récents en premier)
       }).all();
 
       console.log(`✅ ${records.length} sites récupérés depuis la table analyse SEO`);
