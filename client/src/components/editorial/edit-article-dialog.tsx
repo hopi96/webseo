@@ -57,7 +57,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const queryClient = useQueryClient();
   const [showAIDialog, setShowAIDialog] = useState(false);
   
-  // Récupération des sites web pour le sélecteur
+  // Récupération des sites web depuis la table analyse SEO pour le sélecteur
   const { data: websites = [] } = useQuery({
     queryKey: ['/api/websites'],
     select: (data: any[]) => data || []

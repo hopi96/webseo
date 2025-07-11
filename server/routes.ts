@@ -302,10 +302,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validation des données
       const contentData = {
-        siteId: req.body.siteId || 1, // Site par défaut
+        idSite: req.body.siteId || 1, // Site par défaut
         typeContent: req.body.typeContent || 'xtwitter',
         contentText: req.body.contentText,
-        statut: req.body.statut || 'brouillon',
+        statut: req.body.statut || 'en attente',
         hasImage: req.body.hasImage || false,
         dateDePublication: req.body.dateDePublication || new Date().toISOString()
       };
