@@ -161,7 +161,7 @@ export class AirtableService {
       const fieldsToCreate: Record<string, any> = {
         type_contenu: contentData.typeContent,
         contenu_text: contentData.contentText,
-        statut: contentData.statut || 'brouillon',
+        statut: contentData.statut || 'en attente',
         image: contentData.hasImage || false,
         ID_SITE: (contentData.idSite || 1).toString()  // Convertir en string pour Airtable
       };

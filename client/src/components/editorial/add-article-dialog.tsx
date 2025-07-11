@@ -18,7 +18,7 @@ import { AIGenerationDialog } from "./ai-generation-dialog";
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
   typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter"]),
-  statut: z.enum(["brouillon", "en attente", "à réviser", "en cours", "publié"]),
+  statut: z.enum(["en attente", "à réviser", "en cours", "publié"]),
   hasImage: z.boolean(),
   dateDePublication: z.string(),
   siteId: z.number()
@@ -38,7 +38,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
   const [loading, setLoading] = useState(false);
   const [showAIDialog, setShowAIDialog] = useState(false);
 
-  // Récupération des sites web pour le sélecteur
+  // Récupération des sites web depuis la table analyse SEO pour le sélecteur
   const { data: websites = [] } = useQuery({
     queryKey: ['/api/websites'],
     select: (data: any[]) => data || []
@@ -49,7 +49,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
     defaultValues: {
       contentText: "",
       typeContent: "xtwitter",
-      statut: "brouillon",
+      statut: "en attente",
       hasImage: false,
       dateDePublication: defaultDate || new Date().toISOString().split('T')[0],
       siteId: websites.length > 0 ? websites[0].id : 1
@@ -179,7 +179,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <SelectValue placeholder="Sélectionnez le statut" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="brouillon">Brouillon</SelectItem>
                     <SelectItem value="en attente">En attente</SelectItem>
                     <SelectItem value="à réviser">À réviser</SelectItem>
                     <SelectItem value="en cours">En cours</SelectItem>
