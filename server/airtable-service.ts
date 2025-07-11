@@ -61,7 +61,7 @@ export class AirtableService {
         return {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
-          idSite: fields.ID_SITE || 1,
+          idSite: parseInt(fields.ID_SITE) || 1,
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
@@ -101,7 +101,7 @@ export class AirtableService {
         return {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
-          idSite: fields.ID_SITE || 1,
+          idSite: parseInt(fields.ID_SITE) || 1,
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
@@ -123,7 +123,7 @@ export class AirtableService {
     try {
       const { table } = initializeAirtable();
       const records = await table.select({
-        filterByFormula: `{ID_SITE} = ${siteId}`
+        filterByFormula: `{ID_SITE} = "${siteId}"`
       }).all();
 
       return records.map((record: any) => {
@@ -132,7 +132,7 @@ export class AirtableService {
         return {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
-          idSite: fields.ID_SITE || 1,
+          idSite: parseInt(fields.ID_SITE) || 1,
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
@@ -163,7 +163,7 @@ export class AirtableService {
         contenu_text: contentData.contentText,
         statut: contentData.statut || 'brouillon',
         image: contentData.hasImage || false,
-        ID_SITE: contentData.idSite || 1  // Utiliser l'ID du site sélectionné
+        ID_SITE: (contentData.idSite || 1).toString()  // Convertir en string pour Airtable
       };
 
       // Formater la date pour Airtable (YYYY-MM-DD)
@@ -183,14 +183,15 @@ export class AirtableService {
       const createdContent: EditorialContent = {
         id: record.id,
         airtableId: record.id,
-        siteId: record.fields.ID_SITE as number || contentData.siteId || 1,
+        idSite: parseInt(record.fields.ID_SITE) || contentData.idSite || 1,
         typeContent: normalizeContentType(record.fields.type_contenu as string),
         contentText: record.fields.contenu_text as string,
         statut: record.fields.statut as string,
         hasImage: record.fields.image as boolean,
         dateDePublication: record.fields.date_de_publication 
-          ? new Date(record.fields.date_de_publication as string).toISOString()
-          : new Date().toISOString()
+          ? new Date(record.fields.date_de_publication as string)
+          : new Date(),
+        createdAt: new Date()
       };
 
       return createdContent;
@@ -248,7 +249,6 @@ export class AirtableService {
       }
       
       if (updateData.typeContent !== undefined) {
-        // Garder xxtwitter comme valeur pour l'enregistrement en base
         fieldsToUpdate.type_contenu = updateData.typeContent;
       }
       
@@ -257,7 +257,7 @@ export class AirtableService {
       }
       
       if (updateData.idSite !== undefined) {
-        fieldsToUpdate.ID_SITE = updateData.idSite;
+        fieldsToUpdate.ID_SITE = updateData.idSite.toString();
       }
       
       if (updateData.dateDePublication !== undefined) {
@@ -285,7 +285,7 @@ export class AirtableService {
       return {
         id: record.id,
         airtableId: record.id,
-        idSite: fields.ID_SITE || 1,
+        idSite: parseInt(fields.ID_SITE) || 1,
         typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
         contentText: fields.contenu_text || '',
         hasImage: fields.image || false,
@@ -310,11 +310,10 @@ export class AirtableService {
   async testConnection(): Promise<boolean> {
     try {
       const { table } = initializeAirtable();
-      // Teste en récupérant un seul enregistrement
-      await table.select({ maxRecords: 1 }).all();
+      await table.select({ maxRecords: 1 }).firstPage();
       return true;
     } catch (error) {
-      console.error('Erreur de connexion Airtable:', error);
+      console.error('Test de connexion Airtable échoué:', error);
       return false;
     }
   }
