@@ -57,9 +57,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const queryClient = useQueryClient();
   const [showAIDialog, setShowAIDialog] = useState(false);
   
-  // Récupération des sites web depuis la table analyse SEO pour le sélecteur
+  // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
-    queryKey: ['/api/websites'],
+    queryKey: ['/api/sites-airtable'],
     select: (data: any[]) => data || []
   });
   

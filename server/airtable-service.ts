@@ -43,6 +43,41 @@ function normalizeContentType(type: string): string {
 
 export class AirtableService {
   /**
+   * Récupère tous les sites depuis la table analyse SEO d'Airtable
+   */
+  async getAllSites(): Promise<Array<{id: number, name: string, url: string}>> {
+    try {
+      const { base } = initializeAirtable();
+      const analyseSeoTable = base('analyse SEO');
+      
+      const records = await analyseSeoTable.select({
+        fields: ['ID site', 'Nom_site_web', 'URL']
+      }).all();
+
+      console.log(`✅ ${records.length} sites récupérés depuis la table analyse SEO`);
+
+      return records.map((record: any) => {
+        const fields = record.fields as any;
+        
+        // Nettoyer le nom du site en supprimant le préfixe "Analyse SEO - "
+        let siteName = fields['Nom_site_web'] || 'Site sans nom';
+        if (siteName.startsWith('Analyse SEO - ')) {
+          siteName = siteName.replace('Analyse SEO - ', '');
+        }
+        
+        return {
+          id: parseInt(fields['ID site']) || 0,
+          name: siteName,
+          url: fields['URL'] || ''
+        };
+      }).filter(site => site.id > 0); // Filtrer les sites avec un ID valide
+    } catch (error) {
+      console.error('Erreur lors de la récupération des sites depuis analyse SEO:', error);
+      throw new Error('Impossible de récupérer les sites depuis la table analyse SEO');
+    }
+  }
+
+  /**
    * Récupère tous les contenus éditoriaux depuis Airtable
    */
   async getAllContent(): Promise<EditorialContent[]> {

@@ -38,9 +38,9 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
   const [loading, setLoading] = useState(false);
   const [showAIDialog, setShowAIDialog] = useState(false);
 
-  // Récupération des sites web depuis la table analyse SEO pour le sélecteur
+  // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
-    queryKey: ['/api/websites'],
+    queryKey: ['/api/sites-airtable'],
     select: (data: any[]) => data || []
   });
 
