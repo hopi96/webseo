@@ -181,10 +181,13 @@ export default function Calendar() {
   // Fonction pour obtenir la couleur selon le type
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'article': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'social': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'xtwitter': return 'bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200';
+      case 'instagram': return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200';
+      case 'facebook': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'pinterest': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'google my business': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'article': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
       case 'newsletter': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      case 'video': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };

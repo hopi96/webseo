@@ -8,7 +8,7 @@ const openai = new OpenAI({
 export interface ArticleGenerationRequest {
   keywords: string[];
   topic?: string;
-  contentType: string; // twitter, instagram, article, newsletter
+  contentType: string; // xtwitter, instagram, facebook, pinterest, google my business, article, newsletter
   targetAudience?: string;
   tone?: string;
   existingContent?: string;
