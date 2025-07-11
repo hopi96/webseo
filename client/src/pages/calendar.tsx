@@ -78,6 +78,24 @@ export default function Calendar() {
     }
   });
 
+  // Récupérer les sites depuis Airtable
+  const { data: sites = [] } = useQuery({
+    queryKey: ['/api/sites-airtable'],
+    queryFn: async (): Promise<Array<{id: number, name: string, url: string}>> => {
+      const response = await fetch('/api/sites-airtable');
+      if (!response.ok) {
+        throw new Error('Failed to fetch sites');
+      }
+      return response.json();
+    }
+  });
+
+  // Fonction pour récupérer le nom du site par ID
+  const getSiteName = (siteId: number) => {
+    const site = sites.find(s => s.id === siteId);
+    return site ? site.name : `Site ${siteId}`;
+  };
+
   // Transformer les données de l'API en format pour le calendrier
   const events: EditorialEvent[] = editorialContent.map(content => ({
     id: content.id,
@@ -296,9 +314,12 @@ export default function Calendar() {
                             {getEventsForDate(day).slice(0, 2).map(event => (
                               <div
                                 key={event.id}
-                                className="text-xs p-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 truncate"
+                                className="text-xs p-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
                               >
-                                {event.title}
+                                <div className="truncate">{event.title}</div>
+                                <div className="text-xs opacity-75 mt-0.5">
+                                  {getSiteName(event.siteId)}
+                                </div>
                               </div>
                             ))}
                             {getEventsForDate(day).length > 2 && (
@@ -362,6 +383,9 @@ export default function Calendar() {
                           {event.description}
                         </p>
                         <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">
+                            {getSiteName(event.siteId)}
+                          </Badge>
                           <Badge className={getTypeColor(event.type)}>
                             {event.type}
                           </Badge>
