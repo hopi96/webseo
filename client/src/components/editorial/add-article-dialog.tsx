@@ -102,6 +102,12 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
         return "X (Twitter)";
       case "instagram":
         return "Instagram";
+      case "facebook":
+        return "Facebook";
+      case "pinterest":
+        return "Pinterest";
+      case "google my business":
+        return "Google My Business";
       case "article":
         return "Article";
       case "newsletter":
@@ -163,6 +169,9 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   <SelectContent>
                     <SelectItem value="xtwitter">X (Twitter)</SelectItem>
                     <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="pinterest">Pinterest</SelectItem>
+                    <SelectItem value="google my business">Google My Business</SelectItem>
                     <SelectItem value="article">Article</SelectItem>
                     <SelectItem value="newsletter">Newsletter</SelectItem>
                   </SelectContent>
