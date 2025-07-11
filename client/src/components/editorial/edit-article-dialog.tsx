@@ -28,11 +28,11 @@ import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { EditorialContent } from "@shared/schema";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Globe } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
 
 interface EditArticleDialogProps {
@@ -46,7 +46,8 @@ const editArticleSchema = z.object({
   statut: z.enum(["en attente", "à réviser", "en cours", "publié"]),
   typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter"]),
   hasImage: z.boolean(),
-  dateDePublication: z.string().min(1, "La date de publication est obligatoire")
+  dateDePublication: z.string().min(1, "La date de publication est obligatoire"),
+  idSite: z.number()
 });
 
 type EditArticleFormData = z.infer<typeof editArticleSchema>;
@@ -55,6 +56,12 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAIDialog, setShowAIDialog] = useState(false);
+  
+  // Récupération des sites web pour le sélecteur
+  const { data: websites = [] } = useQuery({
+    queryKey: ['/api/websites'],
+    select: (data: any[]) => data || []
+  });
   
   // Normaliser les valeurs pour s'assurer qu'elles correspondent aux options du Select
   const normalizeStatut = (statut: string): "en attente" | "à réviser" | "en cours" | "publié" => {
@@ -74,7 +81,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       statut: normalizeStatut(article.statut),
       typeContent: normalizeTypeContent(article.typeContent),
       hasImage: article.hasImage || false,
-      dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0]
+      dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0],
+      idSite: article.idSite || 1
     }
   });
 
@@ -224,6 +232,34 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="idSite"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Site web
+                  </FormLabel>
+                  <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez un site web" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {websites.map((website: any) => (
+                        <SelectItem key={website.id} value={website.id.toString()}>
+                          {website.name} ({website.url})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

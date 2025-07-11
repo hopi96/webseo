@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Plus, X, Sparkles } from "lucide-react";
+import { Calendar, Plus, X, Sparkles, Globe } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
 
 const addArticleSchema = z.object({
@@ -38,6 +38,12 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
   const [loading, setLoading] = useState(false);
   const [showAIDialog, setShowAIDialog] = useState(false);
 
+  // Récupération des sites web pour le sélecteur
+  const { data: websites = [] } = useQuery({
+    queryKey: ['/api/websites'],
+    select: (data: any[]) => data || []
+  });
+
   const form = useForm<AddArticleFormData>({
     resolver: zodResolver(addArticleSchema),
     defaultValues: {
@@ -46,7 +52,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
       statut: "brouillon",
       hasImage: false,
       dateDePublication: defaultDate || new Date().toISOString().split('T')[0],
-      siteId: 1
+      siteId: websites.length > 0 ? websites[0].id : 1
     }
   });
 
@@ -181,6 +187,33 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="siteId" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Site web *
+              </Label>
+              <Select
+                value={form.watch("siteId")?.toString()}
+                onValueChange={(value) => form.setValue("siteId", parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez un site web" />
+                </SelectTrigger>
+                <SelectContent>
+                  {websites.map((website: any) => (
+                    <SelectItem key={website.id} value={website.id.toString()}>
+                      {website.name} ({website.url})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.siteId && (
+                <p className="text-sm text-red-500 mt-1">
+                  {form.formState.errors.siteId.message}
+                </p>
+              )}
             </div>
 
             <div>
