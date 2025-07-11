@@ -314,12 +314,9 @@ export default function Calendar() {
                             {getEventsForDate(day).slice(0, 2).map(event => (
                               <div
                                 key={event.id}
-                                className="text-xs p-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                className="text-xs p-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 truncate"
                               >
-                                <div className="truncate">{event.title}</div>
-                                <div className="text-xs opacity-75 mt-0.5">
-                                  {getSiteName(event.siteId)}
-                                </div>
+                                {event.title}
                               </div>
                             ))}
                             {getEventsForDate(day).length > 2 && (
