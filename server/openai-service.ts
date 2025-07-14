@@ -153,6 +153,65 @@ Réponds en JSON avec ce format exact :
   }
 
   /**
+   * Génère une image avec DALL-E 3 basée sur le contenu et le type
+   */
+  async generateImage(contentText: string, typeContent: string): Promise<{ imageUrl: string }> {
+    try {
+      // Créer un prompt optimisé pour DALL-E 3 basé sur le contenu et le type
+      let imagePrompt = "";
+      
+      switch (typeContent) {
+        case "xtwitter":
+          imagePrompt = `Créer une image moderne et engageante pour Twitter avec un style épuré et professionnel. L'image doit illustrer visuellement le concept suivant : "${contentText}". Style : minimal, couleurs vives, typographie moderne, format carré optimisé pour les réseaux sociaux.`;
+          break;
+        case "instagram":
+          imagePrompt = `Créer une image esthétique et visuellement attrayante pour Instagram. L'image doit représenter de manière créative et artistique : "${contentText}". Style : photography-like, couleurs saturées, composition équilibrée, format carré, tendance Instagram.`;
+          break;
+        case "facebook":
+          imagePrompt = `Créer une image accrocheuse pour Facebook qui illustre clairement : "${contentText}". Style : moderne, accessible, couleurs harmonieuses, format rectangulaire, adapté au partage social.`;
+          break;
+        case "pinterest":
+          imagePrompt = `Créer une image verticale inspirante pour Pinterest représentant : "${contentText}". Style : esthétique, inspirant, couleurs douces, composition verticale, haute qualité visuelle.`;
+          break;
+        case "google my business":
+          imagePrompt = `Créer une image professionnelle pour Google My Business illustrant : "${contentText}". Style : professionnel, crédible, couleurs corporate, format adapté aux entreprises.`;
+          break;
+        case "article":
+          imagePrompt = `Créer une image d'en-tête d'article de blog professionnelle illustrant : "${contentText}". Style : éditorial, moderne, couleurs neutres, format bannière, qualité web.`;
+          break;
+        case "newsletter":
+          imagePrompt = `Créer une image d'en-tête pour newsletter représentant : "${contentText}". Style : professionnel, clean, couleurs de marque, format email, lisible.`;
+          break;
+        default:
+          imagePrompt = `Créer une image moderne et professionnelle illustrant : "${contentText}". Style : clean, moderne, couleurs harmonieuses, haute qualité.`;
+      }
+
+      console.log('🎨 Génération d\'image avec DALL-E 3 - Prompt:', imagePrompt);
+
+      const response = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: imagePrompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+        style: "vivid",
+      });
+
+      const imageUrl = response.data[0].url;
+      
+      if (!imageUrl) {
+        throw new Error("Aucune URL d'image retournée par DALL-E 3");
+      }
+
+      return { imageUrl };
+
+    } catch (error) {
+      console.error('Erreur lors de la génération d\'image avec DALL-E 3:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Teste la connexion à l'API OpenAI
    */
   async testConnection(): Promise<boolean> {

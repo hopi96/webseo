@@ -320,6 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contentText: req.body.contentText,
         statut: req.body.statut || 'en attente',
         hasImage: req.body.hasImage || false,
+        imageUrl: req.body.imageUrl || null,
         dateDePublication: req.body.dateDePublication || new Date().toISOString()
       };
 
@@ -374,6 +375,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Erreur lors de la suppression du contenu éditorial:', error.message);
       res.status(500).json({ message: 'Failed to delete editorial content', error: error.message });
+    }
+  });
+
+  // Route pour générer des images avec DALL-E 3
+  app.post("/api/generate-image", async (req, res) => {
+    try {
+      const { contentText, typeContent, prompt } = req.body;
+      
+      if (!contentText || !typeContent) {
+        return res.status(400).json({ message: "Content text and type are required" });
+      }
+      
+      console.log(`🎨 Génération d'image IA pour ${typeContent}: "${contentText}"`);
+      
+      // Générer l'image avec OpenAI DALL-E 3
+      const imageResult = await openaiService.generateImage(contentText, typeContent);
+      
+      if (imageResult.imageUrl) {
+        console.log('✅ Image générée avec succès:', imageResult.imageUrl);
+        res.json({ imageUrl: imageResult.imageUrl });
+      } else {
+        res.status(500).json({ message: "Failed to generate image" });
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la génération d\'image:', error);
+      res.status(500).json({ 
+        message: "Failed to generate image", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 
