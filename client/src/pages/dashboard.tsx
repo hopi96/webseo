@@ -68,9 +68,17 @@ export default function DashboardWebhook() {
   });
 
   // S'assurer qu'on a un website ID valide si les sites sont chargés
+  // Sélectionner automatiquement le site le plus récent (ID le plus élevé)
   useEffect(() => {
-    if (websites.length > 0 && !websites.find(w => w.id === selectedWebsiteId)) {
-      setSelectedWebsiteId(websites[0].id);
+    if (websites.length > 0) {
+      // Trier par ID décroissant pour avoir le plus récent en premier
+      const sortedWebsites = [...websites].sort((a, b) => b.id - a.id);
+      const newestWebsite = sortedWebsites[0];
+      
+      // Si aucun site n'est sélectionné ou si le site sélectionné n'existe plus
+      if (!selectedWebsiteId || !websites.find(w => w.id === selectedWebsiteId)) {
+        setSelectedWebsiteId(newestWebsite.id);
+      }
     }
   }, [websites, selectedWebsiteId]);
 
@@ -778,6 +786,10 @@ export default function DashboardWebhook() {
       <AddWebsiteDialog 
         open={isAddWebsiteOpen}
         onOpenChange={setIsAddWebsiteOpen}
+        onWebsiteAdded={(websiteId) => {
+          // Sélectionner automatiquement le nouveau site ajouté
+          setSelectedWebsiteId(websiteId);
+        }}
       />
 
       {/* Dialogue d'actualisation d'analyse */}

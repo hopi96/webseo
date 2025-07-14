@@ -9,9 +9,10 @@ import type { Website } from "@shared/schema";
 interface WebsiteSelectorProps {
   selectedWebsiteId?: number;
   onWebsiteChange: (websiteId: number) => void;
+  onWebsiteAdded?: (websiteId: number) => void;
 }
 
-export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange }: WebsiteSelectorProps) {
+export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteAdded }: WebsiteSelectorProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   const { data: websites, isLoading } = useQuery<Website[]>({
@@ -41,7 +42,7 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange }: WebsiteS
                 <SelectValue placeholder="Select a website" />
               </SelectTrigger>
               <SelectContent>
-                {websites?.map((website) => (
+                {websites?.sort((a, b) => b.id - a.id).map((website) => (
                   <SelectItem key={website.id} value={website.id.toString()}>
                     {website.name}
                   </SelectItem>
@@ -61,6 +62,13 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange }: WebsiteS
       <AddWebsiteDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
+        onWebsiteAdded={(websiteId) => {
+          // Sélectionner automatiquement le nouveau site et appeler le callback parent
+          onWebsiteChange(websiteId);
+          if (onWebsiteAdded) {
+            onWebsiteAdded(websiteId);
+          }
+        }}
       />
     </>
   );
