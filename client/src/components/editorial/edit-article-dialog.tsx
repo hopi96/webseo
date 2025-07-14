@@ -291,7 +291,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Éditer l'article</DialogTitle>
         </DialogHeader>
@@ -485,11 +485,15 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         <div className="relative">
                           <img
                             src={form.watch("imageUrl")}
-                            alt="Image existante"
+                            alt="Image existante de l'article"
                             className="w-full h-32 object-cover rounded-lg"
+                            onError={(e) => {
+                              console.error("Erreur lors du chargement de l'image:", form.watch("imageUrl"));
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                           <span className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
-                            Existante
+                            Image actuelle
                           </span>
                         </div>
                       )}
