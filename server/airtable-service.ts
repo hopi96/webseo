@@ -197,9 +197,18 @@ export class AirtableService {
         contenu_text: contentData.contentText,
         statut: contentData.statut || 'en attente',
         image: contentData.hasImage || false,
-        image_url: contentData.imageUrl || null,
         ID_SITE: (contentData.idSite || 1).toString()  // Convertir en string pour Airtable
       };
+
+      // Gérer l'image : si imageUrl est fournie, créer un attachment Airtable
+      if (contentData.imageUrl) {
+        fieldsToCreate.image_url = contentData.imageUrl;
+        // Pour le champ image d'Airtable (de type attachment), créer un objet d'attachement
+        fieldsToCreate.image = [{
+          url: contentData.imageUrl,
+          filename: `image_${Date.now()}.jpg`
+        }];
+      }
 
       // Formater la date pour Airtable (YYYY-MM-DD)
       if (contentData.dateDePublication) {
@@ -276,6 +285,15 @@ export class AirtableService {
       }
       if (updateData.imageUrl !== undefined) {
         fieldsToUpdate.image_url = updateData.imageUrl;
+        // Si une nouvelle imageUrl est fournie, créer un attachment Airtable
+        if (updateData.imageUrl) {
+          fieldsToUpdate.image = [{
+            url: updateData.imageUrl,
+            filename: `image_${Date.now()}.jpg`
+          }];
+        } else {
+          fieldsToUpdate.image = null; // Supprimer l'image si imageUrl est null
+        }
       }
       if (updateData.idSite) {
         fieldsToUpdate.ID_SITE = updateData.idSite.toString();
