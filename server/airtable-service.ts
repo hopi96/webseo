@@ -196,33 +196,33 @@ export class AirtableService {
         type_contenu: contentData.typeContent,
         contenu_text: contentData.contentText,
         statut: contentData.statut || 'en attente',
-        image: contentData.hasImage || false,
         ID_SITE: (contentData.idSite || 1).toString()  // Convertir en string pour Airtable
       };
 
       // Gérer l'image : si imageUrl est fournie, créer un attachment Airtable
       if (contentData.imageUrl) {
-        fieldsToCreate.image_url = contentData.imageUrl;
-        fieldsToCreate.image = true; // Marquer que le contenu a une image
-        
         // Pour les attachements Airtable, l'URL doit être accessible publiquement
         // Si c'est un chemin local, on utilise l'URL du serveur
         let fullImageUrl = contentData.imageUrl;
         if (contentData.imageUrl.startsWith('/uploads/')) {
           // Construire l'URL complète pour le serveur
-          fullImageUrl = `https://${process.env.REPLIT_DOMAINS || 'localhost:5000'}${contentData.imageUrl}`;
+          const domain = process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
+          fullImageUrl = `https://${domain}${contentData.imageUrl}`;
         }
         
         // Pour le champ image d'Airtable (de type attachment), créer un objet d'attachement
         if (contentData.imageUrl.startsWith('http')) {
           // Image générée par IA ou URL externe
-          fieldsToCreate['image'] = [{
+          fieldsToCreate.image = [{
             url: contentData.imageUrl,
             filename: `image_${Date.now()}.jpg`
           }];
         } else {
-          // Image uploadée localement - on stocke juste l'URL dans image_url
-          fieldsToCreate.image = true;
+          // Image uploadée localement - créer un attachement avec l'URL complète
+          fieldsToCreate.image = [{
+            url: fullImageUrl,
+            filename: `image_${Date.now()}.${contentData.imageUrl.split('.').pop()}`
+          }];
         }
       }
 
