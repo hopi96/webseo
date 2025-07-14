@@ -93,6 +93,14 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     }
   });
 
+  // Debug pour voir les données de l'article
+  console.log("Article data:", {
+    hasImage: article.hasImage,
+    imageUrl: article.imageUrl,
+    formImageUrl: form.watch("imageUrl"),
+    formHasImage: form.watch("hasImage")
+  });
+
   // Fonction pour générer une image avec l'IA
   const generateImageWithAI = async (contentText: string, typeContent: string, customPrompt?: string) => {
     if (!contentText || !contentText.trim()) {
@@ -454,7 +462,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 <h4 className="font-medium mb-3">Gestion des images</h4>
                 
                 {/* Aperçu des images existantes */}
-                {(generatedImageUrl || uploadedImageUrl || form.watch("imageUrl")) && (
+                {(generatedImageUrl || uploadedImageUrl || (form.watch("imageUrl") && form.watch("imageUrl") !== "")) && (
                   <div className="mb-4">
                     <div className="grid grid-cols-1 gap-2">
                       {generatedImageUrl && (
@@ -481,7 +489,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                           </span>
                         </div>
                       )}
-                      {form.watch("imageUrl") && !generatedImageUrl && !uploadedImageUrl && (
+                      {form.watch("imageUrl") && form.watch("imageUrl") !== "" && !generatedImageUrl && !uploadedImageUrl && (
                         <div className="relative">
                           <img
                             src={form.watch("imageUrl")}
@@ -495,6 +503,12 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                           <span className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
                             Image actuelle
                           </span>
+                          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                            {form.watch("imageUrl")?.length > 30 ? 
+                              `${form.watch("imageUrl")?.substring(0, 30)}...` : 
+                              form.watch("imageUrl")
+                            }
+                          </div>
                         </div>
                       )}
                     </div>
@@ -512,6 +526,15 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                     </div>
                   </div>
                 )}
+
+                {/* Debug information */}
+                <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                  <p><strong>Debug:</strong></p>
+                  <p>hasImage: {form.watch("hasImage") ? "true" : "false"}</p>
+                  <p>imageUrl: {form.watch("imageUrl") || "vide"}</p>
+                  <p>generatedImageUrl: {generatedImageUrl || "vide"}</p>
+                  <p>uploadedImageUrl: {uploadedImageUrl || "vide"}</p>
+                </div>
 
                 {/* Options d'image - Choix exclusif */}
                 <div className="space-y-3">
