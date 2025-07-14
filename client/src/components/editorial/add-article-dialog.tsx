@@ -196,9 +196,23 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
         title: "Contenu créé",
         description: "Le nouveau contenu a été ajouté avec succès.",
       });
+      
+      // Réinitialiser complètement le formulaire
+      form.reset({
+        contentText: "",
+        typeContent: "xtwitter",
+        statut: "en attente",
+        hasImage: false,
+        imageUrl: "",
+        dateDePublication: new Date().toISOString().split('T')[0],
+        siteId: websites.length > 0 ? websites[0].id : 1
+      });
+      
+      // Réinitialiser les images
+      resetImages();
+      
       queryClient.invalidateQueries({ queryKey: ["/api/editorial-content"] });
       onOpenChange(false);
-      form.reset();
     },
     onError: (error) => {
       toast({

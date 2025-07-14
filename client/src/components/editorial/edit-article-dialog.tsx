@@ -104,6 +104,17 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         description: "L'article a été modifié avec succès dans Airtable",
         variant: "default"
       });
+      
+      // Réinitialiser le formulaire après modification réussie
+      form.reset({
+        contentText: "",
+        statut: "en attente",
+        typeContent: "xtwitter",
+        hasImage: false,
+        dateDePublication: new Date().toISOString().split('T')[0],
+        idSite: websites.length > 0 ? websites[0].id : 1
+      });
+      
       queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
       onOpenChange(false);
     },
