@@ -49,7 +49,7 @@ export default function Reports() {
   });
 
   // S'assurer qu'on a un website ID valide si les sites sont chargés
-  // Sélectionner automatiquement le site le plus récent (ID le plus élevé)
+  // Sélectionner automatiquement le site le plus récent (ID le plus élevé) seulement au premier chargement
   useEffect(() => {
     if (websites.length > 0) {
       // Trier par ID décroissant pour avoir le plus récent en premier
@@ -61,7 +61,7 @@ export default function Reports() {
         setSelectedWebsiteId(newestWebsite.id);
       }
     }
-  }, [websites, selectedWebsiteId]);
+  }, [websites.length]);
 
   // Récupération de l'analyse SEO
   const { data: seoAnalysis, isLoading } = useQuery<SeoAnalysisType>({
