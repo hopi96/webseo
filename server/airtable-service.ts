@@ -48,12 +48,16 @@ function normalizeContentType(type: string): string {
 function extractImageData(fields: any): { hasImage: boolean; imageUrl: string | null } {
   const imageData = fields.image;
   
+  // D'abord vérifier le champ "image" qui est le champ principal d'Airtable
   if (imageData && Array.isArray(imageData) && imageData.length > 0) {
     return {
       hasImage: true,
       imageUrl: imageData[0].url
     };
-  } else if (fields.image_url) {
+  }
+  
+  // Fallback vers image_url si le champ image n'est pas disponible (rétrocompatibilité)
+  if (fields.image_url) {
     return {
       hasImage: true,
       imageUrl: fields.image_url
@@ -326,26 +330,28 @@ export class AirtableService {
       if (updateData.statut) {
         fieldsToUpdate.statut = updateData.statut;
       }
-      if (updateData.hasImage !== undefined) {
-        fieldsToUpdate.image = updateData.hasImage;
-      }
+      // Gestion des images - ne mettre à jour que si imageUrl est définie
       if (updateData.imageUrl !== undefined) {
-        fieldsToUpdate.image_url = updateData.imageUrl;
-        // Si une nouvelle imageUrl est fournie, créer un attachment Airtable
         if (updateData.imageUrl) {
+          // Si une nouvelle imageUrl est fournie, créer un attachment Airtable
           fieldsToUpdate.image = [{
             url: updateData.imageUrl,
             filename: `image_${Date.now()}.jpg`
           }];
         } else {
-          fieldsToUpdate.image = null; // Supprimer l'image si imageUrl est null
+          // Supprimer l'image si imageUrl est null ou vide
+          fieldsToUpdate.image = null;
         }
       }
       if (updateData.idSite) {
         fieldsToUpdate.ID_SITE = updateData.idSite.toString();
       }
       if (updateData.dateDePublication) {
-        fieldsToUpdate.date_de_publication = updateData.dateDePublication.toISOString().split('T')[0];
+        // Convertir en Date si c'est une chaîne
+        const date = typeof updateData.dateDePublication === 'string' 
+          ? new Date(updateData.dateDePublication)
+          : updateData.dateDePublication;
+        fieldsToUpdate.date_de_publication = date.toISOString().split('T')[0];
       }
 
       console.log('Champs à mettre à jour dans Airtable:', fieldsToUpdate);
