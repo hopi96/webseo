@@ -32,7 +32,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { EditorialContent } from "@shared/schema";
-import { Sparkles, Globe } from "lucide-react";
+import { Sparkles, Globe, Upload, X, RotateCcw } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
 
 interface EditArticleDialogProps {
@@ -46,6 +46,7 @@ const editArticleSchema = z.object({
   statut: z.enum(["en attente", "à réviser", "en cours", "publié"]),
   typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter"]),
   hasImage: z.boolean(),
+  imageUrl: z.string().optional(),
   dateDePublication: z.string().min(1, "La date de publication est obligatoire"),
   idSite: z.number()
 });
@@ -56,6 +57,10 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAIDialog, setShowAIDialog] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState("");
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   
   // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
@@ -81,10 +86,125 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       statut: normalizeStatut(article.statut),
       typeContent: normalizeTypeContent(article.typeContent),
       hasImage: article.hasImage || false,
+      imageUrl: article.imageUrl || "",
       dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0],
       idSite: article.idSite || 1
     }
   });
+
+  // Fonction pour générer une image avec l'IA
+  const generateImageWithAI = async (contentText: string, typeContent: string) => {
+    if (!contentText || !contentText.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez d'abord saisir un contenu pour générer une image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGeneratingImage(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate-image", {
+        contentText,
+        typeContent,
+      });
+
+      const result = await response.json();
+      
+      if (result.imageUrl) {
+        setGeneratedImageUrl(result.imageUrl);
+        setUploadedImageUrl(""); // Reset upload
+        form.setValue("imageUrl", result.imageUrl);
+        form.setValue("hasImage", true);
+        
+        toast({
+          title: "Image générée",
+          description: "L'image a été générée avec succès par l'IA.",
+        });
+      }
+    } catch (error) {
+      console.error("Erreur lors de la génération d'image:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer l'image. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
+  // Fonction pour gérer l'upload d'images
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+
+    // Vérifier le type de fichier
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un fichier image valide.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Vérifier la taille du fichier (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erreur",
+        description: "L'image ne peut pas dépasser 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // Utiliser fetch directement pour l'upload de fichier
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.imageUrl) {
+        setUploadedImageFile(file);
+        setUploadedImageUrl(result.imageUrl);
+        setGeneratedImageUrl(""); // Reset AI generation
+        form.setValue("imageUrl", result.imageUrl);
+        form.setValue("hasImage", true);
+
+        toast({
+          title: "Image uploadée",
+          description: "L'image a été uploadée avec succès.",
+        });
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'upload d'image:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'uploader l'image. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Fonction pour réinitialiser les images
+  const resetImages = () => {
+    setGeneratedImageUrl("");
+    setUploadedImageFile(null);
+    setUploadedImageUrl("");
+    form.setValue("imageUrl", "");
+    form.setValue("hasImage", false);
+  };
 
   const updateArticleMutation = useMutation({
     mutationFn: async (data: EditArticleFormData) => {
@@ -111,9 +231,13 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         statut: "en attente",
         typeContent: "xtwitter",
         hasImage: false,
+        imageUrl: "",
         dateDePublication: new Date().toISOString().split('T')[0],
         idSite: websites.length > 0 ? websites[0].id : 1
       });
+      
+      // Réinitialiser les images
+      resetImages();
       
       queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
       onOpenChange(false);
@@ -316,6 +440,131 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 )}
               />
             </div>
+
+            {/* Section de gestion des images */}
+            {form.watch("hasImage") && (
+              <div className="border rounded-lg p-4 bg-gray-50">
+                <h4 className="font-medium mb-3">Gestion des images</h4>
+                
+                {/* Aperçu des images existantes */}
+                {(generatedImageUrl || uploadedImageUrl || form.watch("imageUrl")) && (
+                  <div className="mb-4">
+                    <div className="grid grid-cols-1 gap-2">
+                      {generatedImageUrl && (
+                        <div className="relative">
+                          <img
+                            src={generatedImageUrl}
+                            alt="Image générée par IA"
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <span className="absolute top-2 left-2 bg-purple-500 text-white px-2 py-1 rounded text-xs">
+                            IA
+                          </span>
+                        </div>
+                      )}
+                      {uploadedImageUrl && (
+                        <div className="relative">
+                          <img
+                            src={uploadedImageUrl}
+                            alt="Image uploadée"
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <span className="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
+                            Upload
+                          </span>
+                        </div>
+                      )}
+                      {form.watch("imageUrl") && !generatedImageUrl && !uploadedImageUrl && (
+                        <div className="relative">
+                          <img
+                            src={form.watch("imageUrl")}
+                            alt="Image existante"
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <span className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
+                            Existante
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-2 flex justify-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={resetImages}
+                        className="flex items-center gap-2"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        Réinitialiser
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Options d'image - Choix exclusif */}
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">Choisissez l'une des deux options :</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Génération par IA */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Option 1: Génération par IA</label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"))}
+                        disabled={generatingImage || uploadedImageUrl !== ""}
+                        className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50 disabled:opacity-50"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        {generatingImage ? "Génération..." : "Générer avec DALL-E 3"}
+                      </Button>
+                      {!form.watch("contentText")?.trim() && (
+                        <p className="text-xs text-gray-500">Saisissez d'abord du contenu</p>
+                      )}
+                      {uploadedImageUrl && (
+                        <p className="text-xs text-orange-500">Image uploadée active</p>
+                      )}
+                    </div>
+
+                    {/* Upload d'image */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Option 2: Upload d'image</label>
+                      <div className="relative">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleImageUpload(file);
+                            }
+                          }}
+                          className="hidden"
+                          id="image-upload-edit"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('image-upload-edit')?.click()}
+                          disabled={generatedImageUrl !== ""}
+                          className="w-full flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 disabled:opacity-50"
+                        >
+                          <Upload className="h-4 w-4" />
+                          Choisir une image
+                        </Button>
+                      </div>
+                      {generatedImageUrl && (
+                        <p className="text-xs text-orange-500">Image IA active</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <DialogFooter>
               <Button
