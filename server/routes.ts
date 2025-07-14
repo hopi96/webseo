@@ -6,6 +6,38 @@ import { requestSeoAnalysisFromWebhook } from "./webhook-service";
 import { airtableService } from "./airtable-service";
 import { openaiService } from "./openai-service";
 import { z } from "zod";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Configuration multer pour l'upload d'images
+const storage_multer = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `image-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage: storage_multer,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB max
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Website routes
@@ -402,6 +434,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ Erreur lors de la génération d\'image:', error);
       res.status(500).json({ 
         message: "Failed to generate image", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
+  // Route pour uploader des images
+  app.post("/api/upload-image", upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+
+      console.log(`📤 Upload d'image: ${req.file.filename}`);
+      
+      // Générer l'URL accessible pour l'image
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      console.log('✅ Image uploadée avec succès:', imageUrl);
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'upload d\'image:', error);
+      res.status(500).json({ 
+        message: "Failed to upload image", 
         error: error instanceof Error ? error.message : "Unknown error" 
       });
     }

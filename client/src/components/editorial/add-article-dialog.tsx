@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Plus, X, Sparkles, Globe } from "lucide-react";
+import { Calendar, Plus, X, Sparkles, Globe, Upload, Image } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
 
 const addArticleSchema = z.object({
@@ -40,6 +40,8 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string>("");
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
 
   // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
@@ -84,6 +86,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
       
       if (result.imageUrl) {
         setGeneratedImageUrl(result.imageUrl);
+        setUploadedImageUrl(""); // Reset upload
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
         
@@ -102,6 +105,68 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
     } finally {
       setGeneratingImage(false);
     }
+  };
+
+  // Fonction pour gérer l'upload d'images
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+
+    // Vérifier le type de fichier
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un fichier image valide.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Vérifier la taille du fichier (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erreur",
+        description: "L'image ne peut pas dépasser 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await apiRequest("POST", "/api/upload-image", formData);
+      const result = await response.json();
+
+      if (result.imageUrl) {
+        setUploadedImageFile(file);
+        setUploadedImageUrl(result.imageUrl);
+        setGeneratedImageUrl(""); // Reset AI generation
+        form.setValue("imageUrl", result.imageUrl);
+        form.setValue("hasImage", true);
+
+        toast({
+          title: "Image uploadée",
+          description: "L'image a été uploadée avec succès.",
+        });
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'upload d'image:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'uploader l'image. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Fonction pour réinitialiser les images
+  const resetImages = () => {
+    setGeneratedImageUrl("");
+    setUploadedImageFile(null);
+    setUploadedImageUrl("");
+    form.setValue("imageUrl", "");
+    form.setValue("hasImage", false);
   };
 
   const createMutation = useMutation({
@@ -295,22 +360,72 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
               />
             </div>
 
-            {/* Section génération d'image avec IA */}
+            {/* Section gestion d'images */}
             {form.watch("hasImage") && (
               <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-blue-50">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">Image générée par IA</Label>
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Image className="h-4 w-4" />
+                    Gestion des images
+                  </Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"))}
-                    disabled={generatingImage || !form.watch("contentText")}
-                    className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                    onClick={resetImages}
+                    className="text-red-600 border-red-200 hover:bg-red-50"
                   >
-                    <Sparkles className="h-4 w-4" />
-                    {generatingImage ? "Génération..." : "Générer avec DALL-E 3"}
+                    <X className="h-4 w-4" />
+                    Réinitialiser
                   </Button>
+                </div>
+
+                {/* Options d'image */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Génération par IA */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Génération par IA</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"))}
+                      disabled={generatingImage || !form.watch("contentText")}
+                      className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {generatingImage ? "Génération..." : "Générer avec DALL-E 3"}
+                    </Button>
+                  </div>
+
+                  {/* Upload d'image */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Upload d'image</Label>
+                    <div className="relative">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleImageUpload(file);
+                          }
+                        }}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('image-upload')?.click()}
+                        className="w-full flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        <Upload className="h-4 w-4" />
+                        Choisir une image
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 {generatingImage && (
@@ -320,6 +435,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   </div>
                 )}
 
+                {/* Aperçu de l'image générée par IA */}
                 {generatedImageUrl && (
                   <div className="space-y-2">
                     <div className="relative">
@@ -328,22 +444,31 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                         alt="Image générée par IA"
                         className="w-full h-48 object-cover rounded-lg border"
                       />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                          setGeneratedImageUrl("");
-                          form.setValue("imageUrl", "");
-                          form.setValue("hasImage", false);
-                        }}
-                        className="absolute top-2 right-2"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <div className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-1 rounded text-xs">
+                        DALL-E 3
+                      </div>
                     </div>
                     <p className="text-xs text-gray-500">
                       Image générée automatiquement par DALL-E 3
+                    </p>
+                  </div>
+                )}
+
+                {/* Aperçu de l'image uploadée */}
+                {uploadedImageUrl && (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <img
+                        src={uploadedImageUrl}
+                        alt="Image uploadée"
+                        className="w-full h-48 object-cover rounded-lg border"
+                      />
+                      <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs">
+                        UPLOADÉE
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {uploadedImageFile ? `Fichier: ${uploadedImageFile.name}` : "Image uploadée"}
                     </p>
                   </div>
                 )}
@@ -356,6 +481,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       {...form.register("imageUrl")}
                       placeholder="https://..."
                       className="mt-1"
+                      readOnly
                     />
                   </div>
                 )}
