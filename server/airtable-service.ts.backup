@@ -154,7 +154,6 @@ export class AirtableService {
 
       return records.map((record: any) => {
         const fields = record.fields as any;
-        const imageData = extractImageData(fields);
         
         return {
           id: record.id, // Utilisation de l'ID Airtable unique
@@ -162,8 +161,8 @@ export class AirtableService {
           idSite: parseInt(fields.ID_SITE) || 1,
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
-          hasImage: imageData.hasImage,
-          imageUrl: imageData.imageUrl,
+          hasImage: fields.image || false,
+          imageUrl: fields.image_url || null,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -187,7 +186,6 @@ export class AirtableService {
 
       return records.map((record: any) => {
         const fields = record.fields as any;
-        const imageData = extractImageData(fields);
         
         return {
           id: record.id, // Utilisation de l'ID Airtable unique
@@ -195,8 +193,8 @@ export class AirtableService {
           idSite: parseInt(fields.ID_SITE) || 1,
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
-          hasImage: imageData.hasImage,
-          imageUrl: imageData.imageUrl,
+          hasImage: fields.image || false,
+          imageUrl: fields.image_url || null,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -355,7 +353,6 @@ export class AirtableService {
 
       // Retourner le contenu mis à jour
       const fields = record.fields as any;
-        const imageData = extractImageData(fields);
       
       return {
         id: record.id,
@@ -363,8 +360,8 @@ export class AirtableService {
         idSite: parseInt(fields.ID_SITE) || 1,
         typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
         contentText: fields.contenu_text || '',
-        hasImage: imageData.hasImage,
-        imageUrl: imageData.imageUrl,
+        hasImage: fields.image || false,
+        imageUrl: fields.image_url || null,
         statut: fields.statut || 'en attente',
         dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
         createdAt: new Date()
