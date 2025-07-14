@@ -5,6 +5,7 @@ import { createChat } from '@n8n/chat';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnifiedHeader } from "@/components/layout/unified-header";
 
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
@@ -43,6 +44,7 @@ export default function Calendar() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [addDialogDate, setAddDialogDate] = useState<string>("");
+  const [selectedSiteFilter, setSelectedSiteFilter] = useState<number | null>(null);
 
   // Initialiser le chatbot n8n
   useEffect(() => {
@@ -97,7 +99,7 @@ export default function Calendar() {
   };
 
   // Transformer les données de l'API en format pour le calendrier
-  const events: EditorialEvent[] = editorialContent.map(content => ({
+  const allEvents: EditorialEvent[] = editorialContent.map(content => ({
     id: content.id,
     title: content.contentText.length > 50 ? content.contentText.substring(0, 50) + '...' : content.contentText,
     description: content.contentText,
@@ -107,6 +109,11 @@ export default function Calendar() {
     hasImage: content.hasImage || false,
     siteId: content.idSite
   }));
+
+  // Filtrer les événements par site sélectionné
+  const events = selectedSiteFilter 
+    ? allEvents.filter(event => event.siteId === selectedSiteFilter)
+    : allEvents;
 
   // Fonction pour obtenir les jours du mois
   const getDaysInMonth = (date: Date) => {
@@ -239,6 +246,37 @@ export default function Calendar() {
               <Plus className="h-4 w-4 mr-2" />
               Nouveau contenu
             </Button>
+          </div>
+          
+          {/* Filtre par site */}
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Filtrer par site :
+              </label>
+              <Select
+                value={selectedSiteFilter?.toString() || "all"}
+                onValueChange={(value) => setSelectedSiteFilter(value === "all" ? null : parseInt(value))}
+              >
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Tous les sites" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les sites</SelectItem>
+                  {sites.sort((a, b) => b.id - a.id).map((site) => (
+                    <SelectItem key={site.id} value={site.id.toString()}>
+                      {site.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {selectedSiteFilter && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {events.length} contenu(s) trouvé(s) pour {getSiteName(selectedSiteFilter)}
+              </div>
+            )}
           </div>
         </div>
 
