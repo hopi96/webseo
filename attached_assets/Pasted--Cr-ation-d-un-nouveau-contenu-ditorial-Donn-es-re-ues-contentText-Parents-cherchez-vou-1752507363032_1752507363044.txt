@@ -1,0 +1,81 @@
+🔄 Création d'un nouveau contenu éditorial
+Données reçues: {
+  contentText: 'Parents, cherchez-vous à rendre le mariage de votre enfant inoubliable? 💍 Le choix du tissu peut faire toute la différence! Un post Twitter sur les tissu utilisés pour un mariage réussi peut vous inspirer. Que ce soit pour la robe de mariée ou la décoration, les tissus doivent être choisis avec soin pour refléter élégance et confort. Du satin classique à la dentelle délicate, chaque texture raconte une histoire. Partagez vos idées et découvrez comment un simple post peut transformer votre vision du mariage! #MariageRéussi #TissusDeMariage',
+  typeContent: 'xtwitter',
+  statut: 'en attente',
+  hasImage: true,
+  imageUrl: '/uploads/image-1752507251653-476176724.webp',
+  dateDePublication: '2025-07-14T00:00:00.000Z',
+  siteId: 1
+}
+🔄 Création d'un nouveau contenu dans Airtable
+Données à créer: {
+  idSite: 1,
+  typeContent: 'xtwitter',
+  contentText: 'Parents, cherchez-vous à rendre le mariage de votre enfant inoubliable? 💍 Le choix du tissu peut faire toute la différence! Un post Twitter sur les tissu utilisés pour un mariage réussi peut vous inspirer. Que ce soit pour la robe de mariée ou la décoration, les tissus doivent être choisis avec soin pour refléter élégance et confort. Du satin classique à la dentelle délicate, chaque texture raconte une histoire. Partagez vos idées et découvrez comment un simple post peut transformer votre vision du mariage! #MariageRéussi #TissusDeMariage',
+  statut: 'en attente',
+  hasImage: true,
+  imageUrl: '/uploads/image-1752507251653-476176724.webp',
+  dateDePublication: '2025-07-14T00:00:00.000Z'
+}
+Erreur lors de la création du contenu dans Airtable: TypeError: contentData.dateDePublication.toISOString is not a function
+    at AirtableService.createContent (/home/runner/workspace/server/airtable-service.ts:215:76)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:365:52)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at <anonymous> (/home/runner/workspace/server/index.ts:40:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at urlencodedParser (/home/runner/workspace/node_modules/body-parser/lib/types/urlencoded.js:85:7)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at /home/runner/workspace/node_modules/body-parser/lib/read.js:137:5
+    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+    at invokeCallback (/home/runner/workspace/node_modules/raw-body/index.js:238:16)
+    at done (/home/runner/workspace/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/home/runner/workspace/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:518:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+Erreur lors de la création du contenu éditorial: Error: Impossible de créer le contenu dans Airtable
+    at AirtableService.createContent (/home/runner/workspace/server/airtable-service.ts:240:13)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:365:52)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at <anonymous> (/home/runner/workspace/server/index.ts:40:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at urlencodedParser (/home/runner/workspace/node_modules/body-parser/lib/types/urlencoded.js:85:7)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at /home/runner/workspace/node_modules/body-parser/lib/read.js:137:5
+    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+    at invokeCallback (/home/runner/workspace/node_modules/raw-body/index.js:238:16)
+    at done (/home/runner/workspace/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/home/runner/workspace/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:518:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+3:35:09 PM [express] POST /api/editorial-content 500 in 13ms :: {"message":"Failed to create editori…

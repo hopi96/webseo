@@ -203,16 +203,35 @@ export class AirtableService {
       // Gérer l'image : si imageUrl est fournie, créer un attachment Airtable
       if (contentData.imageUrl) {
         fieldsToCreate.image_url = contentData.imageUrl;
+        fieldsToCreate.image = true; // Marquer que le contenu a une image
+        
+        // Pour les attachements Airtable, l'URL doit être accessible publiquement
+        // Si c'est un chemin local, on utilise l'URL du serveur
+        let fullImageUrl = contentData.imageUrl;
+        if (contentData.imageUrl.startsWith('/uploads/')) {
+          // Construire l'URL complète pour le serveur
+          fullImageUrl = `https://${process.env.REPLIT_DOMAINS || 'localhost:5000'}${contentData.imageUrl}`;
+        }
+        
         // Pour le champ image d'Airtable (de type attachment), créer un objet d'attachement
-        fieldsToCreate.image = [{
-          url: contentData.imageUrl,
-          filename: `image_${Date.now()}.jpg`
-        }];
+        if (contentData.imageUrl.startsWith('http')) {
+          // Image générée par IA ou URL externe
+          fieldsToCreate['image'] = [{
+            url: contentData.imageUrl,
+            filename: `image_${Date.now()}.jpg`
+          }];
+        } else {
+          // Image uploadée localement - on stocke juste l'URL dans image_url
+          fieldsToCreate.image = true;
+        }
       }
 
       // Formater la date pour Airtable (YYYY-MM-DD)
       if (contentData.dateDePublication) {
-        fieldsToCreate.date_de_publication = contentData.dateDePublication.toISOString().split('T')[0];
+        const date = typeof contentData.dateDePublication === 'string' 
+          ? new Date(contentData.dateDePublication)
+          : contentData.dateDePublication;
+        fieldsToCreate.date_de_publication = date.toISOString().split('T')[0];
       }
 
       console.log('Champs à créer dans Airtable:', fieldsToCreate);
