@@ -64,7 +64,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
   // Fonction pour générer une image avec l'IA
   const generateImageWithAI = async (contentText: string, typeContent: string) => {
-    if (!contentText.trim()) {
+    if (!contentText || !contentText.trim()) {
       toast({
         title: "Erreur",
         description: "Veuillez d'abord saisir un contenu pour générer une image.",
@@ -135,7 +135,16 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await apiRequest("POST", "/api/upload-image", formData);
+      // Utiliser fetch directement pour l'upload de fichier
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
 
       if (result.imageUrl) {
@@ -380,50 +389,64 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   </Button>
                 </div>
 
-                {/* Options d'image */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Génération par IA */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Génération par IA</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"))}
-                      disabled={generatingImage || !form.watch("contentText")}
-                      className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      {generatingImage ? "Génération..." : "Générer avec DALL-E 3"}
-                    </Button>
-                  </div>
-
-                  {/* Upload d'image */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Upload d'image</Label>
-                    <div className="relative">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleImageUpload(file);
-                          }
-                        }}
-                        className="hidden"
-                        id="image-upload"
-                      />
+                {/* Options d'image - Choix exclusif */}
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">Choisissez l'une des deux options :</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Génération par IA */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Option 1: Génération par IA</Label>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => document.getElementById('image-upload')?.click()}
-                        className="w-full flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                        onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"))}
+                        disabled={generatingImage || uploadedImageUrl !== ""}
+                        className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50 disabled:opacity-50"
                       >
-                        <Upload className="h-4 w-4" />
-                        Choisir une image
+                        <Sparkles className="h-4 w-4" />
+                        {generatingImage ? "Génération..." : "Générer avec DALL-E 3"}
                       </Button>
+                      {!form.watch("contentText")?.trim() && (
+                        <p className="text-xs text-gray-500">Saisissez d'abord du contenu</p>
+                      )}
+                      {uploadedImageUrl && (
+                        <p className="text-xs text-orange-500">Image uploadée active</p>
+                      )}
+                    </div>
+
+                    {/* Upload d'image */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Option 2: Upload d'image</Label>
+                      <div className="relative">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleImageUpload(file);
+                            }
+                          }}
+                          className="hidden"
+                          id="image-upload"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('image-upload')?.click()}
+                          disabled={generatedImageUrl !== ""}
+                          className="w-full flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 disabled:opacity-50"
+                        >
+                          <Upload className="h-4 w-4" />
+                          Choisir une image
+                        </Button>
+                      </div>
+                      {generatedImageUrl && (
+                        <p className="text-xs text-orange-500">Image IA active</p>
+                      )}
                     </div>
                   </div>
                 </div>
