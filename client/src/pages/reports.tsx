@@ -15,7 +15,11 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export default function Reports() {
-  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(1);
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(() => {
+    // Récupérer le site sélectionné depuis localStorage
+    const savedWebsiteId = localStorage.getItem('selectedWebsiteId');
+    return savedWebsiteId ? parseInt(savedWebsiteId) : 1;
+  });
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { toast } = useToast();
 
@@ -48,6 +52,12 @@ export default function Reports() {
     queryKey: ['/api/websites'],
   });
 
+  // Fonction pour sélectionner un site et persister l'état
+  const selectWebsite = (websiteId: number) => {
+    setSelectedWebsiteId(websiteId);
+    localStorage.setItem('selectedWebsiteId', websiteId.toString());
+  };
+
   // S'assurer qu'on a un website ID valide si les sites sont chargés
   // Sélectionner automatiquement le site le plus récent (ID le plus élevé) seulement au premier chargement
   useEffect(() => {
@@ -58,7 +68,7 @@ export default function Reports() {
       
       // Si aucun site n'est sélectionné ou si le site sélectionné n'existe plus
       if (!selectedWebsiteId || !websites.find(w => w.id === selectedWebsiteId)) {
-        setSelectedWebsiteId(newestWebsite.id);
+        selectWebsite(newestWebsite.id);
       }
     }
   }, [websites.length]);
@@ -417,10 +427,10 @@ export default function Reports() {
             </label>
             <WebsiteSelector
               selectedWebsiteId={selectedWebsiteId}
-              onWebsiteChange={setSelectedWebsiteId}
+              onWebsiteChange={selectWebsite}
               onWebsiteAdded={(websiteId) => {
                 // Sélectionner automatiquement le nouveau site ajouté
-                setSelectedWebsiteId(websiteId);
+                selectWebsite(websiteId);
               }}
             />
           </div>
