@@ -61,6 +61,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const [generatedImageUrl, setGeneratedImageUrl] = useState("");
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [customPrompt, setCustomPrompt] = useState<string>("");
   
   // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
@@ -93,7 +94,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   });
 
   // Fonction pour générer une image avec l'IA
-  const generateImageWithAI = async (contentText: string, typeContent: string) => {
+  const generateImageWithAI = async (contentText: string, typeContent: string, customPrompt?: string) => {
     if (!contentText || !contentText.trim()) {
       toast({
         title: "Erreur",
@@ -105,9 +106,14 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
     setGeneratingImage(true);
     try {
+      const finalPrompt = customPrompt?.trim() 
+        ? customPrompt 
+        : `Créer une image optimisée pour ${typeContent} basée sur ce contenu : "${contentText}"`;
+        
       const response = await apiRequest("POST", "/api/generate-image", {
         contentText,
         typeContent,
+        prompt: finalPrompt
       });
 
       const result = await response.json();
@@ -202,6 +208,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     setGeneratedImageUrl("");
     setUploadedImageFile(null);
     setUploadedImageUrl("");
+    setCustomPrompt("");
     form.setValue("imageUrl", "");
     form.setValue("hasImage", false);
   };
@@ -510,11 +517,18 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                     {/* Génération par IA */}
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Option 1: Génération par IA</label>
+                      <Textarea
+                        placeholder="Prompt personnalisé pour DALL-E 3 (optionnel)"
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        className="min-h-[60px] text-sm"
+                        disabled={generatingImage || uploadedImageUrl !== ""}
+                      />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"))}
+                        onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"), customPrompt)}
                         disabled={generatingImage || uploadedImageUrl !== ""}
                         className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50 disabled:opacity-50"
                       >
