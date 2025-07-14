@@ -57,13 +57,19 @@ export class AirtableService {
       }).all();
 
       console.log(`✅ ${records.length} sites récupérés depuis la table analyse SEO`);
-      
+
       return records.map((record: any) => {
         const fields = record.fields as any;
         
+        // Nettoyer le nom du site en supprimant le préfixe "Analyse SEO - "
+        let siteName = fields['Nom_site_web'] || 'Site sans nom';
+        if (siteName.startsWith('Analyse SEO - ')) {
+          siteName = siteName.replace('Analyse SEO - ', '');
+        }
+        
         return {
           id: parseInt(fields['ID site']) || 0,
-          name: fields['Nom_site_web'] || 'Site sans nom',
+          name: siteName,
           url: fields['URL'] || ''
         };
       }).filter(site => site.id > 0); // Filtrer les sites avec un ID valide
@@ -96,7 +102,6 @@ export class AirtableService {
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
-          imageUrl: fields.image_url || null,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -137,7 +142,6 @@ export class AirtableService {
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
-          imageUrl: fields.image_url || null,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -169,7 +173,6 @@ export class AirtableService {
           typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
           contentText: fields.contenu_text || '',
           hasImage: fields.image || false,
-          imageUrl: fields.image_url || null,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -197,38 +200,44 @@ export class AirtableService {
         contenu_text: contentData.contentText,
         statut: contentData.statut || 'en attente',
         image: contentData.hasImage || false,
-        image_url: contentData.imageUrl || null,
         ID_SITE: (contentData.idSite || 1).toString()  // Convertir en string pour Airtable
       };
 
       // Formater la date pour Airtable (YYYY-MM-DD)
       if (contentData.dateDePublication) {
-        fieldsToCreate.date_de_publication = contentData.dateDePublication.toISOString().split('T')[0];
+        const date = new Date(contentData.dateDePublication);
+        fieldsToCreate.date_de_publication = date.toISOString().split('T')[0];
       }
 
       console.log('Champs à créer dans Airtable:', fieldsToCreate);
 
+      // Créer l'enregistrement
       const record = await table.create(fieldsToCreate);
+      
       console.log('✅ Contenu créé dans Airtable avec ID:', record.id);
 
-      // Retourner le contenu créé avec l'ID Airtable
+      // Retourner l'objet EditorialContent
       const createdContent: EditorialContent = {
         id: record.id,
         airtableId: record.id,
-        idSite: contentData.idSite || 1,
-        typeContent: contentData.typeContent,
-        contentText: contentData.contentText,
-        hasImage: contentData.hasImage || false,
-        imageUrl: contentData.imageUrl || null,
-        statut: contentData.statut || 'en attente',
-        dateDePublication: contentData.dateDePublication || new Date(),
+        idSite: parseInt(record.fields.ID_SITE) || contentData.idSite || 1,
+        typeContent: normalizeContentType(record.fields.type_contenu as string),
+        contentText: record.fields.contenu_text as string,
+        statut: record.fields.statut as string,
+        hasImage: record.fields.image as boolean,
+        dateDePublication: record.fields.date_de_publication 
+          ? new Date(record.fields.date_de_publication as string)
+          : new Date(),
         createdAt: new Date()
       };
 
       return createdContent;
-    } catch (error) {
-      console.error('Erreur lors de la création du contenu dans Airtable:', error);
-      throw new Error('Impossible de créer le contenu dans Airtable');
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la création du contenu:', {
+        error: error.message,
+        stack: error.stack
+      });
+      throw new Error(`Impossible de créer le contenu dans Airtable: ${error.message}`);
     }
   }
 
@@ -236,16 +245,22 @@ export class AirtableService {
    * Supprime un contenu dans Airtable
    */
   async deleteContent(airtableId: string): Promise<boolean> {
-    console.log('🔄 Suppression du contenu dans Airtable avec ID:', airtableId);
-
+    console.log(`🗑️ Suppression du contenu Airtable ID: ${airtableId}`);
+    
     try {
       const { table } = initializeAirtable();
+      
+      // Supprimer l'enregistrement
       await table.destroy(airtableId);
-      console.log('✅ Contenu supprimé dans Airtable');
+      
+      console.log('✅ Contenu supprimé avec succès de Airtable');
       return true;
-    } catch (error) {
-      console.error('Erreur lors de la suppression du contenu dans Airtable:', error);
-      throw new Error('Impossible de supprimer le contenu dans Airtable');
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la suppression du contenu:', {
+        error: error.message,
+        airtableId
+      });
+      throw new Error(`Impossible de supprimer le contenu: ${error.message}`);
     }
   }
 
@@ -253,44 +268,56 @@ export class AirtableService {
    * Met à jour un contenu dans Airtable
    */
   async updateContent(airtableId: string, updateData: Partial<EditorialContent>): Promise<EditorialContent> {
-    console.log('🔄 Mise à jour du contenu dans Airtable avec ID:', airtableId);
-    console.log('Données à mettre à jour:', updateData);
-
     try {
+      console.log(`🔄 Mise à jour du contenu Airtable ID: ${airtableId}`);
+      console.log('Données à mettre à jour:', updateData);
+      
       const { table } = initializeAirtable();
       
-      // Préparer les champs pour Airtable
-      const fieldsToUpdate: Record<string, any> = {};
+      // Préparer les données pour Airtable
+      const fieldsToUpdate: any = {};
       
-      if (updateData.typeContent) {
-        fieldsToUpdate.type_contenu = updateData.typeContent;
-      }
-      if (updateData.contentText) {
+      if (updateData.contentText !== undefined) {
         fieldsToUpdate.contenu_text = updateData.contentText;
       }
-      if (updateData.statut) {
+      
+      if (updateData.statut !== undefined) {
         fieldsToUpdate.statut = updateData.statut;
       }
+      
+      if (updateData.typeContent !== undefined) {
+        fieldsToUpdate.type_contenu = updateData.typeContent;
+      }
+      
       if (updateData.hasImage !== undefined) {
         fieldsToUpdate.image = updateData.hasImage;
       }
-      if (updateData.imageUrl !== undefined) {
-        fieldsToUpdate.image_url = updateData.imageUrl;
-      }
-      if (updateData.idSite) {
+      
+      if (updateData.idSite !== undefined) {
         fieldsToUpdate.ID_SITE = updateData.idSite.toString();
       }
-      if (updateData.dateDePublication) {
-        fieldsToUpdate.date_de_publication = updateData.dateDePublication.toISOString().split('T')[0];
+      
+      if (updateData.dateDePublication !== undefined) {
+        // Gérer le cas où dateDePublication peut être une chaîne ISO ou un objet Date
+        const date = typeof updateData.dateDePublication === 'string' 
+          ? new Date(updateData.dateDePublication) 
+          : updateData.dateDePublication;
+        fieldsToUpdate.date_de_publication = date.toISOString().split('T')[0];
       }
-
+      
       console.log('Champs à mettre à jour dans Airtable:', fieldsToUpdate);
-
-      const record = await table.update(airtableId, fieldsToUpdate);
-      console.log('✅ Contenu mis à jour dans Airtable');
-
-      // Retourner le contenu mis à jour
+      
+      // Mettre à jour l'enregistrement (selon la documentation Airtable 2024)
+      const updatedRecord = await table.update(airtableId, fieldsToUpdate);
+      
+      if (!updatedRecord) {
+        throw new Error('Aucun enregistrement mis à jour');
+      }
+      
+      const record = updatedRecord;
       const fields = record.fields as any;
+      
+      console.log(`✅ Contenu ${airtableId} mis à jour dans Airtable`);
       
       return {
         id: record.id,
@@ -299,14 +326,18 @@ export class AirtableService {
         typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
         contentText: fields.contenu_text || '',
         hasImage: fields.image || false,
-        imageUrl: fields.image_url || null,
         statut: fields.statut || 'en attente',
         dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
         createdAt: new Date()
       } as EditorialContent;
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du contenu dans Airtable:', error);
-      throw new Error('Impossible de mettre à jour le contenu dans Airtable');
+      
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la mise à jour du contenu:', {
+        airtableId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw new Error(`Impossible de mettre à jour le contenu dans Airtable: ${error.message}`);
     }
   }
 
@@ -316,12 +347,10 @@ export class AirtableService {
   async testConnection(): Promise<boolean> {
     try {
       const { table } = initializeAirtable();
-      // Tester en récupérant un enregistrement
       await table.select({ maxRecords: 1 }).firstPage();
-      console.log('✅ Connexion Airtable OK');
       return true;
     } catch (error) {
-      console.error('❌ Échec de la connexion Airtable:', error);
+      console.error('Test de connexion Airtable échoué:', error);
       return false;
     }
   }
