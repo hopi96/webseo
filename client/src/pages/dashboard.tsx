@@ -68,7 +68,7 @@ export default function DashboardWebhook() {
   });
 
   // S'assurer qu'on a un website ID valide si les sites sont chargés
-  // Sélectionner automatiquement le site le plus récent (ID le plus élevé)
+  // Sélectionner automatiquement le site le plus récent (ID le plus élevé) seulement au premier chargement
   useEffect(() => {
     if (websites.length > 0) {
       // Trier par ID décroissant pour avoir le plus récent en premier
@@ -80,7 +80,7 @@ export default function DashboardWebhook() {
         setSelectedWebsiteId(newestWebsite.id);
       }
     }
-  }, [websites, selectedWebsiteId]);
+  }, [websites.length]);
 
   // Récupération de l'analyse SEO pour le site sélectionné
   const { data: seoAnalysis, isLoading, error: seoError } = useQuery<SeoAnalysisType>({
