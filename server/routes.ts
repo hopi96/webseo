@@ -440,26 +440,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Route pour uploader des images
-  app.post("/api/upload-image", upload.single('image'), async (req, res) => {
-    try {
+  app.post("/api/upload-image", (req, res) => {
+    upload.single('image')(req, res, (err) => {
+      if (err) {
+        console.error('❌ Erreur multer:', err);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: "File too large (max 5MB)" });
+        }
+        return res.status(400).json({ message: err.message });
+      }
+
       if (!req.file) {
+        console.error('❌ Aucun fichier reçu');
         return res.status(400).json({ message: "No image file provided" });
       }
 
       console.log(`📤 Upload d'image: ${req.file.filename}`);
+      console.log('Fichier reçu:', {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      });
       
       // Générer l'URL accessible pour l'image
       const imageUrl = `/uploads/${req.file.filename}`;
       
       console.log('✅ Image uploadée avec succès:', imageUrl);
       res.json({ imageUrl });
-    } catch (error) {
-      console.error('❌ Erreur lors de l\'upload d\'image:', error);
-      res.status(500).json({ 
-        message: "Failed to upload image", 
-        error: error instanceof Error ? error.message : "Unknown error" 
-      });
-    }
+    });
   });
 
   // Test endpoint pour diagnostiquer Airtable avec API REST
