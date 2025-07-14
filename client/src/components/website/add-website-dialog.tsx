@@ -27,9 +27,10 @@ import { Button } from "@/components/ui/button";
 interface AddWebsiteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onWebsiteAdded?: (websiteId: number) => void;
 }
 
-export function AddWebsiteDialog({ open, onOpenChange }: AddWebsiteDialogProps) {
+export function AddWebsiteDialog({ open, onOpenChange, onWebsiteAdded }: AddWebsiteDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -46,10 +47,16 @@ export function AddWebsiteDialog({ open, onOpenChange }: AddWebsiteDialogProps) 
       const response = await apiRequest("POST", "/api/websites", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (newWebsite) => {
       queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
       form.reset();
       onOpenChange(false);
+      
+      // Appeler le callback avec l'ID du nouveau site
+      if (onWebsiteAdded && newWebsite?.id) {
+        onWebsiteAdded(newWebsite.id);
+      }
+      
       toast({
         title: "Site web ajouté",
         description: "Le site web a été ajouté avec succès. L'analyse SEO en temps réel est en cours...",
