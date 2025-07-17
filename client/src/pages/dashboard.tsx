@@ -98,26 +98,38 @@ export default function DashboardWebhook() {
   const isLoading = false;
   const seoError = !seoAnalysis;
 
-  // Mutation pour actualiser l'analyse (désactivée pour les données Airtable)
+  // Mutation pour actualiser l'analyse via webhook n8n
   const refreshAnalysisMutation = useMutation({
     mutationFn: async () => {
-      // Rafraîchir les données depuis Airtable
-      queryClient.invalidateQueries({ queryKey: ['/api/sites-airtable'] });
-      return Promise.resolve();
+      if (!selectedWebsiteId) {
+        throw new Error("Aucun site sélectionné");
+      }
+      
+      const response = await apiRequest('POST', `/api/sites-airtable/${selectedWebsiteId}/refresh-analysis`);
+      return response.json();
     },
     onSuccess: () => {
+      // Rafraîchir les données depuis Airtable après la nouvelle analyse
+      queryClient.invalidateQueries({ queryKey: ['/api/sites-airtable'] });
       toast({
-        title: "Données actualisées",
-        description: "Les données ont été rechargées depuis Airtable",
+        title: "Analyse actualisée",
+        description: "L'analyse SEO a été mise à jour via le webhook n8n",
       });
       setIsAnalysisOpen(false);
     },
     onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'actualiser les données",
-        variant: "destructive",
-      });
+      const errorMessage = error.message || "Impossible d'actualiser l'analyse";
+      
+      // Vérifier si c'est une erreur de webhook
+      if (errorMessage.includes("webhook") || errorMessage.includes("Webhook") || errorMessage.includes("n8n")) {
+        setWebhookError(`Erreur de connexion webhook: ${errorMessage}`);
+      } else {
+        toast({
+          title: "Erreur",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
       setIsAnalysisOpen(false);
     },
   });
@@ -205,7 +217,7 @@ export default function DashboardWebhook() {
                     ) : (
                       <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
                     )}
-                    Actualiser les données
+                    Actualiser l'analyse
                   </Button>
                 </div>
               </div>
