@@ -201,7 +201,7 @@ export default function DashboardWebhook() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <UnifiedHeader />
-      <div className="p-6 space-y-6 animate-in fade-in duration-700">
+      <div className="p-6 space-y-6 animate-in fade-in duration-700 smart-scroll-vertical">
         {/* En-tête avec sélecteur de site et boutons d'action */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500">
           <div className="flex flex-col gap-4">
@@ -759,7 +759,7 @@ export default function DashboardWebhook() {
                 <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
                   🗺️ Opportunités locales
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-2 smart-scroll-vertical max-h-60">
                   {webhookData.contentStrategy?.localOpportunities?.slice(0, 8).map((location: string, index: number) => (
                     <div key={index} className="p-2 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800">
                       <div className="text-sm text-gray-700 dark:text-gray-300">{location}</div>
@@ -773,7 +773,7 @@ export default function DashboardWebhook() {
                 <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
                   🎯 Mots-clés longue traîne
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-2 smart-scroll-vertical max-h-60">
                   {webhookData.contentStrategy?.seasonalKeywords?.slice(0, 8).map((keyword: string, index: number) => (
                     <div key={index} className="p-2 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800">
                       <div className="text-sm text-gray-700 dark:text-gray-300">{keyword}</div>

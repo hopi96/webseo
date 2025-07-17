@@ -410,7 +410,7 @@ export default function Reports() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <UnifiedHeader />
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 smart-scroll-vertical">
         {/* En-tête */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">

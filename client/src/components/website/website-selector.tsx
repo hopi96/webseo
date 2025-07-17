@@ -41,7 +41,7 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteA
               <SelectTrigger className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
                 <SelectValue placeholder="Select a website" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="smart-scroll-vertical max-h-60">
                 {websites?.sort((a, b) => b.id - a.id).map((website) => (
                   <SelectItem key={website.id} value={website.id.toString()}>
                     {website.name}

@@ -299,7 +299,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] smart-scroll-vertical">
         <DialogHeader>
           <DialogTitle>Éditer l'article</DialogTitle>
         </DialogHeader>
@@ -349,7 +349,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                           <SelectValue placeholder="Choisir le type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="smart-scroll-vertical max-h-60">
                         <SelectItem value="xtwitter">X (Twitter)</SelectItem>
                         <SelectItem value="instagram">Instagram</SelectItem>
                         <SelectItem value="facebook">Facebook</SelectItem>
@@ -376,7 +376,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                           <SelectValue placeholder="Choisir le statut" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="smart-scroll-vertical max-h-60">
                         <SelectItem value="en attente">En attente</SelectItem>
                         <SelectItem value="à réviser">À réviser</SelectItem>
                         <SelectItem value="en cours">En cours</SelectItem>
@@ -404,7 +404,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         <SelectValue placeholder="Sélectionnez un site web" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="smart-scroll-vertical max-h-60">
                       {websites.map((website: any) => (
                         <SelectItem key={website.id} value={website.id.toString()}>
                           {website.name} ({website.url})

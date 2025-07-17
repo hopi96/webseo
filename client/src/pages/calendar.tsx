@@ -261,7 +261,7 @@ export default function Calendar() {
                 <SelectTrigger className="w-64">
                   <SelectValue placeholder="Tous les sites" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="smart-scroll-vertical max-h-60">
                   <SelectItem value="all">Tous les sites</SelectItem>
                   {sites.sort((a, b) => b.id - a.id).map((site) => (
                     <SelectItem key={site.id} value={site.id.toString()}>
@@ -391,7 +391,7 @@ export default function Calendar() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <div className="space-y-3">
+                  <div className="space-y-3 smart-scroll-vertical max-h-80">
                     {getEventsForDate(selectedDate).map(event => (
                       <div key={event.id} className="p-3 border border-gray-100 dark:border-gray-700 rounded-lg">
                         <div className="flex items-start justify-between mb-2">
