@@ -115,6 +115,7 @@ Changelog:
 - January 17, 2025. Dashboard now uses Airtable sites data: migrated from local database to Airtable "analyse SEO" table with integrated JSON analysis data, dashboard displays real SEO metrics (seoScore, pageSpeed, keywordCount, internalLinks) directly from Airtable, eliminated dependency on local SEO analysis table, improved site selector with clean names (removed "Analyse SEO -" prefix), all metrics now sourced from authentic Airtable JSON data
 - January 17, 2025. Removed "Mots-clés" menu item from navigation: eliminated unused keywords page from all navigation components (UnifiedHeader, BottomNavigation, Navigation), streamlined navigation to focus on essential features (Dashboard, Calendrier, Rapports, Paramètres), cleaned up imports removing unused Search icon
 - January 17, 2025. Dashboard synchronization improvements: implemented automatic polling (every 30s) of Airtable data to detect newly added sites, added intelligent detection of new sites with automatic selection and toast notifications, resolved flash error on page load by improving loading state management, enhanced error handling to prevent premature error display, added forced data refresh after website addition with optimized cache invalidation strategies
+- January 17, 2025. Dashboard cleanup: removed Core Web Vitals section from dashboard per user request to simplify the interface and focus on essential SEO metrics
 
 ## User Preferences
 

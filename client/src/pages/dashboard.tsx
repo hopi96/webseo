@@ -768,44 +768,7 @@ export default function DashboardWebhook() {
           </CardContent>
         </Card>
 
-        {/* Core Web Vitals */}
-        {webhookData.pageSpeedMetrics && (
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Core Web Vitals
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {webhookData.pageSpeedMetrics.firstContentfulPaint}s
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">FCP</div>
-                </div>
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {webhookData.pageSpeedMetrics.largestContentfulPaint}s
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">LCP</div>
-                </div>
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {webhookData.pageSpeedMetrics.cumulativeLayoutShift}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">CLS</div>
-                </div>
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {webhookData.pageSpeedMetrics.totalBlockingTime}ms
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">TBT</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
           </>
         )}
       </div>
