@@ -503,7 +503,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📅 Génération du calendrier éditorial pour le site', websiteId);
       console.log('📊 Données SEO reçues:', seoAnalysis ? 'Oui' : 'Non');
       console.log('🔍 JSON COMPLET ENVOYÉ AU WEBHOOK:');
+      console.log('================================================');
       console.log(JSON.stringify(webhookData, null, 2));
+      console.log('================================================');
       
       // Vérifier que l'analyse SEO contient bien les données nécessaires
       if (seoAnalysis) {
@@ -525,6 +527,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Envoyer la requête au webhook n8n avec timeout réduit
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 secondes timeout
+      
+      console.log('🚀 Envoi du JSON au webhook n8n...');
+      console.log('📍 URL webhook:', webhookUrl);
+      console.log('📦 Body JSON à envoyer:', JSON.stringify(webhookData, null, 2));
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
@@ -555,7 +561,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const result = await response.json();
       
-      console.log('✅ Calendrier éditorial généré avec succès:', result);
+      console.log('✅ Calendrier éditorial généré avec succès !');
+      console.log('📥 Réponse du webhook n8n:', JSON.stringify(result, null, 2));
       
       res.json({
         success: true,
