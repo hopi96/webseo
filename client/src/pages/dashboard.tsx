@@ -793,8 +793,20 @@ export default function DashboardWebhook() {
         open={isAddWebsiteOpen}
         onOpenChange={setIsAddWebsiteOpen}
         onWebsiteAdded={(websiteId) => {
-          // Sélectionner automatiquement le nouveau site ajouté
-          selectWebsite(websiteId);
+          // Attendre un peu que les données soient mises à jour puis sélectionner le site
+          setTimeout(() => {
+            // Vérifier si le site existe maintenant dans les données
+            const siteExists = websites.find(w => w.id === websiteId);
+            if (siteExists) {
+              selectWebsite(websiteId);
+            } else {
+              // Sélectionner le site le plus récent par défaut
+              const sortedWebsites = [...websites].sort((a, b) => b.id - a.id);
+              if (sortedWebsites.length > 0) {
+                selectWebsite(sortedWebsites[0].id);
+              }
+            }
+          }, 1000);
         }}
       />
 
