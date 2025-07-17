@@ -1,0 +1,325 @@
+{
+  "site_id": 11,
+  "site_name": "www.adr2.fr",
+  "site_url": "https://www.adr2.fr/",
+  "seo_analysis": {
+    "url": "https://www.adr2.fr/",
+    "title": "Analyse SEO - www.adr2.fr",
+    "analysisType": "deep",
+    "seoScore": 89,
+    "pageSpeed": 78,
+    "issuesCount": 1,
+    "keywordCount": 12,
+    "internalLinks": 32,
+    "externalLinks": 1,
+    "titleTags": {
+      "title": "ADR – Spécialiste en agencement et décoration à Montreuil",
+      "length": 57,
+      "hasKeyword": false,
+      "hasBrand": false,
+      "status": "good",
+      "suggestions": [
+        "Inclure le mot-clé principal dans le titre",
+        "Considérer l'ajout de mots d'action pour améliorer le CTR"
+      ]
+    },
+    "metaDescriptions": {
+      "description": "À la recherche d’un spécialiste en agencement et décoration ? ADR est le spécialiste qu’il vous faut. Contactez nous au 01 48 59 73 91",
+      "length": 134,
+      "hasKeyword": false,
+      "status": "warning",
+      "missingPages": [],
+      "suggestions": [
+        "2 meta descriptions détectées - une seule recommandée",
+        "Inclure des mots-clés pertinents dans la description"
+      ]
+    },
+    "headingStructure": [
+      {
+        "level": "H1",
+        "text": "ADR – Votre spécialiste en agencement et décoration à Montreuil",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Nos prestations",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Nos valeurs",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Nos partenaires",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Nos réalisations",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Contactez-nous",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "BESOIN D'AIDE",
+        "hasKeyword": true
+      },
+      {
+        "level": "H3",
+        "text": "Habillage d’ascenseur",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Habillage d’ascenseur",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Aménagement",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Aménagement",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Décoration",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Décoration",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Habillage d'ascenseur",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Habillage d'ascenseur",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Aménagement",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Aménagement",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Décoration",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Décoration",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Interlocuteur unique",
+        "hasKeyword": false
+      }
+    ],
+    "keywordAnalysis": [
+      {
+        "keyword": "montreuil",
+        "count": 426,
+        "density": 18.79
+      },
+      {
+        "keyword": "habillage",
+        "count": 154,
+        "density": 6.79
+      },
+      {
+        "keyword": "dascenceur",
+        "count": 140,
+        "density": 6.18
+      },
+      {
+        "keyword": "content",
+        "count": 68,
+        "density": 3
+      },
+      {
+        "keyword": "uploads",
+        "count": 68,
+        "density": 3
+      },
+      {
+        "keyword": "decoding async",
+        "count": 55,
+        "density": 2.43
+      },
+      {
+        "keyword": "decoding",
+        "count": 55,
+        "density": 2.43
+      },
+      {
+        "keyword": "décoration",
+        "count": 42,
+        "density": 1.85
+      },
+      {
+        "keyword": "height",
+        "count": 53,
+        "density": 2.34
+      },
+      {
+        "keyword": "dims placeholder",
+        "count": 2,
+        "density": 0.09
+      },
+      {
+        "keyword": "empty dims",
+        "count": 2,
+        "density": 0.09
+      },
+      {
+        "keyword": "fusion empty",
+        "count": 2,
+        "density": 0.09
+      }
+    ],
+    "technicalSeo": {
+      "robotsTxt": true,
+      "xmlSitemap": true,
+      "mobileFriendly": true,
+      "https": true,
+      "compression": false,
+      "imageAltTags": true
+    },
+    "pageSpeedMetrics": {
+      "performanceScore": 78,
+      "firstContentfulPaint": 2.42,
+      "largestContentfulPaint": 3.72,
+      "cumulativeLayoutShift": 0.099,
+      "totalBlockingTime": 600
+    },
+    "linkAnalysis": {
+      "internalLinks": 32,
+      "externalLinks": 1,
+      "brokenLinks": 0,
+      "topExternalDomains": [
+        {
+          "domain": "cookiedatabase.org",
+          "count": 1
+        }
+      ]
+    },
+    "contentStrategy": {
+      "themes": [
+        "agencement et habillage d'ascenseurs pour espaces collectifs et professionnels"
+      ],
+      "trendingKeywords": [
+        {
+          "keyword": "habillage ascenseur sur-mesure",
+          "searchVolume": 1200,
+          "trend": "rising",
+          "relatedQueries": [
+            "habillage cabine ascenseur",
+            "rénovation ascenseur collectif"
+          ],
+          "seasonality": "medium"
+        },
+        {
+          "keyword": "agencement intérieur ascenseur copropriété",
+          "searchVolume": 800,
+          "trend": "rising",
+          "relatedQueries": [
+            "aménagement ascenseur immeuble",
+            "décoration ascenseur collectif"
+          ],
+          "seasonality": "medium"
+        },
+        {
+          "keyword": "décoration cabine ascenseur entreprise",
+          "searchVolume": 600,
+          "trend": "rising",
+          "relatedQueries": [
+            "décoration ascenseur bureau",
+            "design ascenseur professionnel"
+          ],
+          "seasonality": "medium"
+        },
+        {
+          "keyword": "habillage ascenseur bâtiment public",
+          "searchVolume": 500,
+          "trend": "rising",
+          "relatedQueries": [
+            "rénovation ascenseur mairie",
+            "habillage ascenseur école"
+          ],
+          "seasonality": "medium"
+        },
+        {
+          "keyword": "agencement ascenseur espaces collectifs",
+          "searchVolume": 400,
+          "trend": "rising",
+          "relatedQueries": [
+            "agencement ascenseur entreprise",
+            "aménagement ascenseur collectif"
+          ],
+          "seasonality": "low"
+        }
+      ],
+      "longTailKeywords": [
+        "habillage d’ascenseur sur-mesure pour copropriété à Montreuil",
+        "comment rénover la cabine d’ascenseur d’un immeuble collectif",
+        "entreprise spécialisée en agencement intérieur d’ascenseur à Vincennes",
+        "solution d’habillage ascenseur bâtiment public Île-de-France",
+        "prix rénovation cabine ascenseur pour syndics de copropriété",
+        "décoration sur-mesure cabine ascenseur entreprise Pantin",
+        "aménagement intérieur ascenseur pour gestionnaire d’immeuble",
+        "habillage mural ascenseur immeuble ancien Montreuil"
+      ],
+      "contentQuestions": [
+        "Comment moderniser l’intérieur d’un ascenseur collectif ?",
+        "Quel est le coût d’un habillage d’ascenseur sur-mesure ?",
+        "Quelles sont les normes à respecter pour l’aménagement d’un ascenseur en copropriété ?",
+        "Combien de temps dure une rénovation de cabine d’ascenseur ?",
+        "Peut-on personnaliser la décoration d’un ascenseur d’entreprise ?",
+        "Quelles solutions existent pour protéger les parois d’un ascenseur ?",
+        "Qui contacter pour l’habillage d’un ascenseur à Montreuil ?",
+        "Comment améliorer la sécurité et l’esthétique d’un ascenseur dans un bâtiment public ?"
+      ],
+      "localOpportunities": [
+        "habillage ascenseur sur-mesure Montreuil",
+        "agencement ascenseur Vincennes",
+        "rénovation cabine ascenseur Fontenay-sous-Bois",
+        "décoration ascenseur Ivry-sur-Seine",
+        "habillage ascenseur Romainville",
+        "aménagement ascenseur Pantin",
+        "habillage ascenseur Île-de-France",
+        "agencement ascenseur Seine-Saint-Denis"
+      ],
+      "seasonalKeywords": [
+        "rénovation ascenseur copropriété rentrée",
+        "habillage ascenseur entreprise avant fin d’année",
+        "rénovation espaces communs printemps",
+        "agencement ascenseur pour audit annuel",
+        "décoration ascenseur bâtiment public été"
+      ]
+    },
+    "id": 1,
+    "createdAt": "2025-07-17T14:00:22.977Z"
+  },
+  "timestamp": "2025-07-17T18:26:53.068Z"
+}
