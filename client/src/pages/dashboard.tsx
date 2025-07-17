@@ -66,9 +66,9 @@ export default function DashboardWebhook() {
   });
   const { toast } = useToast();
 
-  // Récupération des sites web
-  const { data: websites = [] } = useQuery<WebsiteType[]>({
-    queryKey: ['/api/websites'],
+  // Récupération des sites web depuis Airtable
+  const { data: websites = [] } = useQuery<any[]>({
+    queryKey: ['/api/sites-airtable'],
   });
 
   // Fonction pour sélectionner un site et persister l'état
@@ -92,11 +92,11 @@ export default function DashboardWebhook() {
     }
   }, [websites.length]);
 
-  // Récupération de l'analyse SEO pour le site sélectionné
-  const { data: seoAnalysis, isLoading, error: seoError } = useQuery<SeoAnalysisType>({
-    queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`],
-    enabled: !!selectedWebsiteId,
-  });
+  // Récupération de l'analyse SEO depuis les données Airtable
+  const website = websites.find(w => w.id === selectedWebsiteId);
+  const seoAnalysis = website?.seoAnalysis;
+  const isLoading = false;
+  const seoError = !seoAnalysis;
 
   // Mutation pour actualiser l'analyse
   const refreshAnalysisMutation = useMutation({
@@ -130,18 +130,10 @@ export default function DashboardWebhook() {
     },
   });
 
-  const hasAnalysisError = seoError || !seoAnalysis || !seoAnalysis.rawWebhookData;
-  const website = websites.find(w => w.id === selectedWebsiteId);
+  const hasAnalysisError = seoError || !seoAnalysis;
 
-  // Traiter les données webhook seulement si disponibles
-  let webhookData: any = null;
-  if (seoAnalysis?.rawWebhookData) {
-    try {
-      webhookData = JSON.parse(seoAnalysis.rawWebhookData);
-    } catch (e) {
-      console.error('Erreur lors du parsing des données webhook:', e);
-    }
-  }
+  // Utiliser directement les données seoAnalysis depuis Airtable
+  const webhookData = seoAnalysis;
 
 
 
