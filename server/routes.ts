@@ -76,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await airtableService.updateSocialMediaProgram(siteId, programme_rs);
       res.json({ message: "Programme des réseaux sociaux mis à jour avec succès" });
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du programme RS:", error);
+      console.error("❌ Erreur lors de la mise à jour du programme RS:", error);
       res.status(500).json({ message: error.message || "Erreur lors de la mise à jour du programme" });
     }
   });
