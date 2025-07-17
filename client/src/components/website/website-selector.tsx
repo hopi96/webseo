@@ -15,8 +15,8 @@ interface WebsiteSelectorProps {
 export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteAdded }: WebsiteSelectorProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
 
-  const { data: websites, isLoading } = useQuery<Website[]>({
-    queryKey: ["/api/websites"],
+  const { data: websites, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/sites-airtable"],
   });
 
   if (isLoading) {
