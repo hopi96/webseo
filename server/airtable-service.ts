@@ -89,9 +89,14 @@ export class AirtableService {
       return records.map((record: any) => {
         const fields = record.fields as any;
         
+        // Nettoyer le nom du site en enlevant "Analyse SEO - " et "Analyse SEO pour "
+        let cleanName = fields['Nom_site_web'] || 'Site sans nom';
+        cleanName = cleanName.replace(/^Analyse SEO - /, '');
+        cleanName = cleanName.replace(/^Analyse SEO pour /, '');
+        
         return {
           id: parseInt(fields['ID site']) || 0,
-          name: fields['Nom_site_web'] || 'Site sans nom',
+          name: cleanName,
           url: fields['URL'] || ''
         };
       }).filter(site => site.id > 0); // Filtrer les sites avec un ID valide
