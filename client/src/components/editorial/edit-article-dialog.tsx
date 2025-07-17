@@ -311,17 +311,17 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
               name="contentText"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <FormLabel>Contenu</FormLabel>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => setShowAIDialog(true)}
-                      className="flex items-center gap-1 text-purple-600 border-purple-200 hover:bg-purple-50 text-xs px-2 py-1"
+                      className="flex items-center gap-1 text-purple-600 border-purple-200 hover:bg-purple-50 text-sm px-3 py-1.5"
                     >
-                      <Sparkles className="h-3 w-3" />
-                      Générer
+                      <Sparkles className="h-4 w-4" />
+                      Générer avec GPT-4o
                     </Button>
                   </div>
                   <FormControl>

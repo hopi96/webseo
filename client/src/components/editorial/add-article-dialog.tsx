@@ -272,17 +272,17 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <Label htmlFor="contentText">Contenu *</Label>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setShowAIDialog(true)}
-                  className="flex items-center gap-1 text-purple-600 border-purple-200 hover:bg-purple-50 text-xs px-2 py-1"
+                  className="flex items-center gap-1 text-purple-600 border-purple-200 hover:bg-purple-50 text-sm px-3 py-1.5"
                 >
-                  <Sparkles className="h-3 w-3" />
-                  Générer
+                  <Sparkles className="h-4 w-4" />
+                  Générer avec GPT-4o
                 </Button>
               </div>
               <Textarea
