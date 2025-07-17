@@ -71,8 +71,8 @@ export function EditorialCalendarGeneratorDialog({
       setCurrentStep('Traitement par l\'IA...');
       setProgress(80);
       
-      // Attendre un délai pour s'assurer que le workflow n8n se termine
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Attendre au moins 30 minutes (30 * 60 * 1000 = 1800000 ms)
+      await new Promise(resolve => setTimeout(resolve, 1800000));
       
       return response.json();
     },
@@ -284,14 +284,6 @@ export function EditorialCalendarGeneratorDialog({
                       Le calendrier éditorial a été généré et peut être consulté dans la section "Calendrier" de l'application.
                     </p>
                   </div>
-                  {generationResult.data && (
-                    <div className="mt-4">
-                      <h4 className="font-medium mb-2">Détails de la génération :</h4>
-                      <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs overflow-auto">
-                        {JSON.stringify(generationResult.data, null, 2)}
-                      </pre>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
