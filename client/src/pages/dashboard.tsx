@@ -223,16 +223,6 @@ export default function DashboardWebhook() {
                 {/* Boutons d'action */}
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => setIsAddWebsiteOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
-                  >
-                    <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
-                    Ajouter un site
-                  </Button>
-                  
-                  <Button
                     onClick={() => setIsSocialProgramOpen(true)}
                     variant="outline"
                     size="sm"
