@@ -535,12 +535,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "websiteId, websiteName, and websiteUrl are required" });
       }
       
-      // Préparer les données pour le webhook n8n
+      // Préparer les données pour le webhook n8n selon le format attendu
       const webhookData = {
-        websiteId,
-        websiteName,
-        websiteUrl,
-        seoAnalysis: seoAnalysis || null
+        id_site: websiteId,
+        analyse_seo: seoAnalysis || null
       };
       
       console.log('📅 Génération du calendrier éditorial via webhook n8n:', webhookData);
