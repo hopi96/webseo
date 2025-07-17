@@ -1,0 +1,427 @@
+{
+  "id_site": 3,
+  "analyse_seo": {
+    "url": "https://www.monstresdesfetes.com/",
+    "title": "Analyse SEO - www.monstresdesfetes.com",
+    "analysisType": "deep",
+    "seoScore": 82,
+    "pageSpeed": 97,
+    "issuesCount": 3,
+    "keywordCount": 11,
+    "internalLinks": 49,
+    "externalLinks": 1,
+    "titleTags": {
+      "title": "Décoration anniversaire et fête",
+      "length": 31,
+      "hasKeyword": false,
+      "hasBrand": false,
+      "status": "good",
+      "suggestions": [
+        "Inclure le mot-clé principal dans le titre",
+        "Considérer l'ajout de mots d'action pour améliorer le CTR"
+      ]
+    },
+    "metaDescriptions": {
+      "description": "Découvrez chez Monstres des fêtes une sélection écoresponsable et unique de décorations pour anniversaire enfant. Explorez nos thèmes, conseils et accessoires pour créer une décoration de fête parfaite",
+      "length": 201,
+      "hasKeyword": false,
+      "status": "warning",
+      "missingPages": [
+        "og:image manquant"
+      ],
+      "suggestions": [
+        "Raccourcir la meta description (120-160 caractères)",
+        "Inclure des mots-clés pertinents dans la description"
+      ]
+    },
+    "headingStructure": [
+      {
+        "level": "H1",
+        "text": "La déco de toutes vos fêtes chez Monstres des fêtes",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Nos thèmes anniversaires enfants",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire Camion",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire Magie",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire Avion",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire Printemps",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire Sirène",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire Dinosaure",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire Super-héros",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "Anniversaire à la ferme",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "🎉 Pourquoi opter pour Monstres des fêtes pour la décoration de votre anniversai...",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "🎈 Comment choisir la décoration parfaite pour votre fête avec Monstres des fête...",
+        "hasKeyword": false
+      },
+      {
+        "level": "H2",
+        "text": "🥳 Quels sont les accessoires de décoration indispensables pour un anniversaire ...",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Chantier et travaux de construction",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Baguettes, lapins et tour de magie",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Pour un anniversaire dans les airs !",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Une déco fleur et papillon",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Coquillages et cheval de mer",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Déco royaume des dinosaures",
+        "hasKeyword": false
+      },
+      {
+        "level": "H3",
+        "text": "Foudre, éclair et justiciers masqués",
+        "hasKeyword": false
+      }
+    ],
+    "keywordAnalysis": [
+      {
+        "keyword": "anniversaire",
+        "count": 105,
+        "density": 15.96
+      },
+      {
+        "keyword": "décoration",
+        "count": 36,
+        "density": 5.47
+      },
+      {
+        "keyword": "monstres",
+        "count": 20,
+        "density": 3.04
+      },
+      {
+        "keyword": "sports automobiles",
+        "count": 2,
+        "density": 0.3
+      },
+      {
+        "keyword": "passion sports",
+        "count": 2,
+        "density": 0.3
+      },
+      {
+        "keyword": "marin poissons",
+        "count": 2,
+        "density": 0.3
+      },
+      {
+        "keyword": "sous marin",
+        "count": 2,
+        "density": 0.3
+      },
+      {
+        "keyword": "hélium fête",
+        "count": 2,
+        "density": 0.3
+      },
+      {
+        "keyword": "ballons hélium",
+        "count": 2,
+        "density": 0.3
+      },
+      {
+        "keyword": "search here",
+        "count": 2,
+        "density": 0.3
+      },
+      {
+        "keyword": "décoration anniversaire",
+        "count": 5,
+        "density": 0.76
+      }
+    ],
+    "technicalSeo": {
+      "robotsTxt": true,
+      "xmlSitemap": false,
+      "mobileFriendly": true,
+      "https": true,
+      "compression": false,
+      "imageAltTags": true
+    },
+    "pageSpeedMetrics": {
+      "performanceScore": 97,
+      "firstContentfulPaint": 0.8,
+      "largestContentfulPaint": 1.2,
+      "cumulativeLayoutShift": 0.097,
+      "totalBlockingTime": 600
+    },
+    "linkAnalysis": {
+      "internalLinks": 49,
+      "externalLinks": 1,
+      "brokenLinks": 0,
+      "topExternalDomains": [
+        {
+          "domain": "www.trustpilot.com",
+          "count": 1
+        }
+      ]
+    },
+    "contentStrategy": {
+      "themes": [
+        "general"
+      ],
+      "trendingKeywords": [
+        {
+          "keyword": "fête galante",
+          "searchVolume": 10398,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment fête galante",
+            "meilleur fête galante",
+            "prix fête galante",
+            "avis fête galante",
+            "où trouver fête galante"
+          ],
+          "seasonality": "low"
+        },
+        {
+          "keyword": "fête meaning",
+          "searchVolume": 10351,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment fête meaning",
+            "meilleur fête meaning",
+            "prix fête meaning",
+            "avis fête meaning",
+            "où trouver fête meaning"
+          ],
+          "seasonality": "low"
+        },
+        {
+          "keyword": "fête de la musique",
+          "searchVolume": 7946,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment fête de la musique",
+            "meilleur fête de la musique",
+            "prix fête de la musique",
+            "avis fête de la musique",
+            "où trouver fête de la musique"
+          ],
+          "seasonality": "low"
+        },
+        {
+          "keyword": "fête des mères 2025 france",
+          "searchVolume": 5913,
+          "trend": "rising",
+          "relatedQueries": [
+            "comment fête des mères 2025 france",
+            "meilleur fête des mères 2025 france",
+            "prix fête des mères 2025 france",
+            "avis fête des mères 2025 france",
+            "où trouver fête des mères 2025 france"
+          ],
+          "seasonality": "low"
+        },
+        {
+          "keyword": "décoration murale",
+          "searchVolume": 4632,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment décoration murale",
+            "meilleur décoration murale",
+            "prix décoration murale",
+            "avis décoration murale",
+            "où trouver décoration murale"
+          ],
+          "seasonality": "low"
+        },
+        {
+          "keyword": "anniversaire de mariage",
+          "searchVolume": 4111,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment anniversaire de mariage",
+            "meilleur anniversaire de mariage",
+            "prix anniversaire de mariage",
+            "avis anniversaire de mariage",
+            "où trouver anniversaire de mariage"
+          ],
+          "seasonality": "high"
+        },
+        {
+          "keyword": "décoration le corbusier",
+          "searchVolume": 3858,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment décoration le corbusier",
+            "meilleur décoration le corbusier",
+            "prix décoration le corbusier",
+            "avis décoration le corbusier",
+            "où trouver décoration le corbusier"
+          ],
+          "seasonality": "low"
+        },
+        {
+          "keyword": "anniversaire in french",
+          "searchVolume": 3735,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment anniversaire in french",
+            "meilleur anniversaire in french",
+            "prix anniversaire in french",
+            "avis anniversaire in french",
+            "où trouver anniversaire in french"
+          ],
+          "seasonality": "high"
+        },
+        {
+          "keyword": "décoration chambre",
+          "searchVolume": 3466,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment décoration chambre",
+            "meilleur décoration chambre",
+            "prix décoration chambre",
+            "avis décoration chambre",
+            "où trouver décoration chambre"
+          ],
+          "seasonality": "low"
+        },
+        {
+          "keyword": "décoration mariage",
+          "searchVolume": 3433,
+          "trend": "stable",
+          "relatedQueries": [
+            "comment décoration mariage",
+            "meilleur décoration mariage",
+            "prix décoration mariage",
+            "avis décoration mariage",
+            "où trouver décoration mariage"
+          ],
+          "seasonality": "low"
+        }
+      ],
+      "longTailKeywords": [
+        "décoration chambre",
+        "décoration mariage",
+        "décoration le corbusier",
+        "décoration murale",
+        "décoration salon",
+        "décoration d'intérieur",
+        "décoration anniversaire",
+        "anniversaire in french",
+        "anniversaire charms",
+        "anniversaire de mariage",
+        "anniversaire in english",
+        "anniversaire masculine or feminine",
+        "anniversaire d'une amie",
+        "anniversaire de naissance",
+        "fête des mères 2025 france",
+        "fête de la musique",
+        "fête meaning",
+        "fête galante",
+        "fête des pères 2025",
+        "fête de la musique paris 2025"
+      ],
+      "contentQuestions": [
+        "Comment utiliser décoration pour automatiser mon business ?",
+        "Quels sont les meilleurs outils décoration en 2025 ?",
+        "Comment intégrer décoration dans mon entreprise ?",
+        "décoration vs alternatives : que choisir ?",
+        "Comment apprendre décoration rapidement ?",
+        "Comment utiliser anniversaire pour automatiser mon business ?",
+        "Quels sont les meilleurs outils anniversaire en 2025 ?",
+        "Comment intégrer anniversaire dans mon entreprise ?",
+        "anniversaire vs alternatives : que choisir ?",
+        "Comment apprendre anniversaire rapidement ?",
+        "Comment utiliser fête pour automatiser mon business ?",
+        "Quels sont les meilleurs outils fête en 2025 ?"
+      ],
+      "localOpportunities": [
+        "décoration marseille",
+        "décoration près de marseille",
+        "décoration lyon",
+        "décoration près de lyon",
+        "décoration paris",
+        "décoration près de paris",
+        "décoration toulouse",
+        "décoration près de toulouse",
+        "décoration nice",
+        "décoration près de nice",
+        "décoration nantes",
+        "décoration près de nantes",
+        "décoration bordeaux",
+        "décoration près de bordeaux",
+        "décoration près de moi"
+      ],
+      "seasonalKeywords": [
+        "décoration été",
+        "décoration vacances d'été",
+        "décoration soleil",
+        "décoration plage",
+        "décoration outdoor",
+        "anniversaire été",
+        "anniversaire vacances d'été",
+        "anniversaire soleil",
+        "anniversaire plage",
+        "anniversaire outdoor"
+      ]
+    },
+    "id": 2,
+    "createdAt": "2025-06-29T15:34:32.241Z"
+  }
+}
