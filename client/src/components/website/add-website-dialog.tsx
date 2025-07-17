@@ -48,24 +48,30 @@ export function AddWebsiteDialog({ open, onOpenChange, onWebsiteAdded }: AddWebs
       return response.json();
     },
     onSuccess: (newWebsite) => {
+      // Invalider les deux caches pour assurer la cohérence
       queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sites-airtable"] });
+      
       form.reset();
       onOpenChange(false);
-      
-      // Appeler le callback avec l'ID du nouveau site
-      if (onWebsiteAdded && newWebsite?.id) {
-        onWebsiteAdded(newWebsite.id);
-      }
       
       toast({
         title: "Site web ajouté",
         description: "Le site web a été ajouté avec succès. L'analyse SEO en temps réel est en cours...",
       });
+      
+      // Appeler le callback avec l'ID du nouveau site après un délai pour permettre aux données de se mettre à jour
+      if (onWebsiteAdded && newWebsite?.id) {
+        setTimeout(() => {
+          onWebsiteAdded(newWebsite.id);
+        }, 500);
+      }
     },
     onError: (error) => {
+      console.error("Error adding website:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to add website",
+        title: "Erreur lors de l'ajout du site",
+        description: error.message || "Impossible d'ajouter le site web. Vérifiez l'URL et réessayez.",
         variant: "destructive",
       });
     },
