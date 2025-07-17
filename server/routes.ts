@@ -63,6 +63,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nouvelle route pour déclencher l'analyse SEO d'un site Airtable via webhook n8n
+  app.post("/api/sites-airtable/:id/refresh-analysis", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const sites = await airtableService.getAllSites();
+      const site = sites.find(s => s.id === siteId);
+      
+      if (!site) {
+        return res.status(404).json({ message: "Site not found" });
+      }
+
+      console.log(`🔄 Déclenchement de l'analyse SEO pour ${site.url} via webhook n8n...`);
+      
+      // Appel du webhook n8n pour déclencher une nouvelle analyse
+      const webhookAnalysisData = await requestSeoAnalysisFromWebhook(site.url);
+      
+      console.log('✅ Nouvelle analyse SEO reçue du webhook:', webhookAnalysisData);
+      
+      // Retourner les données de l'analyse mise à jour
+      res.json(webhookAnalysisData);
+    } catch (error) {
+      console.error("❌ Erreur lors du rafraîchissement de l'analyse via webhook:", error);
+      res.status(500).json({ message: "Failed to refresh analysis via webhook", error: error.message });
+    }
+  });
+
   app.get("/api/websites/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
