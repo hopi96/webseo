@@ -116,6 +116,7 @@ Changelog:
 - January 17, 2025. Removed "Mots-clés" menu item from navigation: eliminated unused keywords page from all navigation components (UnifiedHeader, BottomNavigation, Navigation), streamlined navigation to focus on essential features (Dashboard, Calendrier, Rapports, Paramètres), cleaned up imports removing unused Search icon
 - January 17, 2025. Dashboard synchronization improvements: implemented automatic polling (every 30s) of Airtable data to detect newly added sites, added intelligent detection of new sites with automatic selection and toast notifications, resolved flash error on page load by improving loading state management, enhanced error handling to prevent premature error display, added forced data refresh after website addition with optimized cache invalidation strategies
 - January 17, 2025. Dashboard cleanup: removed Core Web Vitals section from dashboard per user request to simplify the interface and focus on essential SEO metrics
+- January 17, 2025. Nouvelle fonctionnalité programme réseaux sociaux : ajout bouton "Réseaux sociaux" dans dashboard, création formulaire intuitif SocialMediaProgramDialog avec aperçu JSON et validation, implémentation route API PUT /api/sites-airtable/:id/social-program pour mise à jour champ programme_rs dans Airtable, support structure JSON avec fréquences hebdomadaires/mensuelles pour 6 plateformes (newsletter, tiktok, instagram, xtwitter, youtube, facebook), interface avec mode édition/aperçu et visualisation des totaux de publications
 
 ## User Preferences
 

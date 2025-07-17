@@ -84,5 +84,6 @@ export type AirtableSite = {
   id: number;
   name: string;
   url: string;
+  programmeRs?: string; // Nouveau champ pour le programme des réseaux sociaux
   seoAnalysis?: any; // JSON d'analyse SEO
 };
