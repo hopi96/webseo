@@ -504,7 +504,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📊 Données SEO reçues:', seoAnalysis ? 'Oui' : 'Non');
       console.log('🔍 JSON COMPLET ENVOYÉ AU WEBHOOK:');
       console.log('================================================');
-      console.log(JSON.stringify(webhookData, null, 2));
+      console.log('STRUCTURE JSON WEBHOOK:');
+      console.log('id_site:', webhookData.id_site);
+      console.log('analyse_seo présente:', !!webhookData.analyse_seo);
+      if (webhookData.analyse_seo) {
+        console.log('analyse_seo.url:', webhookData.analyse_seo.url);
+        console.log('analyse_seo.seoScore:', webhookData.analyse_seo.seoScore);
+        console.log('analyse_seo.keywordCount:', webhookData.analyse_seo.keywordCount);
+        console.log('analyse_seo.keywordAnalysis présent:', !!webhookData.analyse_seo.keywordAnalysis);
+        console.log('analyse_seo.contentStrategy présent:', !!webhookData.analyse_seo.contentStrategy);
+      }
       console.log('================================================');
       
       // Vérifier que l'analyse SEO contient bien les données nécessaires
@@ -530,7 +539,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🚀 Envoi du JSON au webhook n8n...');
       console.log('📍 URL webhook:', webhookUrl);
-      console.log('📦 Body JSON à envoyer:', JSON.stringify(webhookData, null, 2));
+      console.log('📦 CONFIRMATION: Structure JSON utilisée:');
+      console.log('   - id_site:', webhookData.id_site);
+      console.log('   - analyse_seo:', webhookData.analyse_seo ? 'PRÉSENTE' : 'ABSENTE');
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
@@ -562,7 +573,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await response.json();
       
       console.log('✅ Calendrier éditorial généré avec succès !');
-      console.log('📥 Réponse du webhook n8n:', JSON.stringify(result, null, 2));
+      console.log('📥 Réponse du webhook n8n reçue');
+      console.log('   - Status:', response.status);
+      console.log('   - Response présente:', !!result);
       
       res.json({
         success: true,
