@@ -100,7 +100,7 @@ export default function Settings() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <UnifiedHeader />
 
-      <main className="px-6 py-6">
+      <main className="px-6 py-6 smart-scroll-vertical">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Paramètres</h1>
 
         <div className="space-y-4">

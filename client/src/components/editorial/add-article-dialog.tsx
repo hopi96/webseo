@@ -261,7 +261,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] smart-scroll-vertical">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
@@ -308,7 +308,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez le type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="smart-scroll-vertical max-h-60">
                     <SelectItem value="xtwitter">X (Twitter)</SelectItem>
                     <SelectItem value="instagram">Instagram</SelectItem>
                     <SelectItem value="facebook">Facebook</SelectItem>
@@ -329,7 +329,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez le statut" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="smart-scroll-vertical max-h-60">
                     <SelectItem value="en attente">En attente</SelectItem>
                     <SelectItem value="à réviser">À réviser</SelectItem>
                     <SelectItem value="en cours">En cours</SelectItem>
@@ -351,7 +351,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionnez un site web" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="smart-scroll-vertical max-h-60">
                   {websites.map((website: any) => (
                     <SelectItem key={website.id} value={website.id.toString()}>
                       {website.name} ({website.url})
