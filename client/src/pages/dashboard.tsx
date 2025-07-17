@@ -199,14 +199,14 @@ export default function DashboardWebhook() {
                 </div>
                 
                 {/* Boutons d'action */}
-                <div className="dashboard-buttons">
+                <div className="flex gap-2 justify-end">
                   <Button
                     onClick={() => setIsAddWebsiteOpen(true)}
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                    className="flex items-center gap-1 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs px-2 py-1"
                   >
-                    <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
+                    <Plus className="h-3 w-3 transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
                     <span>Ajouter un site</span>
                   </Button>
                   
@@ -214,13 +214,13 @@ export default function DashboardWebhook() {
                     onClick={() => setIsAnalysisOpen(true)}
                     variant="default"
                     size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                    className="flex items-center gap-1 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs px-2 py-1"
                     disabled={refreshAnalysisMutation.isPending}
                   >
                     {refreshAnalysisMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />
+                      <Loader2 className="h-3 w-3 animate-spin flex-shrink-0" />
                     ) : (
-                      <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180 flex-shrink-0" />
+                      <RefreshCw className="h-3 w-3 transition-transform duration-200 hover:rotate-180 flex-shrink-0" />
                     )}
                     <span>Actualiser l'analyse</span>
                   </Button>
