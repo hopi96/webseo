@@ -18,13 +18,13 @@ export function UnifiedHeader() {
   const currentPage = navItems.find(item => item.href === location);
 
   return (
-    <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-      <div className="px-4 lg:px-6 py-3 lg:py-4">
+    <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 w-full overflow-x-hidden">
+      <div className="px-4 lg:px-6 py-3 lg:py-4 w-full max-w-full">
         {/* Version Desktop */}
-        <div className="hidden lg:flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">SEO Dashboard</h1>
-            <nav className="flex space-x-6">
+        <div className="hidden lg:flex items-center justify-between w-full max-w-full">
+          <div className="flex items-center space-x-8 min-w-0">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white whitespace-nowrap">SEO Dashboard</h1>
+            <nav className="flex space-x-6 min-w-0">
               {navItems.map((item) => {
                 const isActive = location === item.href;
                 const Icon = item.icon;
@@ -49,11 +49,11 @@ export function UnifiedHeader() {
         </div>
 
         {/* Version Mobile */}
-        <div className="lg:hidden">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {currentPage && <currentPage.icon className="h-5 w-5 text-blue-600" />}
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="lg:hidden w-full max-w-full">
+          <div className="flex items-center justify-between w-full max-w-full">
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              {currentPage && <currentPage.icon className="h-5 w-5 text-blue-600 flex-shrink-0" />}
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                 {currentPage?.label || "SEO Analytics"}
               </h1>
             </div>
@@ -61,7 +61,7 @@ export function UnifiedHeader() {
               variant="ghost"
               size="sm"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2"
+              className="p-2 flex-shrink-0"
             >
               <Menu className="h-5 w-5" />
             </Button>

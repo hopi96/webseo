@@ -66,9 +66,68 @@
     @apply border-border;
   }
 
+  html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Styles globaux pour responsive design */
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Empêcher le débordement horizontal */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Styles pour les grilles responsives */
+  .grid {
+    display: grid;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Styles pour flex containers */
+  .flex {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Styles pour les cartes */
+  .card {
+    width: 100%;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Styles pour les contenus textuels */
+  .text-content {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 }
 
@@ -136,6 +195,102 @@
 @media (max-width: 768px) {
   .mobile-padding {
     @apply px-4;
+  }
+
+  /* Prevent horizontal scrolling on mobile */
+  .container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Ensure tables don't overflow */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure cards don't overflow */
+  .card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    word-wrap: break-word;
+  }
+
+  /* Ensure grid layouts are responsive */
+  .grid-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Ensure flex items wrap properly */
+  .flex-container {
+    flex-wrap: wrap;
+  }
+
+  /* Ensure text doesn't overflow */
+  .text-container {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Ensure images are responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Styles supplémentaires pour empêcher le débordement */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .calendar-day {
+    min-height: 4rem;
+    padding: 0.5rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .metrics-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .calendar-grid {
+      gap: 0.125rem;
+    }
+    
+    .calendar-day {
+      min-height: 3rem;
+      padding: 0.25rem;
+    }
   }
 }
 
