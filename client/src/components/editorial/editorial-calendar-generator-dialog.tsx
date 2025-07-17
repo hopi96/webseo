@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ export function EditorialCalendarGeneratorDialog({
   const [generationResult, setGenerationResult] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Mutation pour générer le calendrier éditorial
   const generateCalendarMutation = useMutation({
@@ -330,8 +332,8 @@ export function EditorialCalendarGeneratorDialog({
                 variant="default"
                 onClick={() => {
                   handleClose();
-                  // Rediriger vers la page du calendrier
-                  window.location.href = '/calendrier';
+                  // Rediriger vers la page du calendrier éditorial
+                  setLocation('/calendrier');
                 }}
                 className="flex items-center gap-2"
               >
