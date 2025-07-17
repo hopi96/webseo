@@ -224,10 +224,10 @@ export default function Calendar() {
   const days = getDaysInMonth(currentDate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 w-full overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <UnifiedHeader />
       
-      <main className="container mx-auto px-4 pt-20 pb-20 max-w-7xl w-full max-w-full">
+      <main className="container mx-auto px-4 pt-20 pb-20 max-w-7xl">
         {/* En-tête */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -280,9 +280,9 @@ export default function Calendar() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 w-full max-w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendrier principal */}
-          <div className="lg:col-span-2 w-full max-w-full min-w-0">
+          <div className="lg:col-span-2">
             <Card className="shadow-lg border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
               <CardHeader className="border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">

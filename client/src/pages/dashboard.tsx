@@ -176,22 +176,21 @@ export default function DashboardWebhook() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <UnifiedHeader />
-      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-700 w-full max-w-full">
+      <div className="p-6 space-y-6 animate-in fade-in duration-700">
         {/* En-tête avec sélecteur de site et boutons d'action */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500 w-full max-w-full dashboard-header">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500">
           <div className="flex flex-col gap-4">
-            {/* Première ligne : Titre */}
-            <div className="flex flex-col gap-4">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            {/* Première ligne : Titre et sélecteur */}
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Analyse SEO du site web
               </h1>
               
-              {/* Deuxième ligne : Sélecteur et boutons */}
-              <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-4">
                 {/* Sélecteur de site web */}
-                <div className="w-full">
+                <div className="min-w-64">
                   <WebsiteSelector
                     selectedWebsiteId={selectedWebsiteId}
                     onWebsiteChange={selectWebsite}
@@ -199,30 +198,30 @@ export default function DashboardWebhook() {
                 </div>
                 
                 {/* Boutons d'action */}
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2">
                   <Button
                     onClick={() => setIsAddWebsiteOpen(true)}
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-1 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs px-2 py-1"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
                   >
-                    <Plus className="h-3 w-3 transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
-                    <span>Ajouter un site</span>
+                    <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+                    Ajouter un site
                   </Button>
                   
                   <Button
                     onClick={() => setIsAnalysisOpen(true)}
                     variant="default"
                     size="sm"
-                    className="flex items-center gap-1 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs px-2 py-1"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
                     disabled={refreshAnalysisMutation.isPending}
                   >
                     {refreshAnalysisMutation.isPending ? (
-                      <Loader2 className="h-3 w-3 animate-spin flex-shrink-0" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <RefreshCw className="h-3 w-3 transition-transform duration-200 hover:rotate-180 flex-shrink-0" />
+                      <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
                     )}
-                    <span>Actualiser l'analyse</span>
+                    Actualiser l'analyse
                   </Button>
                 </div>
               </div>
@@ -284,7 +283,7 @@ export default function DashboardWebhook() {
         {!hasAnalysisError && webhookData && (
           <>
             {/* Métriques principales en cartes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Score SEO */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-100">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -556,16 +555,16 @@ export default function DashboardWebhook() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {Object.entries(webhookData.technicalSeo || {}).map(([key, value]) => (
-                <div key={key} className="flex items-center space-x-2 p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded min-w-0">
+                <div key={key} className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-700 rounded">
                   {value ? (
-                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                   ) : (
-                    <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
+                    <XCircle className="h-5 w-5 text-red-600" />
                   )}
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">
                       {key === 'robotsTxt' ? 'Robots.txt' :
                        key === 'xmlSitemap' ? 'XML Sitemap' :
                        key === 'mobileFriendly' ? 'Mobile-Friendly' :
@@ -573,7 +572,7 @@ export default function DashboardWebhook() {
                        key === 'compression' ? 'Compression' :
                        key === 'imageAltTags' ? 'Balises Alt' : key}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
                       {value ? 'Conforme' : 'À corriger'}
                     </div>
                   </div>
@@ -623,7 +622,7 @@ export default function DashboardWebhook() {
         </Card>
 
         {/* Stratégie de contenu avec mots-clés géolocalisés et saisonniers */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full max-w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Opportunités locales */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
