@@ -291,6 +291,74 @@
       min-height: 3rem;
       padding: 0.25rem;
     }
+    
+    /* Styles pour boutons responsives */
+    .button-responsive {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  /* Breakpoint pour très petits écrans */
+  @media (max-width: 475px) {
+    .button-responsive {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.5rem;
+      min-height: 2rem;
+    }
+    
+    .text-xs-mobile {
+      font-size: 0.625rem;
+    }
+    
+    .gap-xs-mobile {
+      gap: 0.25rem;
+    }
+    
+    /* Styles pour containers très petits écrans */
+    .container-xs {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+    
+    /* Assurer que les boutons ne débordent jamais */
+    .button-container {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+    }
+    
+    .button-container button {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  /* Styles supplémentaires pour garantir la responsive */
+  .dashboard-header {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .dashboard-buttons {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dashboard-buttons button {
+    flex: 1;
+    min-width: 0;
+    max-width: 50%;
   }
 }
 

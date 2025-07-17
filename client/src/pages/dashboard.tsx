@@ -180,17 +180,18 @@ export default function DashboardWebhook() {
       <UnifiedHeader />
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-700 w-full max-w-full">
         {/* En-tête avec sélecteur de site et boutons d'action */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500 w-full max-w-full">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500 w-full max-w-full dashboard-header">
           <div className="flex flex-col gap-4">
-            {/* Première ligne : Titre et sélecteur */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between">
+            {/* Première ligne : Titre */}
+            <div className="flex flex-col gap-4">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 Analyse SEO du site web
               </h1>
               
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              {/* Deuxième ligne : Sélecteur et boutons */}
+              <div className="flex flex-col gap-3">
                 {/* Sélecteur de site web */}
-                <div className="min-w-0 sm:min-w-64 flex-1 sm:flex-none">
+                <div className="w-full">
                   <WebsiteSelector
                     selectedWebsiteId={selectedWebsiteId}
                     onWebsiteChange={selectWebsite}
@@ -198,32 +199,32 @@ export default function DashboardWebhook() {
                 </div>
                 
                 {/* Boutons d'action */}
-                <div className="flex gap-2 flex-wrap">
+                <div className="dashboard-buttons">
                   <Button
                     onClick={() => setIsAddWebsiteOpen(true)}
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md flex-1 sm:flex-none"
+                    className="flex items-center gap-1 sm:gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md justify-center text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 button-responsive"
                   >
-                    <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
                     <span className="hidden sm:inline">Ajouter un site</span>
-                    <span className="sm:hidden">Ajouter</span>
+                    <span className="sm:hidden truncate">Ajouter</span>
                   </Button>
                   
                   <Button
                     onClick={() => setIsAnalysisOpen(true)}
                     variant="default"
                     size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md flex-1 sm:flex-none"
+                    className="flex items-center gap-1 sm:gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md justify-center text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 button-responsive"
                     disabled={refreshAnalysisMutation.isPending}
                   >
                     {refreshAnalysisMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
                     ) : (
-                      <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
+                      <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 hover:rotate-180 flex-shrink-0" />
                     )}
                     <span className="hidden sm:inline">Actualiser l'analyse</span>
-                    <span className="sm:hidden">Actualiser</span>
+                    <span className="sm:hidden truncate">Actualiser</span>
                   </Button>
                 </div>
               </div>
