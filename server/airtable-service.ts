@@ -72,6 +72,38 @@ function extractImageData(fields: any): { hasImage: boolean; imageUrl: string | 
 
 export class AirtableService {
   /**
+   * Met à jour le programme des réseaux sociaux pour un site
+   */
+  async updateSocialMediaProgram(siteId: number, programData: string): Promise<void> {
+    const { base } = initializeAirtable();
+    const seoTable = base('analyse SEO');
+    
+    try {
+      // Rechercher le site par ID
+      const records = await seoTable.select({
+        filterByFormula: `{ID} = ${siteId}`,
+        maxRecords: 1
+      }).firstPage();
+      
+      if (records.length === 0) {
+        throw new Error(`Site avec ID ${siteId} non trouvé`);
+      }
+      
+      const record = records[0];
+      
+      // Mettre à jour le champ programme_rs
+      await seoTable.update(record.getId(), {
+        programme_rs: programData
+      });
+      
+      console.log(`✅ Programme RS mis à jour pour le site ${siteId}`);
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour du programme RS:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Récupère tous les sites depuis la table analyse SEO d'Airtable avec données d'analyse SEO
    */
   async getAllSites(): Promise<AirtableSite[]> {
@@ -108,6 +140,7 @@ export class AirtableService {
           id: parseInt(fields['ID site']) || 0,
           name: cleanName,
           url: fields['URL'] || '',
+          programmeRs: fields['programme_rs'] || null,
           seoAnalysis: seoAnalysis
         };
       }).filter(site => site.id > 0); // Filtrer les sites avec un ID valide

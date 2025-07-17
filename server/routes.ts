@@ -63,6 +63,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour mettre à jour le programme des réseaux sociaux
+  app.put("/api/sites-airtable/:id/social-program", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const { programme_rs } = req.body;
+      
+      if (!programme_rs) {
+        return res.status(400).json({ message: "Le programme des réseaux sociaux est requis" });
+      }
+      
+      await airtableService.updateSocialMediaProgram(siteId, programme_rs);
+      res.json({ message: "Programme des réseaux sociaux mis à jour avec succès" });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du programme RS:", error);
+      res.status(500).json({ message: error.message || "Erreur lors de la mise à jour du programme" });
+    }
+  });
+
   // Nouvelle route pour déclencher l'analyse SEO d'un site Airtable via webhook n8n
   app.post("/api/sites-airtable/:id/refresh-analysis", async (req, res) => {
     try {

@@ -11,6 +11,7 @@ import { UnifiedHeader } from "@/components/layout/unified-header";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
 import { WebsiteSelector } from "@/components/website/website-selector";
+import { SocialMediaProgramDialog } from "@/components/social-media/social-media-program-dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -29,7 +30,8 @@ import {
   Calendar,
   Plus,
   RefreshCw,
-  Loader2
+  Loader2,
+  Share2
 } from "lucide-react";
 
 type WebsiteType = {
@@ -58,6 +60,7 @@ type SeoAnalysisType = {
 export default function DashboardWebhook() {
   const [isAddWebsiteOpen, setIsAddWebsiteOpen] = useState(false);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const [isSocialProgramOpen, setIsSocialProgramOpen] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(() => {
     // Récupérer le site sélectionné depuis localStorage
@@ -225,6 +228,17 @@ export default function DashboardWebhook() {
                   >
                     <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
                     Ajouter un site
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setIsSocialProgramOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                    disabled={!selectedWebsiteId}
+                  >
+                    <Share2 className="h-4 w-4" />
+                    Réseaux sociaux
                   </Button>
                   
                   <Button
@@ -787,6 +801,14 @@ export default function DashboardWebhook() {
             queryClient.refetchQueries({ queryKey: ['/api/sites-airtable'] });
           }, 2000);
         }}
+      />
+
+      {/* Dialogue de gestion des réseaux sociaux */}
+      <SocialMediaProgramDialog 
+        open={isSocialProgramOpen}
+        onOpenChange={setIsSocialProgramOpen}
+        websiteId={selectedWebsiteId!}
+        currentProgram={website?.programmeRs}
       />
 
       {/* Dialogue d'actualisation d'analyse */}
