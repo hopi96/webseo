@@ -64,11 +64,18 @@ export default function DashboardWebhook() {
     const savedWebsiteId = localStorage.getItem('selectedWebsiteId');
     return savedWebsiteId ? parseInt(savedWebsiteId) : 1;
   });
+  
+  // Stocker la liste précédente des sites pour détecter les nouveaux
+  const [previousWebsites, setPreviousWebsites] = useState<any[]>([]);
   const { toast } = useToast();
 
-  // Récupération des sites web depuis Airtable
-  const { data: websites = [] } = useQuery<any[]>({
+  // Récupération des sites web depuis Airtable avec rafraîchissement intelligent
+  const { data: websites = [], isLoading: isLoadingWebsites } = useQuery<any[]>({
     queryKey: ['/api/sites-airtable'],
+    refetchInterval: 30000, // Rafraîchir toutes les 30 secondes (plus raisonnable)
+    refetchOnWindowFocus: true, // Rafraîchir quand la fenêtre regagne le focus
+    refetchOnReconnect: true, // Rafraîchir à la reconnexion
+    staleTime: 15000, // Considérer les données comme fraîches pendant 15 secondes
   });
 
   // Fonction pour sélectionner un site et persister l'état
@@ -77,26 +84,41 @@ export default function DashboardWebhook() {
     localStorage.setItem('selectedWebsiteId', websiteId.toString());
   };
 
-  // S'assurer qu'on a un website ID valide si les sites sont chargés
-  // Sélectionner automatiquement le site le plus récent (ID le plus élevé) seulement au premier chargement
+  // Détecter les nouveaux sites ajoutés et les sélectionner automatiquement
   useEffect(() => {
-    if (websites.length > 0) {
+    if (websites.length > 0 && !isLoadingWebsites) {
       // Trier par ID décroissant pour avoir le plus récent en premier
       const sortedWebsites = [...websites].sort((a, b) => b.id - a.id);
       const newestWebsite = sortedWebsites[0];
       
-      // Si aucun site n'est sélectionné ou si le site sélectionné n'existe plus
+      // Si c'est le premier chargement ou s'il n'y a pas de site sélectionné
       if (!selectedWebsiteId || !websites.find(w => w.id === selectedWebsiteId)) {
         selectWebsite(newestWebsite.id);
       }
+      
+      // Détecter les nouveaux sites
+      if (previousWebsites.length > 0 && websites.length > previousWebsites.length) {
+        // Trouver le nouveau site (celui avec le plus grand ID)
+        const newSite = websites.find(w => !previousWebsites.some(p => p.id === w.id));
+        if (newSite) {
+          selectWebsite(newSite.id);
+          toast({
+            title: "Nouveau site ajouté",
+            description: `${newSite.name} a été ajouté et sélectionné automatiquement`,
+          });
+        }
+      }
+      
+      // Mettre à jour la liste précédente
+      setPreviousWebsites(websites);
     }
-  }, [websites.length]);
+  }, [websites.length, isLoadingWebsites]);
 
   // Récupération de l'analyse SEO depuis les données Airtable
   const website = websites.find(w => w.id === selectedWebsiteId);
   const seoAnalysis = website?.seoAnalysis;
-  const isLoading = false;
-  const seoError = !seoAnalysis;
+  const isLoading = isLoadingWebsites;
+  const seoError = !seoAnalysis && !isLoadingWebsites && websites.length > 0;
 
   // Mutation pour actualiser l'analyse via webhook n8n
   const refreshAnalysisMutation = useMutation({
@@ -134,7 +156,7 @@ export default function DashboardWebhook() {
     },
   });
 
-  const hasAnalysisError = seoError || !seoAnalysis;
+  const hasAnalysisError = seoError || (!seoAnalysis && !isLoadingWebsites && websites.length > 0);
 
   // Utiliser directement les données seoAnalysis depuis Airtable
   const webhookData = seoAnalysis;
@@ -239,8 +261,8 @@ export default function DashboardWebhook() {
           </div>
         </div>
 
-        {/* Message d'erreur si l'analyse échoue */}
-        {hasAnalysisError && (
+        {/* Message d'erreur si l'analyse échoue - mais seulement si les sites sont chargés */}
+        {hasAnalysisError && websites.length > 0 && !isLoadingWebsites && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0" />
@@ -276,7 +298,7 @@ export default function DashboardWebhook() {
         )}
 
         {/* Contenu de l'analyse - affiché seulement si les données sont disponibles */}
-        {!hasAnalysisError && webhookData && (
+        {!hasAnalysisError && webhookData && !isLoadingWebsites && (
           <>
             {/* Métriques principales en cartes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -793,20 +815,14 @@ export default function DashboardWebhook() {
         open={isAddWebsiteOpen}
         onOpenChange={setIsAddWebsiteOpen}
         onWebsiteAdded={(websiteId) => {
-          // Attendre un peu que les données soient mises à jour puis sélectionner le site
+          // Force le refetch des données Airtable
+          queryClient.invalidateQueries({ queryKey: ['/api/sites-airtable'] });
+          
+          // Attendre que les données soient mises à jour
           setTimeout(() => {
-            // Vérifier si le site existe maintenant dans les données
-            const siteExists = websites.find(w => w.id === websiteId);
-            if (siteExists) {
-              selectWebsite(websiteId);
-            } else {
-              // Sélectionner le site le plus récent par défaut
-              const sortedWebsites = [...websites].sort((a, b) => b.id - a.id);
-              if (sortedWebsites.length > 0) {
-                selectWebsite(sortedWebsites[0].id);
-              }
-            }
-          }, 1000);
+            // Déclencher un nouveau fetch pour obtenir les données les plus récentes
+            queryClient.refetchQueries({ queryKey: ['/api/sites-airtable'] });
+          }, 2000);
         }}
       />
 
