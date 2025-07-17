@@ -71,8 +71,8 @@ export function EditorialCalendarGeneratorDialog({
       setCurrentStep('Traitement par l\'IA...');
       setProgress(80);
       
-      // Attendre au moins 30 minutes (30 * 60 * 1000 = 1800000 ms)
-      await new Promise(resolve => setTimeout(resolve, 1800000));
+      // Attendre au moins 1 heure (60 * 60 * 1000 = 3600000 ms)
+      await new Promise(resolve => setTimeout(resolve, 3600000));
       
       return response.json();
     },
