@@ -72,19 +72,19 @@ function extractImageData(fields: any): { hasImage: boolean; imageUrl: string | 
 
 export class AirtableService {
   /**
-   * Récupère tous les sites depuis la table sites d'Airtable avec données d'analyse SEO
+   * Récupère tous les sites depuis la table analyse SEO d'Airtable avec données d'analyse SEO
    */
   async getAllSites(): Promise<AirtableSite[]> {
     try {
       const { base } = initializeAirtable();
-      const sitesTable = base('sites');
+      const analyseSeoTable = base('analyse SEO');
       
-      const records = await sitesTable.select({
-        fields: ['ID', 'Nom_site_web', 'URL', 'Analyse_SEO'],
-        sort: [{ field: 'ID', direction: 'desc' }] // Trier par ID décroissant (plus récents en premier)
+      const records = await analyseSeoTable.select({
+        fields: ['ID site', 'Nom_site_web', 'URL', 'Analyse_SEO'],
+        sort: [{ field: 'ID site', direction: 'desc' }] // Trier par ID décroissant (plus récents en premier)
       }).all();
 
-      console.log(`✅ ${records.length} sites récupérés depuis la table sites`);
+      console.log(`✅ ${records.length} sites récupérés depuis la table analyse SEO`);
       
       return records.map((record: any) => {
         const fields = record.fields as any;
@@ -95,20 +95,25 @@ export class AirtableService {
           try {
             seoAnalysis = JSON.parse(fields['Analyse_SEO']);
           } catch (error) {
-            console.warn(`Erreur lors du parsing JSON pour le site ${fields['ID']}:`, error);
+            console.warn(`Erreur lors du parsing JSON pour le site ${fields['ID site']}:`, error);
           }
         }
         
+        // Nettoyer le nom du site en enlevant "Analyse SEO - " et "Analyse SEO pour "
+        let cleanName = fields['Nom_site_web'] || 'Site sans nom';
+        cleanName = cleanName.replace(/^Analyse SEO - /, '');
+        cleanName = cleanName.replace(/^Analyse SEO pour /, '');
+        
         return {
-          id: parseInt(fields['ID']) || 0,
-          name: fields['Nom_site_web'] || 'Site sans nom',
+          id: parseInt(fields['ID site']) || 0,
+          name: cleanName,
           url: fields['URL'] || '',
           seoAnalysis: seoAnalysis
         };
       }).filter(site => site.id > 0); // Filtrer les sites avec un ID valide
     } catch (error) {
-      console.error('Erreur lors de la récupération des sites depuis la table sites:', error);
-      throw new Error('Impossible de récupérer les sites depuis la table sites');
+      console.error('Erreur lors de la récupération des sites depuis la table analyse SEO:', error);
+      throw new Error('Impossible de récupérer les sites depuis la table analyse SEO');
     }
   }
 

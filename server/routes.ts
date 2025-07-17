@@ -50,12 +50,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Nouvelle route pour récupérer les sites depuis la table sites d'Airtable avec données d'analyse SEO
+  // Nouvelle route pour récupérer les sites depuis la table analyse SEO d'Airtable avec données d'analyse SEO
   app.get("/api/sites-airtable", async (req, res) => {
     try {
-      console.log('🔍 Récupération des sites depuis la table sites avec analyse SEO...');
+      console.log('🔍 Récupération des sites depuis la table analyse SEO avec JSON...');
       const sites = await airtableService.getAllSites();
-      console.log('✅ Sites récupérés:', sites);
+      console.log('✅ Sites récupérés avec analyse SEO:', sites);
       res.json(sites);
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des sites Airtable:', error);
