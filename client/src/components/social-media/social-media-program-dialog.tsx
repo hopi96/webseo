@@ -35,7 +35,9 @@ import {
   Eye,
   Edit3,
   Save,
-  Loader2
+  Loader2,
+  FileText,
+  Image
 } from "lucide-react";
 
 // Schéma de validation pour le formulaire
@@ -46,6 +48,8 @@ const socialMediaProgramSchema = z.object({
   xtwitter_semaine: z.number().min(0).max(50),
   youtube_semaine: z.number().min(0).max(50),
   facebook_semaine: z.number().min(0).max(50),
+  blog_semaine: z.number().min(0).max(50),
+  pinterest_semaine: z.number().min(0).max(50),
 });
 
 type SocialMediaProgramForm = z.infer<typeof socialMediaProgramSchema>;
@@ -90,6 +94,8 @@ export function SocialMediaProgramDialog({
       xtwitter_semaine: existingProgram?.xtwitter?.par_semaine || 7,
       youtube_semaine: existingProgram?.youtube?.par_semaine || 2,
       facebook_semaine: existingProgram?.facebook?.par_semaine || 3,
+      blog_semaine: existingProgram?.blog?.par_semaine || 2,
+      pinterest_semaine: existingProgram?.pinterest?.par_semaine || 3,
     },
   });
 
@@ -121,6 +127,14 @@ export function SocialMediaProgramDialog({
           facebook: {
             par_semaine: data.facebook_semaine,
             par_mois: data.facebook_semaine * 4
+          },
+          blog: {
+            par_semaine: data.blog_semaine,
+            par_mois: data.blog_semaine * 4
+          },
+          pinterest: {
+            par_semaine: data.pinterest_semaine,
+            par_mois: data.pinterest_semaine * 4
           }
         }
       }
@@ -165,6 +179,8 @@ export function SocialMediaProgramDialog({
     xtwitter: <Twitter className="w-5 h-5 text-blue-400" />,
     youtube: <Youtube className="w-5 h-5 text-red-600" />,
     facebook: <Facebook className="w-5 h-5 text-blue-700" />,
+    blog: <FileText className="w-5 h-5 text-green-600" />,
+    pinterest: <Image className="w-5 h-5 text-red-500" />,
   };
 
   const platformNames = {
@@ -174,6 +190,8 @@ export function SocialMediaProgramDialog({
     xtwitter: "X (Twitter)",
     youtube: "YouTube",
     facebook: "Facebook",
+    blog: "Blog",
+    pinterest: "Pinterest",
   };
 
   const currentValues = form.watch();
