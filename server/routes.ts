@@ -543,6 +543,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('📅 Génération du calendrier éditorial pour le site', websiteId);
       console.log('📊 Données SEO reçues:', seoAnalysis ? 'Oui' : 'Non');
+      console.log('🔍 JSON COMPLET ENVOYÉ AU WEBHOOK:');
+      console.log(JSON.stringify(webhookData, null, 2));
       
       // Vérifier que l'analyse SEO contient bien les données nécessaires
       if (seoAnalysis) {
