@@ -12,6 +12,7 @@ import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
 import { WebsiteSelector } from "@/components/website/website-selector";
 import { SocialMediaProgramDialog } from "@/components/social-media/social-media-program-dialog";
+import { EditorialCalendarGeneratorDialog } from "@/components/editorial/editorial-calendar-generator-dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -61,6 +62,7 @@ export default function DashboardWebhook() {
   const [isAddWebsiteOpen, setIsAddWebsiteOpen] = useState(false);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const [isSocialProgramOpen, setIsSocialProgramOpen] = useState(false);
+  const [isCalendarGeneratorOpen, setIsCalendarGeneratorOpen] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(() => {
     // Récupérer le site sélectionné depuis localStorage
@@ -239,6 +241,17 @@ export default function DashboardWebhook() {
                   >
                     <Share2 className="h-4 w-4" />
                     Réseaux sociaux
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setIsCalendarGeneratorOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                    disabled={!selectedWebsiteId}
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Calendrier éditorial
                   </Button>
                   
                   <Button
@@ -918,6 +931,16 @@ export default function DashboardWebhook() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialogue de génération du calendrier éditorial */}
+      <EditorialCalendarGeneratorDialog
+        open={isCalendarGeneratorOpen}
+        onOpenChange={setIsCalendarGeneratorOpen}
+        websiteId={selectedWebsiteId}
+        websiteName={website?.name || ''}
+        websiteUrl={website?.url || ''}
+        seoAnalysis={website?.seoAnalysis}
+      />
     </div>
   );
 }
