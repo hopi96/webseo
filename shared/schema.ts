@@ -78,3 +78,11 @@ export type SeoAnalysis = typeof seoAnalyses.$inferSelect;
 export type InsertSeoAnalysis = z.infer<typeof insertSeoAnalysisSchema>;
 export type EditorialContent = typeof editorialContent.$inferSelect;
 export type InsertEditorialContent = z.infer<typeof insertEditorialContentSchema>;
+
+// Type pour les sites avec analyse SEO depuis Airtable
+export type AirtableSite = {
+  id: number;
+  name: string;
+  url: string;
+  seoAnalysis?: any; // JSON d'analyse SEO
+};
