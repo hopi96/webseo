@@ -333,7 +333,7 @@ export function EditorialCalendarGeneratorDialog({
                 onClick={() => {
                   handleClose();
                   // Rediriger vers la page du calendrier éditorial
-                  setLocation('/calendrier');
+                  setLocation('/calendar');
                 }}
                 className="flex items-center gap-2"
               >
