@@ -81,6 +81,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour générer le calendrier éditorial
+  app.post('/api/generate-editorial-calendar', async (req, res) => {
+    try {
+      const { websiteId, websiteName, websiteUrl, seoAnalysis } = req.body;
+
+      console.log(`📅 Génération du calendrier éditorial pour le site ${websiteId}`);
+
+      // Préparer les données pour le webhook n8n
+      const webhookData = {
+        site_id: websiteId,
+        site_name: websiteName,
+        site_url: websiteUrl,
+        seo_analysis: seoAnalysis,
+        timestamp: new Date().toISOString()
+      };
+
+      // Appeler le webhook n8n
+      const webhookUrl = 'https://doseit.app.n8n.cloud/webhook/b254a7dc-af2a-4994-8d24-82200f836f57';
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur webhook: ${response.status} ${response.statusText}`);
+      }
+
+      const webhookResult = await response.json();
+      
+      console.log(`✅ Calendrier éditorial généré pour le site ${websiteId}`);
+      res.json({ 
+        message: 'Calendrier éditorial généré avec succès',
+        webhookResponse: webhookResult
+      });
+    } catch (error) {
+      console.error('Erreur lors de la génération du calendrier éditorial:', error);
+      res.status(500).json({ error: 'Erreur lors de la génération du calendrier éditorial' });
+    }
+  });
+
   // Nouvelle route pour déclencher l'analyse SEO d'un site Airtable via webhook n8n
   app.post("/api/sites-airtable/:id/refresh-analysis", async (req, res) => {
     try {
@@ -479,6 +522,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Failed to generate image", 
         error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
+  // Route pour générer un calendrier éditorial via webhook n8n
+  app.post("/api/generate-editorial-calendar", async (req, res) => {
+    try {
+      const { websiteId, websiteName, websiteUrl, seoAnalysis } = req.body;
+      
+      if (!websiteId || !websiteName || !websiteUrl) {
+        return res.status(400).json({ message: "websiteId, websiteName, and websiteUrl are required" });
+      }
+      
+      // Préparer les données pour le webhook n8n
+      const webhookData = {
+        websiteId,
+        websiteName,
+        websiteUrl,
+        seoAnalysis: seoAnalysis || null
+      };
+      
+      console.log('📅 Génération du calendrier éditorial via webhook n8n:', webhookData);
+      
+      // URL du webhook n8n pour la génération de calendrier éditorial
+      const webhookUrl = 'https://doseit.app.n8n.cloud/webhook/b254a7dc-af2a-4994-8d24-82200f836f57';
+      
+      // Envoyer la requête au webhook n8n
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Webhook request failed: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      console.log('✅ Calendrier éditorial généré avec succès:', result);
+      
+      res.json({
+        success: true,
+        message: "Calendrier éditorial généré avec succès",
+        data: result
+      });
+    } catch (error) {
+      console.error("Error generating editorial calendar:", error);
+      res.status(500).json({ 
+        message: "Failed to generate editorial calendar", 
+        error: error.message 
       });
     }
   });
