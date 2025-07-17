@@ -98,34 +98,26 @@ export default function DashboardWebhook() {
   const isLoading = false;
   const seoError = !seoAnalysis;
 
-  // Mutation pour actualiser l'analyse
+  // Mutation pour actualiser l'analyse (désactivée pour les données Airtable)
   const refreshAnalysisMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', `/api/websites/${selectedWebsiteId}/refresh-analysis`);
-      return response.json();
+      // Rafraîchir les données depuis Airtable
+      queryClient.invalidateQueries({ queryKey: ['/api/sites-airtable'] });
+      return Promise.resolve();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/websites'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/websites/${selectedWebsiteId}/seo-analysis`] });
       toast({
-        title: "Analyse actualisée",
-        description: "L'analyse SEO a été mise à jour avec succès",
+        title: "Données actualisées",
+        description: "Les données ont été rechargées depuis Airtable",
       });
       setIsAnalysisOpen(false);
     },
     onError: (error: any) => {
-      const errorMessage = error.message || "Impossible d'actualiser l'analyse";
-      
-      // Vérifier si c'est une erreur de webhook
-      if (errorMessage.includes("webhook") || errorMessage.includes("Webhook") || errorMessage.includes("n8n")) {
-        setWebhookError(`Erreur de connexion webhook: ${errorMessage}`);
-      } else {
-        toast({
-          title: "Erreur",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Erreur",
+        description: "Impossible d'actualiser les données",
+        variant: "destructive",
+      });
       setIsAnalysisOpen(false);
     },
   });
@@ -213,7 +205,7 @@ export default function DashboardWebhook() {
                     ) : (
                       <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
                     )}
-                    Actualiser l'analyse
+                    Actualiser les données
                   </Button>
                 </div>
               </div>
