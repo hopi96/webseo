@@ -204,27 +204,25 @@ export default function DashboardWebhook() {
                     onClick={() => setIsAddWebsiteOpen(true)}
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-1 sm:gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md justify-center text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 button-responsive"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
                   >
-                    <Plus className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
-                    <span className="hidden sm:inline">Ajouter un site</span>
-                    <span className="sm:hidden truncate">Ajouter</span>
+                    <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
+                    <span>Ajouter un site</span>
                   </Button>
                   
                   <Button
                     onClick={() => setIsAnalysisOpen(true)}
                     variant="default"
                     size="sm"
-                    className="flex items-center gap-1 sm:gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md justify-center text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 button-responsive"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
                     disabled={refreshAnalysisMutation.isPending}
                   >
                     {refreshAnalysisMutation.isPending ? (
-                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
+                      <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />
                     ) : (
-                      <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 hover:rotate-180 flex-shrink-0" />
+                      <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180 flex-shrink-0" />
                     )}
-                    <span className="hidden sm:inline">Actualiser l'analyse</span>
-                    <span className="sm:hidden truncate">Actualiser</span>
+                    <span>Actualiser l'analyse</span>
                   </Button>
                 </div>
               </div>
