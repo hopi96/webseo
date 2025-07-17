@@ -81,7 +81,7 @@ export class AirtableService {
     try {
       // Rechercher le site par ID
       const records = await seoTable.select({
-        filterByFormula: `{ID} = ${siteId}`,
+        filterByFormula: `{ID site} = ${siteId}`,
         maxRecords: 1
       }).firstPage();
       
@@ -112,7 +112,7 @@ export class AirtableService {
       const analyseSeoTable = base('analyse SEO');
       
       const records = await analyseSeoTable.select({
-        fields: ['ID site', 'Nom_site_web', 'URL', 'Analyse_SEO'],
+        fields: ['ID site', 'Nom_site_web', 'URL', 'Analyse_SEO', 'programme_rs'],
         sort: [{ field: 'ID site', direction: 'desc' }] // Trier par ID décroissant (plus récents en premier)
       }).all();
 
