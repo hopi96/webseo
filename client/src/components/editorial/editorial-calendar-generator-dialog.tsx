@@ -54,23 +54,41 @@ export function EditorialCalendarGeneratorDialog({
   // Mutation pour générer le calendrier éditorial
   const generateCalendarMutation = useMutation({
     mutationFn: async () => {
+      // Commencer la génération
+      setCurrentStep('Génération en cours...');
+      setProgress(60);
+      
       const response = await apiRequest('POST', '/api/generate-editorial-calendar', {
         websiteId,
         websiteName,
         websiteUrl,
         seoAnalysis
       });
+      
+      // Attendre que le webhook n8n termine complètement
+      setCurrentStep('Traitement par l\'IA...');
+      setProgress(80);
+      
+      // Attendre un délai pour s'assurer que le workflow n8n se termine
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
       return response.json();
     },
     onSuccess: (data) => {
-      setGenerationResult(data);
-      setIsGenerating(false);
-      setProgress(100);
-      setCurrentStep('Terminé');
-      toast({
-        title: "Calendrier généré",
-        description: "Le calendrier éditorial a été généré avec succès",
-      });
+      setCurrentStep('Finalisation...');
+      setProgress(95);
+      
+      // Attendre un peu plus pour s'assurer que tout est terminé
+      setTimeout(() => {
+        setGenerationResult(data);
+        setIsGenerating(false);
+        setProgress(100);
+        setCurrentStep('Terminé');
+        toast({
+          title: "Calendrier généré",
+          description: "Le calendrier éditorial a été généré avec succès",
+        });
+      }, 2000);
     },
     onError: (error: any) => {
       setIsGenerating(false);
@@ -90,13 +108,11 @@ export function EditorialCalendarGeneratorDialog({
     setCurrentStep('Initialisation...');
     setGenerationResult(null);
 
-    // Simuler les étapes de génération
+    // Simuler les étapes de génération avant l'appel API
     const steps = [
       { step: 'Analyse du site web...', progress: 20 },
       { step: 'Extraction des données SEO...', progress: 40 },
-      { step: 'Génération du calendrier...', progress: 60 },
-      { step: 'Optimisation du contenu...', progress: 80 },
-      { step: 'Finalisation...', progress: 95 }
+      { step: 'Préparation des données...', progress: 50 }
     ];
 
     for (let i = 0; i < steps.length; i++) {
@@ -105,6 +121,7 @@ export function EditorialCalendarGeneratorDialog({
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
+    // Lancer la génération avec le webhook n8n
     generateCalendarMutation.mutate();
   };
 
