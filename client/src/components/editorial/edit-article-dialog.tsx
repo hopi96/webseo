@@ -318,10 +318,10 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                       variant="outline"
                       size="sm"
                       onClick={() => setShowAIDialog(true)}
-                      className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                      className="flex items-center gap-1 text-purple-600 border-purple-200 hover:bg-purple-50 text-xs px-2 py-1"
                     >
-                      <Sparkles className="h-4 w-4" />
-                      Générer avec GPT-4o
+                      <Sparkles className="h-3 w-3" />
+                      Générer
                     </Button>
                   </div>
                   <FormControl>
