@@ -62,7 +62,7 @@ export function EditorialCalendarGeneratorDialog({
         websiteId,
         websiteName,
         websiteUrl,
-        seoAnalysis
+        seoAnalysis: seoAnalysis || {}
       });
       
       // Attendre que le webhook n8n termine complètement
@@ -94,9 +94,22 @@ export function EditorialCalendarGeneratorDialog({
       setIsGenerating(false);
       setProgress(0);
       setCurrentStep('');
+      
+      // Gestion spécifique des erreurs de webhook n8n
+      let errorMessage = error.message || "Impossible de générer le calendrier éditorial";
+      let errorTitle = "Erreur";
+      
+      if (error.message?.includes('timeout') || error.message?.includes('mode test')) {
+        errorTitle = "Webhook n8n non disponible";
+        errorMessage = "Le workflow n8n est peut-être en mode test ou non activé. Activez-le en mode production ou cliquez sur 'Execute workflow' pour le mode test.";
+      } else if (error.message?.includes('webhook') || error.message?.includes('n8n')) {
+        errorTitle = "Erreur de connexion n8n";
+        errorMessage = "Erreur de connexion avec n8n. Vérifiez que le webhook est correctement configuré.";
+      }
+      
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de générer le calendrier éditorial",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     },

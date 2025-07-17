@@ -541,22 +541,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analyse_seo: seoAnalysis || null
       };
       
-      console.log('📅 Génération du calendrier éditorial via webhook n8n:', webhookData);
+      console.log('📅 Génération du calendrier éditorial pour le site', websiteId);
+      console.log('📊 Données SEO reçues:', seoAnalysis ? 'Oui' : 'Non');
+      
+      // Vérifier que l'analyse SEO contient bien les données nécessaires
+      if (seoAnalysis) {
+        console.log('✅ Analyse SEO complète trouvée:', {
+          url: seoAnalysis.url,
+          title: seoAnalysis.title,
+          seoScore: seoAnalysis.seoScore,
+          keywordCount: seoAnalysis.keywordCount,
+          hasKeywordAnalysis: seoAnalysis.keywordAnalysis ? seoAnalysis.keywordAnalysis.length : 0,
+          hasContentStrategy: !!seoAnalysis.contentStrategy
+        });
+      } else {
+        console.log('⚠️ Aucune analyse SEO fournie au webhook');
+      }
       
       // URL du webhook n8n pour la génération de calendrier éditorial
       const webhookUrl = 'https://doseit.app.n8n.cloud/webhook/b254a7dc-af2a-4994-8d24-82200f836f57';
       
-      // Envoyer la requête au webhook n8n
+      // Envoyer la requête au webhook n8n avec timeout réduit
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 secondes timeout
+      
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(webhookData)
+        body: JSON.stringify(webhookData),
+        signal: controller.signal
       });
       
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
-        throw new Error(`Webhook request failed: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`❌ Webhook error ${response.status}: ${errorText}`);
+        
+        // Gestion spécifique des erreurs
+        if (response.status === 524) {
+          throw new Error('Timeout webhook n8n: Le workflow n8n est peut-être en mode test ou non activé');
+        } else if (response.status === 404) {
+          throw new Error('Webhook n8n non trouvé: Vérifiez l\'URL du webhook dans les paramètres');
+        } else if (response.status === 500) {
+          throw new Error('Erreur interne n8n: Le workflow n8n a rencontré une erreur');
+        } else {
+          throw new Error(`Erreur webhook: ${response.status} ${response.statusText}`);
+        }
       }
       
       const result = await response.json();
@@ -569,11 +602,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: result
       });
     } catch (error) {
-      console.error("Error generating editorial calendar:", error);
-      res.status(500).json({ 
-        message: "Failed to generate editorial calendar", 
-        error: error.message 
-      });
+      console.error("❌ Erreur lors de la génération du calendrier éditorial:", error);
+      
+      // Gestion spécifique des erreurs pour le frontend
+      if (error.message?.includes('timeout') || error.message?.includes('aborted')) {
+        res.status(500).json({ 
+          message: "Timeout webhook n8n: Le workflow n8n est peut-être en mode test ou non activé", 
+          error: error.message,
+          solution: "Activez votre workflow n8n ou cliquez sur 'Execute workflow' pour le mode test"
+        });
+      } else if (error.message?.includes('mode test')) {
+        res.status(500).json({ 
+          message: "Workflow n8n en mode test", 
+          error: error.message,
+          solution: "Cliquez sur 'Execute workflow' dans votre canvas n8n puis réessayez"
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Erreur lors de la génération du calendrier éditorial", 
+          error: error.message 
+        });
+      }
     }
   });
 
