@@ -1,12 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { BarChart3, Search, FileText, Calendar, Settings } from "lucide-react";
+import { BarChart3, FileText, Calendar, Settings } from "lucide-react";
 
 export function BottomNavigation() {
   const [location] = useLocation();
 
   const navItems = [
     { href: "/", icon: BarChart3, label: "Tableau de bord", id: "dashboard" },
-    { href: "/keywords", icon: Search, label: "Mots-clés", id: "keywords" },
     { href: "/calendar", icon: Calendar, label: "Calendrier", id: "calendar" },
     { href: "/reports", icon: FileText, label: "Rapports", id: "reports" },
     { href: "/settings", icon: Settings, label: "Paramètres", id: "settings" },
