@@ -431,6 +431,33 @@ export class AirtableService {
   }
 
   /**
+   * Supprime un site de la table analyse SEO
+   */
+  async deleteSite(siteId: number): Promise<boolean> {
+    try {
+      const { base } = initializeAirtable();
+      const analyseSeoTable = base('analyse SEO');
+      
+      // Trouver le record à supprimer
+      const records = await analyseSeoTable.select({
+        filterByFormula: `{ID site} = "${siteId}"`
+      }).all();
+      
+      if (records.length === 0) {
+        throw new Error(`Site avec ID ${siteId} non trouvé`);
+      }
+      
+      // Supprimer le record
+      await analyseSeoTable.destroy(records[0].id);
+      console.log(`✅ Site ${siteId} supprimé de la table analyse SEO`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Erreur lors de la suppression du site ${siteId}:`, error);
+      throw new Error(`Impossible de supprimer le site ${siteId}`);
+    }
+  }
+
+  /**
    * Teste la connexion Airtable
    */
   async testConnection(): Promise<boolean> {

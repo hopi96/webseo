@@ -33,16 +33,16 @@ export default function Settings() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzingWebsite, setAnalyzingWebsite] = useState<string>("");
 
-  const { data: websites } = useQuery<Website[]>({
-    queryKey: ["/api/websites"],
+  const { data: websites = [] } = useQuery<any[]>({
+    queryKey: ["/api/sites-airtable"],
   });
 
   const deleteWebsiteMutation = useMutation({
     mutationFn: async (websiteId: number) => {
-      await apiRequest("DELETE", `/api/websites/${websiteId}`);
+      await apiRequest("DELETE", `/api/sites-airtable/${websiteId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sites-airtable"] });
       toast({
         title: "Succès",
         description: "Site web supprimé avec succès",
@@ -64,14 +64,13 @@ export default function Settings() {
         setIsAnalyzing(true);
         setAnalyzingWebsite(website.name);
       }
-      const response = await apiRequest("POST", `/api/websites/${websiteId}/analyze`);
+      const response = await apiRequest("POST", `/api/sites-airtable/${websiteId}/analyze`);
       return response.json();
     },
     onSuccess: () => {
       setIsAnalyzing(false);
       setAnalyzingWebsite("");
-      queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/websites", "seo-analysis"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sites-airtable"] });
       toast({
         title: "Succès",
         description: "Analyse du site web terminée avec succès",
