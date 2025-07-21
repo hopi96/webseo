@@ -81,6 +81,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour supprimer un site Airtable
+  app.delete("/api/sites-airtable/:id", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      await airtableService.deleteSite(siteId);
+      res.json({ message: "Site supprimé avec succès" });
+    } catch (error) {
+      console.error("❌ Erreur lors de la suppression du site:", error);
+      res.status(500).json({ message: error.message || "Erreur lors de la suppression du site" });
+    }
+  });
+
+  // Route pour analyser un site Airtable
+  app.post("/api/sites-airtable/:id/analyze", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const sites = await airtableService.getAllSites();
+      const site = sites.find(s => s.id === siteId);
+      
+      if (!site) {
+        return res.status(404).json({ message: "Site not found" });
+      }
+
+      console.log(`🔄 Déclenchement de l'analyse SEO pour ${site.url} via webhook n8n...`);
+      
+      // Appel du webhook n8n pour déclencher une nouvelle analyse
+      const webhookAnalysisData = await requestSeoAnalysisFromWebhook(site.url);
+      
+      console.log('✅ Nouvelle analyse SEO reçue du webhook:', webhookAnalysisData);
+      
+      res.json(webhookAnalysisData);
+    } catch (error) {
+      console.error("❌ Erreur lors de l'analyse du site:", error);
+      res.status(500).json({ message: error.message || "Erreur lors de l'analyse du site" });
+    }
+  });
+
 
 
   // Nouvelle route pour déclencher l'analyse SEO d'un site Airtable via webhook n8n
