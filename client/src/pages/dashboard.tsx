@@ -13,6 +13,7 @@ import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
 import { WebsiteSelector } from "@/components/website/website-selector";
 import { SocialMediaProgramDialog } from "@/components/social-media/social-media-program-dialog";
 import { EditorialCalendarGeneratorDialog } from "@/components/editorial/editorial-calendar-generator-dialog";
+import { SEOAIAgent } from "@/components/dashboard/seo-ai-agent";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -785,6 +786,13 @@ export default function DashboardWebhook() {
           </CardContent>
         </Card>
 
+        {/* Agent IA SEO */}
+        <div className="mt-8">
+          <SEOAIAgent 
+            siteId={selectedWebsiteId!}
+            seoData={webhookData}
+          />
+        </div>
 
           </>
         )}
