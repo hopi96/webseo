@@ -849,6 +849,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour l'analyse IA SEO
+  app.post("/api/seo-ai-analysis", async (req, res) => {
+    try {
+      const { siteId, seoData } = req.body;
+
+      if (!seoData) {
+        return res.status(400).json({ error: 'Données SEO manquantes' });
+      }
+
+      console.log('🤖 Analyse IA SEO pour le site:', siteId);
+
+      // Préparer le prompt pour GPT-4o avec les données SEO réelles
+      const prompt = `Tu es un expert SEO senior avec 15 ans d'expérience. Analyse les données SEO suivantes et fournis des recommandations détaillées et actionnables.
+
+DONNÉES SEO À ANALYSER:
+- Score SEO: ${seoData.seoScore}/100
+- Vitesse de page: ${seoData.pageSpeed}
+- Nombre de problèmes: ${seoData.issuesCount}
+- Mots-clés suivis: ${seoData.keywordCount}
+- Liens internes: ${seoData.internalLinks}
+- Liens externes: ${seoData.externalLinks}
+- URL: ${seoData.url}
+
+DONNÉES TECHNIQUES:
+${JSON.stringify(seoData.technicalSeo, null, 2)}
+
+MÉTRIQUES DE VITESSE:
+${JSON.stringify(seoData.pageSpeedMetrics, null, 2)}
+
+ANALYSE DES MOTS-CLÉS:
+${JSON.stringify(seoData.keywordAnalysis, null, 2)}
+
+CONSIGNES:
+1. Fournis un score global d'évaluation /100 basé sur ton expertise
+2. Identifie 3-5 points forts spécifiques
+3. Identifie 3-5 points d'amélioration prioritaires  
+4. Génère 4-6 recommandations concrètes avec:
+   - Priorité (high/medium/low)
+   - Catégorie (technique, contenu, mots-clés, vitesse, etc.)
+   - Titre court et impactant
+   - Description détaillée du problème
+   - Impact attendu précis
+   - 3-5 étapes d'action concrètes
+   - Estimation d'amélioration quantifiée
+
+Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
+{
+  "overallScore": number,
+  "summary": "string",
+  "strengths": ["string"],
+  "weaknesses": ["string"],
+  "recommendations": [
+    {
+      "priority": "high|medium|low",
+      "category": "string",
+      "title": "string",
+      "description": "string",
+      "impact": "string",
+      "actionSteps": ["string"],
+      "estimatedImprovement": "string"
+    }
+  ]
+}`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            {
+              role: "system",
+              content: "Tu es un expert SEO senior. Analyse les données et fournis des recommandations en JSON strict."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          response_format: { type: "json_object" },
+          max_tokens: 4000,
+          temperature: 0.3
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur OpenAI: ${response.status}`);
+      }
+
+      const openaiResult = await response.json();
+      const analysis = JSON.parse(openaiResult.choices[0].message.content);
+      
+      console.log('✅ Analyse IA SEO générée avec succès');
+      res.json(analysis);
+    } catch (error: any) {
+      console.error('Erreur lors de l\'analyse IA SEO:', error);
+      res.status(500).json({ 
+        error: 'Impossible de générer l\'analyse IA',
+        details: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
