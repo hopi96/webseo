@@ -51,7 +51,8 @@ export const editorialContent = pgTable("editorial_content", {
   typeContent: text("type_content").notNull(), // twitter, instagram, article, newsletter, facebook, pinterest, google my business
   contentText: text("content_text").notNull(),
   hasImage: boolean("has_image").default(false),
-  imageUrl: text("image_url"), // URL de l'image générée par l'IA
+  imageUrl: text("image_url"), // URL de l'image (DALL-E ou upload)
+  imageSource: text("image_source"), // 'upload', 'ai', ou null
   statut: text("statut").notNull(), // en attente, à réviser, en cours, publié
   dateDePublication: timestamp("date_de_publication").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

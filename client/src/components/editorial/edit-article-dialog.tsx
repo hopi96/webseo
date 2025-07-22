@@ -34,6 +34,14 @@ import { useToast } from "@/hooks/use-toast";
 import { EditorialContent } from "@shared/schema";
 import { Sparkles, Globe, Upload, X, RotateCcw } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
+import { 
+  prepareImageDataForSubmission, 
+  initializeImageFormState, 
+  resetImageState, 
+  getDisplayImageUrl, 
+  getImageSourceLabel,
+  type FormImageState 
+} from "@/lib/image-utils";
 
 interface EditArticleDialogProps {
   open: boolean;
@@ -44,9 +52,10 @@ interface EditArticleDialogProps {
 const editArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est obligatoire"),
   statut: z.enum(["en attente", "à réviser", "en cours", "publié"]),
-  typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter"]),
+  typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter", "facebook", "pinterest", "google my business"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
+  imageSource: z.enum(["upload", "ai"]).optional(),
   dateDePublication: z.string().min(1, "La date de publication est obligatoire"),
   idSite: z.number()
 });
@@ -58,10 +67,16 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const queryClient = useQueryClient();
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState("");
-  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [customPrompt, setCustomPrompt] = useState<string>("");
+  
+  // État des images utilisant la nouvelle logique
+  const [imageState, setImageState] = useState<FormImageState>(() => 
+    initializeImageFormState({
+      hasImage: article.hasImage,
+      imageUrl: article.imageUrl,
+      imageSource: article.imageSource
+    })
+  );
   
   // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
@@ -504,9 +519,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                             Image actuelle
                           </span>
                           <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                            {form.watch("imageUrl")?.length > 30 ? 
-                              `${form.watch("imageUrl")?.substring(0, 30)}...` : 
-                              form.watch("imageUrl")
+                            {form.watch("imageUrl") && form.watch("imageUrl")!.length > 30 ? 
+                              `${form.watch("imageUrl")!.substring(0, 30)}...` : 
+                              form.watch("imageUrl") || ""
                             }
                           </div>
                         </div>

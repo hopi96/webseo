@@ -43,34 +43,149 @@ function normalizeContentType(type: string): string {
 }
 
 /**
- * Extrait l'URL de l'image depuis les champs Airtable
+ * Extrait l'URL de l'image depuis les champs Airtable avec support des deux champs
  */
-function extractImageData(fields: any): { hasImage: boolean; imageUrl: string | null } {
+function extractImageData(fields: any): { hasImage: boolean; imageUrl: string | null; imageSource: 'upload' | 'ai' | null } {
   const imageData = fields.image;
+  const imageUrl = fields.image_url;
   
-  // D'abord vérifier le champ "image" qui est le champ principal d'Airtable
-  if (imageData && Array.isArray(imageData) && imageData.length > 0) {
+  // Priorité 1: Champ "image" (uploads locaux) - le plus fiable
+  if (imageData && Array.isArray(imageData) && imageData.length > 0 && imageData[0].url) {
     return {
       hasImage: true,
-      imageUrl: imageData[0].url
+      imageUrl: imageData[0].url,
+      imageSource: 'upload'
     };
   }
   
-  // Fallback vers image_url si le champ image n'est pas disponible (rétrocompatibilité)
-  if (fields.image_url) {
+  // Priorité 2: Champ "image_url" (images DALL-E ou URLs externes)
+  if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
     return {
       hasImage: true,
-      imageUrl: fields.image_url
+      imageUrl: imageUrl.trim(),
+      imageSource: 'ai'
     };
   }
   
+  // Aucune image disponible
   return {
     hasImage: false,
-    imageUrl: null
+    imageUrl: null,
+    imageSource: null
   };
 }
 
 export class AirtableService {
+  /**
+   * Gère les champs d'image pour la création de contenu
+   */
+  private async handleImageFieldsForCreation(contentData: any, fieldsToCreate: Record<string, any>): Promise<void> {
+    if (!contentData.imageUrl) {
+      return; // Pas d'image à traiter
+    }
+
+    try {
+      const imageUrl = contentData.imageUrl.trim();
+      
+      // Déterminer le type d'image
+      const isDALLEImage = imageUrl.includes('oaidalleapi') || imageUrl.includes('openai.com');
+      const isExternalURL = imageUrl.startsWith('http');
+      const isLocalUpload = imageUrl.startsWith('/uploads/');
+      
+      if (isDALLEImage || (isExternalURL && !isLocalUpload)) {
+        // Image générée par DALL-E ou URL externe
+        console.log('🖼️ Traitement image DALL-E/externe:', imageUrl);
+        
+        // Remplir les deux champs pour les images DALL-E (redondance sécurisée)
+        fieldsToCreate.image_url = imageUrl;
+        fieldsToCreate.image = [{
+          url: imageUrl,
+          filename: `dalle_image_${Date.now()}.png`
+        }];
+        
+      } else if (isLocalUpload) {
+        // Image uploadée localement
+        console.log('📁 Traitement image uploadée:', imageUrl);
+        
+        // Construire l'URL complète pour Airtable
+        const domain = process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
+        const fullImageUrl = `https://${domain}${imageUrl}`;
+        
+        // Priorité au champ image pour les uploads
+        fieldsToCreate.image = [{
+          url: fullImageUrl,
+          filename: `uploaded_${Date.now()}.${imageUrl.split('.').pop()}`
+        }];
+        
+        // image_url reste vide pour les uploads locaux
+        
+      } else {
+        console.warn('⚠️ Type d\'image non reconnu:', imageUrl);
+        // Fallback: traiter comme URL externe
+        fieldsToCreate.image_url = imageUrl;
+      }
+      
+    } catch (error) {
+      console.error('❌ Erreur lors du traitement de l\'image:', error);
+      // Ne pas faire échouer la création pour une erreur d'image
+    }
+  }
+
+  /**
+   * Gère les champs d'image pour la mise à jour de contenu
+   */
+  private async handleImageFieldsForUpdate(updateData: any, fieldsToUpdate: Record<string, any>): Promise<void> {
+    // Si hasImage est false, vider les deux champs
+    if (updateData.hasImage === false) {
+      fieldsToUpdate.image = null;
+      fieldsToUpdate.image_url = '';
+      return;
+    }
+    
+    if (!updateData.imageUrl) {
+      return; // Pas de changement d'image
+    }
+
+    try {
+      const imageUrl = updateData.imageUrl.trim();
+      
+      // Même logique que pour la création
+      const isDALLEImage = imageUrl.includes('oaidalleapi') || imageUrl.includes('openai.com');
+      const isExternalURL = imageUrl.startsWith('http');
+      const isLocalUpload = imageUrl.startsWith('/uploads/');
+      
+      if (isDALLEImage || (isExternalURL && !isLocalUpload)) {
+        console.log('🖼️ Mise à jour image DALL-E/externe:', imageUrl);
+        
+        fieldsToUpdate.image_url = imageUrl;
+        fieldsToUpdate.image = [{
+          url: imageUrl,
+          filename: `dalle_updated_${Date.now()}.png`
+        }];
+        
+      } else if (isLocalUpload) {
+        console.log('📁 Mise à jour image uploadée:', imageUrl);
+        
+        const domain = process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
+        const fullImageUrl = `https://${domain}${imageUrl}`;
+        
+        fieldsToUpdate.image = [{
+          url: fullImageUrl,
+          filename: `uploaded_updated_${Date.now()}.${imageUrl.split('.').pop()}`
+        }];
+        
+        // Vider image_url pour les uploads locaux
+        fieldsToUpdate.image_url = '';
+        
+      } else {
+        console.warn('⚠️ Type d\'image non reconnu lors de la mise à jour:', imageUrl);
+        fieldsToUpdate.image_url = imageUrl;
+      }
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour de l\'image:', error);
+    }
+  }
   /**
    * Met à jour le programme des réseaux sociaux pour un site
    */
@@ -143,7 +258,7 @@ export class AirtableService {
           programmeRs: fields['programme_rs'] || null,
           seoAnalysis: seoAnalysis
         };
-      }).filter(site => site.id > 0); // Filtrer les sites avec un ID valide
+      }).filter((site: any) => site.id > 0); // Filtrer les sites avec un ID valide
     } catch (error) {
       console.error('Erreur lors de la récupération des sites depuis la table analyse SEO:', error);
       throw new Error('Impossible de récupérer les sites depuis la table analyse SEO');
@@ -175,6 +290,7 @@ export class AirtableService {
           contentText: fields.contenu_text || '',
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
+          imageSource: imageData.imageSource,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -217,6 +333,7 @@ export class AirtableService {
           contentText: fields.contenu_text || '',
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
+          imageSource: imageData.imageSource,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -250,6 +367,7 @@ export class AirtableService {
           contentText: fields.contenu_text || '',
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
+          imageSource: imageData.imageSource,
           statut: fields.statut || 'en attente',
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
@@ -279,32 +397,8 @@ export class AirtableService {
         ID_SITE: (contentData.idSite || 1).toString()  // Convertir en string pour Airtable
       };
 
-      // Gérer l'image : si imageUrl est fournie, créer un attachment Airtable
-      if (contentData.imageUrl) {
-        // Pour les attachements Airtable, l'URL doit être accessible publiquement
-        // Si c'est un chemin local, on utilise l'URL du serveur
-        let fullImageUrl = contentData.imageUrl;
-        if (contentData.imageUrl.startsWith('/uploads/')) {
-          // Construire l'URL complète pour le serveur
-          const domain = process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
-          fullImageUrl = `https://${domain}${contentData.imageUrl}`;
-        }
-        
-        // Pour le champ image d'Airtable (de type attachment), créer un objet d'attachement
-        if (contentData.imageUrl.startsWith('http')) {
-          // Image générée par IA ou URL externe
-          fieldsToCreate.image = [{
-            url: contentData.imageUrl,
-            filename: `image_${Date.now()}.jpg`
-          }];
-        } else {
-          // Image uploadée localement - créer un attachement avec l'URL complète
-          fieldsToCreate.image = [{
-            url: fullImageUrl,
-            filename: `image_${Date.now()}.${contentData.imageUrl.split('.').pop()}`
-          }];
-        }
-      }
+      // Gestion avancée des images avec support des deux champs
+      await this.handleImageFieldsForCreation(contentData, fieldsToCreate);
 
       // Formater la date pour Airtable (YYYY-MM-DD)
       if (contentData.dateDePublication) {
@@ -328,6 +422,7 @@ export class AirtableService {
         contentText: contentData.contentText,
         hasImage: contentData.hasImage || false,
         imageUrl: contentData.imageUrl || null,
+        imageSource: contentData.imageSource || null,
         statut: contentData.statut || 'en attente',
         dateDePublication: contentData.dateDePublication || new Date(),
         createdAt: new Date()
@@ -379,19 +474,8 @@ export class AirtableService {
       if (updateData.statut) {
         fieldsToUpdate.statut = updateData.statut;
       }
-      // Gestion des images - ne mettre à jour que si imageUrl est définie
-      if (updateData.imageUrl !== undefined) {
-        if (updateData.imageUrl) {
-          // Si une nouvelle imageUrl est fournie, créer un attachment Airtable
-          fieldsToUpdate.image = [{
-            url: updateData.imageUrl,
-            filename: `image_${Date.now()}.jpg`
-          }];
-        } else {
-          // Supprimer l'image si imageUrl est null ou vide
-          fieldsToUpdate.image = null;
-        }
-      }
+      // Gestion avancée des images avec support des deux champs
+      await this.handleImageFieldsForUpdate(updateData, fieldsToUpdate);
       if (updateData.idSite) {
         fieldsToUpdate.ID_SITE = updateData.idSite.toString();
       }
@@ -420,6 +504,7 @@ export class AirtableService {
         contentText: fields.contenu_text || '',
         hasImage: imageData.hasImage,
         imageUrl: imageData.imageUrl,
+        imageSource: imageData.imageSource,
         statut: fields.statut || 'en attente',
         dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
         createdAt: new Date()
