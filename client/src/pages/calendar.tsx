@@ -45,6 +45,7 @@ export default function Calendar() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [addDialogDate, setAddDialogDate] = useState<string>("");
   const [selectedSiteFilter, setSelectedSiteFilter] = useState<number | null>(null);
+  const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string | null>(null);
 
   // Initialiser le chatbot n8n
   useEffect(() => {
@@ -110,10 +111,12 @@ export default function Calendar() {
     siteId: content.idSite
   }));
 
-  // Filtrer les événements par site sélectionné
-  const events = selectedSiteFilter 
-    ? allEvents.filter(event => event.siteId === selectedSiteFilter)
-    : allEvents;
+  // Filtrer les événements par site et plateforme sélectionnés
+  const events = allEvents.filter(event => {
+    const siteMatch = selectedSiteFilter ? event.siteId === selectedSiteFilter : true;
+    const platformMatch = selectedPlatformFilter ? event.type === selectedPlatformFilter : true;
+    return siteMatch && platformMatch;
+  });
 
   // Fonction pour obtenir les jours du mois
   const getDaysInMonth = (date: Date) => {
@@ -248,35 +251,83 @@ export default function Calendar() {
             </Button>
           </div>
           
-          {/* Filtre par site */}
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Filtrer par site :
-              </label>
-              <Select
-                value={selectedSiteFilter?.toString() || "all"}
-                onValueChange={(value) => setSelectedSiteFilter(value === "all" ? null : parseInt(value))}
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Tous les sites" />
-                </SelectTrigger>
-                <SelectContent className="smart-scroll-vertical max-h-60">
-                  <SelectItem value="all">Tous les sites</SelectItem>
-                  {sites.sort((a, b) => b.id - a.id).map((site) => (
-                    <SelectItem key={site.id} value={site.id.toString()}>
-                      {site.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Filtres */}
+          <div className="space-y-4 mb-4">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Filtre par site */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Site :
+                </label>
+                <Select
+                  value={selectedSiteFilter?.toString() || "all"}
+                  onValueChange={(value) => setSelectedSiteFilter(value === "all" ? null : parseInt(value))}
+                >
+                  <SelectTrigger className="w-56">
+                    <SelectValue placeholder="Tous les sites" />
+                  </SelectTrigger>
+                  <SelectContent className="smart-scroll-vertical max-h-60">
+                    <SelectItem value="all">Tous les sites</SelectItem>
+                    {sites.sort((a, b) => b.id - a.id).map((site) => (
+                      <SelectItem key={site.id} value={site.id.toString()}>
+                        {site.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filtre par plateforme */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Plateforme :
+                </label>
+                <Select
+                  value={selectedPlatformFilter || "all"}
+                  onValueChange={(value) => setSelectedPlatformFilter(value === "all" ? null : value)}
+                >
+                  <SelectTrigger className="w-56">
+                    <SelectValue placeholder="Toutes les plateformes" />
+                  </SelectTrigger>
+                  <SelectContent className="smart-scroll-vertical max-h-60">
+                    <SelectItem value="all">Toutes les plateformes</SelectItem>
+                    <SelectItem value="xtwitter">X (Twitter)</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="pinterest">Pinterest</SelectItem>
+                    <SelectItem value="google my business">Google My Business</SelectItem>
+                    <SelectItem value="article">Article de blog</SelectItem>
+                    <SelectItem value="newsletter">Newsletter</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
-            {selectedSiteFilter && (
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {events.length} contenu(s) trouvé(s) pour {getSiteName(selectedSiteFilter)}
+            {/* Compteur de résultats */}
+            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <div>
+                📊 {events.length} contenu(s) affiché(s)
+                {selectedSiteFilter && ` • Site: ${getSiteName(selectedSiteFilter)}`}
+                {selectedPlatformFilter && ` • Plateforme: ${selectedPlatformFilter === 'xtwitter' ? 'X (Twitter)' : 
+                  selectedPlatformFilter === 'google my business' ? 'Google My Business' :
+                  selectedPlatformFilter === 'article' ? 'Article de blog' :
+                  selectedPlatformFilter.charAt(0).toUpperCase() + selectedPlatformFilter.slice(1)}`}
               </div>
-            )}
+              
+              {(selectedSiteFilter || selectedPlatformFilter) && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedSiteFilter(null);
+                    setSelectedPlatformFilter(null);
+                  }}
+                  className="text-xs"
+                >
+                  ✕ Effacer les filtres
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
