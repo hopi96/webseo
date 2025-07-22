@@ -72,9 +72,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   // État des images utilisant la nouvelle logique
   const [imageState, setImageState] = useState<FormImageState>(() => 
     initializeImageFormState({
-      hasImage: article.hasImage,
-      imageUrl: article.imageUrl,
-      imageSource: article.imageSource
+      hasImage: article.hasImage ?? false,
+      imageUrl: article.imageUrl ?? null,
+      imageSource: article.imageSource ?? null
     })
   );
   
@@ -142,8 +142,13 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       const result = await response.json();
       
       if (result.imageUrl) {
-        setGeneratedImageUrl(result.imageUrl);
-        setUploadedImageUrl(""); // Reset upload
+        setImageState(prev => ({
+          ...prev,
+          generatedImageUrl: result.imageUrl,
+          uploadedImageUrl: "",
+          formImageUrl: result.imageUrl,
+          formHasImage: true
+        }));
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
         
@@ -205,9 +210,13 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       const result = await response.json();
 
       if (result.imageUrl) {
-        setUploadedImageFile(file);
-        setUploadedImageUrl(result.imageUrl);
-        setGeneratedImageUrl(""); // Reset AI generation
+        setImageState(prev => ({
+          ...prev,
+          uploadedImageUrl: result.imageUrl,
+          generatedImageUrl: "",
+          formImageUrl: result.imageUrl,
+          formHasImage: true
+        }));
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
 
@@ -228,9 +237,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   // Fonction pour réinitialiser les images
   const resetImages = () => {
-    setGeneratedImageUrl("");
-    setUploadedImageFile(null);
-    setUploadedImageUrl("");
+    setImageState(resetImageState());
     setCustomPrompt("");
     form.setValue("imageUrl", "");
     form.setValue("hasImage", false);
@@ -238,11 +245,15 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   const updateArticleMutation = useMutation({
     mutationFn: async (data: EditArticleFormData) => {
+      // Préparer les données d'image avec la nouvelle logique
+      const imageData = prepareImageDataForSubmission(imageState);
+      
       const response = await apiRequest(
         'PUT',
         `/api/editorial-content/${encodeURIComponent(article.id)}`,
         {
           ...data,
+          ...imageData,
           dateDePublication: new Date(data.dateDePublication)
         }
       );
@@ -477,62 +488,46 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 <h4 className="font-medium mb-3">Gestion des images</h4>
                 
                 {/* Aperçu des images existantes */}
-                {(generatedImageUrl || uploadedImageUrl || (form.watch("imageUrl") && form.watch("imageUrl") !== "")) && (
+                {getDisplayImageUrl(imageState) && (
                   <div className="mb-4">
-                    <div className="grid grid-cols-1 gap-2">
-                      {generatedImageUrl && (
-                        <div className="relative">
-                          <img
-                            src={generatedImageUrl}
-                            alt="Image générée par IA"
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                          <span className="absolute top-2 left-2 bg-purple-500 text-white px-2 py-1 rounded text-xs">
-                            IA
+                    <div className="relative">
+                      <img
+                        src={getDisplayImageUrl(imageState)!}
+                        alt="Image de l'article"
+                        className="w-full h-32 object-cover rounded-lg"
+                        onError={(e) => {
+                          console.error("Erreur lors du chargement de l'image:", getDisplayImageUrl(imageState));
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      {(() => {
+                        const imageUrl = getDisplayImageUrl(imageState)!;
+                        const { label, color } = getImageSourceLabel(imageUrl);
+                        const colorClass = color === 'purple' ? 'bg-purple-500' : 
+                                          color === 'blue' ? 'bg-blue-500' : 'bg-green-500';
+                        return (
+                          <span className={`absolute top-2 left-2 ${colorClass} text-white px-2 py-1 rounded text-xs`}>
+                            {label}
                           </span>
-                        </div>
-                      )}
-                      {uploadedImageUrl && (
-                        <div className="relative">
-                          <img
-                            src={uploadedImageUrl}
-                            alt="Image uploadée"
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                          <span className="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
-                            Upload
-                          </span>
-                        </div>
-                      )}
-                      {form.watch("imageUrl") && form.watch("imageUrl") !== "" && !generatedImageUrl && !uploadedImageUrl && (
-                        <div className="relative">
-                          <img
-                            src={form.watch("imageUrl")}
-                            alt="Image existante de l'article"
-                            className="w-full h-32 object-cover rounded-lg"
-                            onError={(e) => {
-                              console.error("Erreur lors du chargement de l'image:", form.watch("imageUrl"));
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                          <span className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
-                            Image actuelle
-                          </span>
-                          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                            {form.watch("imageUrl") && form.watch("imageUrl")!.length > 30 ? 
-                              `${form.watch("imageUrl")!.substring(0, 30)}...` : 
-                              form.watch("imageUrl") || ""
-                            }
-                          </div>
-                        </div>
-                      )}
+                        );
+                      })()}
+                      <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                        {(() => {
+                          const url = getDisplayImageUrl(imageState) || "";
+                          return url.length > 30 ? `${url.substring(0, 30)}...` : url;
+                        })()}
+                      </div>
                     </div>
                     <div className="mt-2 flex justify-center">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={resetImages}
+                        onClick={() => {
+                          setImageState(resetImageState());
+                          form.setValue("hasImage", false);
+                          form.setValue("imageUrl", "");
+                        }}
                         className="flex items-center gap-2"
                       >
                         <RotateCcw className="h-4 w-4" />
@@ -547,8 +542,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                   <p><strong>Debug:</strong></p>
                   <p>hasImage: {form.watch("hasImage") ? "true" : "false"}</p>
                   <p>imageUrl: {form.watch("imageUrl") || "vide"}</p>
-                  <p>generatedImageUrl: {generatedImageUrl || "vide"}</p>
-                  <p>uploadedImageUrl: {uploadedImageUrl || "vide"}</p>
+                  <p>imageState.generatedImageUrl: {imageState.generatedImageUrl || "vide"}</p>
+                  <p>imageState.uploadedImageUrl: {imageState.uploadedImageUrl || "vide"}</p>
+                  <p>displayUrl: {getDisplayImageUrl(imageState) || "vide"}</p>
                 </div>
 
                 {/* Options d'image - Choix exclusif */}
@@ -564,14 +560,14 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         value={customPrompt}
                         onChange={(e) => setCustomPrompt(e.target.value)}
                         className="min-h-[60px] text-sm"
-                        disabled={generatingImage || uploadedImageUrl !== ""}
+                        disabled={generatingImage || imageState.uploadedImageUrl !== ""}
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"), customPrompt)}
-                        disabled={generatingImage || uploadedImageUrl !== ""}
+                        disabled={generatingImage || imageState.uploadedImageUrl !== ""}
                         className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50 disabled:opacity-50"
                       >
                         <Sparkles className="h-4 w-4" />
@@ -580,7 +576,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                       {!form.watch("contentText")?.trim() && (
                         <p className="text-xs text-gray-500">Saisissez d'abord du contenu</p>
                       )}
-                      {uploadedImageUrl && (
+                      {imageState.uploadedImageUrl && (
                         <p className="text-xs text-orange-500">Image uploadée active</p>
                       )}
                     </div>
@@ -606,14 +602,14 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                           variant="outline"
                           size="sm"
                           onClick={() => document.getElementById('image-upload-edit')?.click()}
-                          disabled={generatedImageUrl !== ""}
+                          disabled={imageState.generatedImageUrl !== ""}
                           className="w-full flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 disabled:opacity-50"
                         >
                           <Upload className="h-4 w-4" />
                           Choisir une image
                         </Button>
                       </div>
-                      {generatedImageUrl && (
+                      {imageState.generatedImageUrl && (
                         <p className="text-xs text-orange-500">Image IA active</p>
                       )}
                     </div>

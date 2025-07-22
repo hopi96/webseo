@@ -14,6 +14,11 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Plus, X, Sparkles, Globe, Upload, Image } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
+import { 
+  prepareImageDataForSubmission, 
+  resetImageState, 
+  type FormImageState 
+} from "@/lib/image-utils";
 
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
@@ -39,10 +44,10 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
   const [loading, setLoading] = useState(false);
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string>("");
-  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [customPrompt, setCustomPrompt] = useState<string>("");
+  
+  // État des images utilisant la nouvelle logique
+  const [imageState, setImageState] = useState<FormImageState>(resetImageState());
 
   // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
@@ -90,8 +95,13 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
       const result = await response.json();
       
       if (result.imageUrl) {
-        setGeneratedImageUrl(result.imageUrl);
-        setUploadedImageUrl(""); // Reset upload
+        setImageState(prev => ({
+          ...prev,
+          generatedImageUrl: result.imageUrl,
+          uploadedImageUrl: "",
+          formImageUrl: result.imageUrl,
+          formHasImage: true
+        }));
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
         
@@ -153,9 +163,13 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
       const result = await response.json();
 
       if (result.imageUrl) {
-        setUploadedImageFile(file);
-        setUploadedImageUrl(result.imageUrl);
-        setGeneratedImageUrl(""); // Reset AI generation
+        setImageState(prev => ({
+          ...prev,
+          uploadedImageUrl: result.imageUrl,
+          generatedImageUrl: "",
+          formImageUrl: result.imageUrl,
+          formHasImage: true
+        }));
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
 
