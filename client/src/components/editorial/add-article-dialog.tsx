@@ -190,9 +190,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
   // Fonction pour réinitialiser les images
   const resetImages = () => {
-    setGeneratedImageUrl("");
-    setUploadedImageFile(null);
-    setUploadedImageUrl("");
+    setImageState(resetImageState());
     setCustomPrompt("");
     form.setValue("imageUrl", "");
     form.setValue("hasImage", false);
@@ -229,7 +227,8 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
       });
       
       // Réinitialiser les images
-      resetImages();
+      setImageState(resetImageState());
+      setCustomPrompt("");
       
       queryClient.invalidateQueries({ queryKey: ["/api/editorial-content"] });
       onOpenChange(false);
@@ -436,14 +435,14 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                         value={customPrompt}
                         onChange={(e) => setCustomPrompt(e.target.value)}
                         className="min-h-[60px] text-sm"
-                        disabled={generatingImage || uploadedImageUrl !== ""}
+                        disabled={generatingImage || imageState.uploadedImageUrl !== ""}
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"), customPrompt)}
-                        disabled={generatingImage || uploadedImageUrl !== ""}
+                        disabled={generatingImage || imageState.uploadedImageUrl !== ""}
                         className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50 disabled:opacity-50"
                       >
                         <Sparkles className="h-4 w-4" />
@@ -452,7 +451,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       {!form.watch("contentText")?.trim() && (
                         <p className="text-xs text-gray-500">Saisissez d'abord du contenu</p>
                       )}
-                      {uploadedImageUrl && (
+                      {imageState.uploadedImageUrl && (
                         <p className="text-xs text-orange-500">Image uploadée active</p>
                       )}
                     </div>
@@ -478,14 +477,14 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                           variant="outline"
                           size="sm"
                           onClick={() => document.getElementById('image-upload')?.click()}
-                          disabled={generatedImageUrl !== ""}
+                          disabled={imageState.generatedImageUrl !== ""}
                           className="w-full flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 disabled:opacity-50"
                         >
                           <Upload className="h-4 w-4" />
                           Choisir une image
                         </Button>
                       </div>
-                      {generatedImageUrl && (
+                      {imageState.generatedImageUrl && (
                         <p className="text-xs text-orange-500">Image IA active</p>
                       )}
                     </div>
@@ -500,11 +499,11 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                 )}
 
                 {/* Aperçu de l'image générée par IA */}
-                {generatedImageUrl && (
+                {imageState.generatedImageUrl && (
                   <div className="space-y-2">
                     <div className="relative">
                       <img
-                        src={generatedImageUrl}
+                        src={imageState.generatedImageUrl}
                         alt="Image générée par IA"
                         className="w-full h-48 object-cover rounded-lg border"
                       />
@@ -519,11 +518,11 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                 )}
 
                 {/* Aperçu de l'image uploadée */}
-                {uploadedImageUrl && (
+                {imageState.uploadedImageUrl && (
                   <div className="space-y-2">
                     <div className="relative">
                       <img
-                        src={uploadedImageUrl}
+                        src={imageState.uploadedImageUrl}
                         alt="Image uploadée"
                         className="w-full h-48 object-cover rounded-lg border"
                       />
@@ -532,7 +531,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       </div>
                     </div>
                     <p className="text-xs text-gray-500">
-                      {uploadedImageFile ? `Fichier: ${uploadedImageFile.name}` : "Image uploadée"}
+                      Image uploadée
                     </p>
                   </div>
                 )}
