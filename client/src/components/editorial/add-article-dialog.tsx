@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Plus, X, Sparkles, Globe, Upload, Image } from "lucide-react";
+import { Calendar, Plus, X, Sparkles, Globe, Upload, Image, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AIGenerationDialog } from "./ai-generation-dialog";
 import { 
   prepareImageDataForSubmission, 
@@ -282,11 +283,22 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <TooltipProvider>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="contentText">Contenu *</Label>
+                <div className="flex items-center gap-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Le texte principal de votre publication. Saisissez directement ou utilisez l'IA pour générer du contenu optimisé.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Label htmlFor="contentText">Contenu *</Label>
+                </div>
                 <Button
                   type="button"
                   variant="outline"
@@ -313,7 +325,17 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="typeContent">Type de contenu</Label>
+                <div className="flex items-center gap-2 mb-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Choisissez la plateforme ou le type de publication (réseau social, article de blog, newsletter).</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Label htmlFor="typeContent">Type de contenu</Label>
+                </div>
                 <Select
                   value={form.watch("typeContent")}
                   onValueChange={(value: any) => form.setValue("typeContent", value)}
@@ -334,7 +356,17 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
               </div>
 
               <div>
-                <Label htmlFor="statut">Statut</Label>
+                <div className="flex items-center gap-2 mb-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>État d'avancement de votre contenu : en attente, à réviser, en cours de création ou déjà publié.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Label htmlFor="statut">Statut</Label>
+                </div>
                 <Select
                   value={form.watch("statut")}
                   onValueChange={(value: any) => form.setValue("statut", value)}
@@ -353,10 +385,20 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
             </div>
 
             <div>
-              <Label htmlFor="siteId" className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                Site web *
-              </Label>
+              <div className="flex items-center gap-2 mb-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Sélectionnez le site web pour lequel vous créez ce contenu. Utilisé pour la stratégie SEO et l'organisation.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Label htmlFor="siteId" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Site web *
+                </Label>
+              </div>
               <Select
                 value={form.watch("siteId")?.toString()}
                 onValueChange={(value) => form.setValue("siteId", parseInt(value))}
@@ -380,10 +422,20 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
             </div>
 
             <div>
-              <Label htmlFor="dateDePublication" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Date de publication
-              </Label>
+              <div className="flex items-center gap-2 mb-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Planifiez quand ce contenu sera publié. Utilisé pour organiser votre calendrier éditorial et suivre les deadlines.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Label htmlFor="dateDePublication" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Date de publication
+                </Label>
+              </div>
               <Input
                 id="dateDePublication"
                 type="date"
@@ -392,9 +444,19 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="hasImage" className="text-sm font-medium">
-                Contient une image
-              </Label>
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Activez cette option si votre contenu inclut une image. Vous pourrez ensuite la générer avec l'IA ou l'uploader.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Label htmlFor="hasImage" className="text-sm font-medium">
+                  Contient une image
+                </Label>
+              </div>
               <Switch
                 id="hasImage"
                 checked={form.watch("hasImage")}
@@ -581,6 +643,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
             </Button>
           </DialogFooter>
         </form>
+        </TooltipProvider>
       </DialogContent>
       
       <AIGenerationDialog
