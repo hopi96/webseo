@@ -125,6 +125,7 @@ Changelog:
 - January 22, 2025. Intégration agent IA SEO avec GPT-4o : création composant SEOAIAgent avec interface moderne, implémentation route API /api/seo-ai-analysis utilisant GPT-4o pour analyse intelligente des données SEO Airtable, génération de recommandations personnalisées avec priorités et plans d'action détaillés, intégration complète dans le dashboard principal pour conseils d'optimisation en temps réel
 - January 22, 2025. Amélioration programme publications réseaux sociaux : logique flexible pour publications mensuelles (< 4 publications/mois), nouveau schéma avec champs hebdomadaires et mensuels, interface modernisée avec cartes individuelles par plateforme, auto-calcul et synchronisation entre modes, indicateurs visuels pour différencier les modes de publication
 - January 22, 2025. Système de filtrage avancé calendrier éditorial : ajout filtre par plateforme/réseau social combinable avec filtre par site, interface utilisateur améliorée avec compteur de résultats et bouton d'effacement des filtres, support complet pour toutes les plateformes (X, Instagram, Facebook, Pinterest, Google My Business, articles, newsletter)
+- January 22, 2025. Implémentation tooltips d'aide dans formulaire création contenu : ajout icônes point d'interrogation avec tooltips explicatifs devant chaque champ (Contenu, Type de contenu, Statut, Site web, Date de publication, Contient une image), messages d'aide détaillés pour guider les utilisateurs, intégration composant Tooltip avec design cohérent
 
 ## User Preferences
 
