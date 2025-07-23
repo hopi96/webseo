@@ -53,12 +53,57 @@ export function EditorialCalendarGeneratorDialog({
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
+  // Fonction de polling intelligent pour détecter la fin de génération
+  const pollGenerationStatus = async (startTime: Date): Promise<any> => {
+    const maxPollingTime = 15 * 60 * 1000; // 15 minutes maximum
+    const pollInterval = 10000; // Vérifier toutes les 10 secondes
+    const startPollingTime = Date.now();
+    
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        try {
+          // Vérifier si on a dépassé le timeout maximum
+          if (Date.now() - startPollingTime > maxPollingTime) {
+            reject(new Error('Timeout: La génération a pris plus de 15 minutes'));
+            return;
+          }
+          
+          // Vérifier le statut de génération
+          const response = await fetch(`/api/check-generation-status/${websiteId}?since=${startTime.toISOString()}`);
+          const status = await response.json();
+          
+          console.log('📊 Polling status:', status);
+          
+          if (status.hasNewContent && status.newContentCount > 0) {
+            console.log(`✅ Génération terminée ! ${status.newContentCount} nouveaux contenus détectés`);
+            setCurrentStep(`Terminé ! ${status.newContentCount} contenus générés`);
+            setProgress(100);
+            resolve(status);
+          } else {
+            // Continuer le polling
+            const elapsedMinutes = Math.floor((Date.now() - startPollingTime) / (1000 * 60));
+            setCurrentStep(`Génération en cours... (${elapsedMinutes}min)`);
+            setTimeout(poll, pollInterval);
+          }
+        } catch (error) {
+          console.error('Erreur lors du polling:', error);
+          reject(error);
+        }
+      };
+      
+      // Commencer le polling après un délai initial
+      setTimeout(poll, 5000); // Attendre 5s avant le premier check
+    });
+  };
+
   // Mutation pour générer le calendrier éditorial
   const generateCalendarMutation = useMutation({
     mutationFn: async () => {
+      const generationStartTime = new Date();
+      
       // Commencer la génération
-      setCurrentStep('Génération en cours...');
-      setProgress(60);
+      setCurrentStep('Lancement de la génération...');
+      setProgress(20);
       
       const response = await apiRequest('POST', '/api/generate-editorial-calendar', {
         websiteId,
@@ -67,46 +112,49 @@ export function EditorialCalendarGeneratorDialog({
         seoAnalysis: seoAnalysis || {}
       });
       
-      // Attendre que le webhook n8n termine complètement
-      setCurrentStep('Traitement par l\'IA...');
-      setProgress(80);
+      // Webhook lancé, commencer le polling intelligent
+      setCurrentStep('Traitement par l\'IA en cours...');
+      setProgress(40);
       
-      // Attendre au moins 1 heure (60 * 60 * 1000 = 3600000 ms)
-      await new Promise(resolve => setTimeout(resolve, 3600000));
+      // Utiliser le polling intelligent au lieu d'attendre 1h
+      const result = await pollGenerationStatus(generationStartTime);
       
-      return response.json();
+      return { ...response, pollResult: result };
     },
     onSuccess: (data) => {
-      setCurrentStep('Finalisation...');
-      setProgress(95);
+      setGenerationResult(data);
+      setIsGenerating(false);
       
-      // Attendre un peu plus pour s'assurer que tout est terminé
-      setTimeout(() => {
-        setGenerationResult(data);
-        setIsGenerating(false);
-        setProgress(100);
-        setCurrentStep('Terminé');
-        toast({
-          title: "Calendrier généré",
-          description: "Le calendrier éditorial a été généré avec succès",
-        });
-      }, 2000);
+      const contentCount = data.pollResult?.newContentCount || 0;
+      toast({
+        title: "Calendrier généré avec succès",
+        description: `${contentCount} contenus éditoriaux ont été générés automatiquement`,
+      });
+      
+      // Invalider le cache pour forcer le rechargement des données
+      queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
     },
     onError: (error: any) => {
       setIsGenerating(false);
       setProgress(0);
       setCurrentStep('');
       
-      // Gestion spécifique des erreurs de webhook n8n
+      // Gestion spécifique des erreurs de webhook n8n et polling
       let errorMessage = error.message || "Impossible de générer le calendrier éditorial";
       let errorTitle = "Erreur";
       
-      if (error.message?.includes('timeout') || error.message?.includes('mode test')) {
+      if (error.message?.includes('Timeout: La génération a pris plus de 15 minutes')) {
+        errorTitle = "Timeout de génération";
+        errorMessage = "La génération a pris plus de 15 minutes. Le processus peut encore être en cours dans n8n. Vérifiez votre table Airtable dans quelques minutes.";
+      } else if (error.message?.includes('timeout') || error.message?.includes('mode test')) {
         errorTitle = "Webhook n8n non disponible";
         errorMessage = "Le workflow n8n est peut-être en mode test ou non activé. Activez-le en mode production ou cliquez sur 'Execute workflow' pour le mode test.";
       } else if (error.message?.includes('webhook') || error.message?.includes('n8n')) {
         errorTitle = "Erreur de connexion n8n";
         errorMessage = "Erreur de connexion avec n8n. Vérifiez que le webhook est correctement configuré.";
+      } else if (error.message?.includes('polling')) {
+        errorTitle = "Erreur de vérification";
+        errorMessage = "Erreur lors de la vérification du statut. La génération peut avoir réussi malgré cette erreur.";
       }
       
       toast({

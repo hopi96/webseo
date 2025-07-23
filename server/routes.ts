@@ -522,6 +522,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour vérifier le statut de génération du calendrier éditorial
+  app.get("/api/check-generation-status/:siteId", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.siteId);
+      const since = req.query.since ? new Date(req.query.since as string) : new Date(Date.now() - 10 * 60 * 1000); // 10 minutes par défaut
+      
+      console.log(`🔍 Vérification du statut de génération pour le site ${siteId} depuis ${since.toISOString()}`);
+      
+      // Récupérer le contenu éditorial récent pour ce site
+      const recentContent = await airtableService.getContentBySite(siteId);
+      
+      // Filtrer le contenu créé après la date de début de génération
+      const newContent = recentContent.filter(content => {
+        const createdAt = new Date(content.createdAt || content.dateDeCreation || Date.now());
+        return createdAt > since;
+      });
+      
+      const hasNewContent = newContent.length > 0;
+      const totalContent = recentContent.length;
+      
+      console.log(`📊 Résultat vérification:`, {
+        siteId,
+        hasNewContent,
+        newContentCount: newContent.length,
+        totalContent,
+        since: since.toISOString()
+      });
+      
+      res.json({
+        hasNewContent,
+        newContentCount: newContent.length,
+        totalContent,
+        latestContent: newContent.slice(0, 3), // Retourner les 3 derniers contenus
+        checkTime: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Erreur lors de la vérification du statut:', error);
+      res.status(500).json({ 
+        message: "Failed to check generation status",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Route pour générer un calendrier éditorial via webhook n8n
   app.post("/api/generate-editorial-calendar", async (req, res) => {
     try {
