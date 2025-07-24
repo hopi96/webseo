@@ -569,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Route pour générer un calendrier éditorial via webhook n8n
   app.post("/api/generate-editorial-calendar", async (req, res) => {
     try {
-      const { websiteId, websiteName, websiteUrl, seoAnalysis, period = 'monthly' } = req.body;
+      const { websiteId, websiteName, websiteUrl, seoAnalysis, period } = req.body;
       
       if (!websiteId || !websiteName || !websiteUrl) {
         return res.status(400).json({ message: "websiteId, websiteName, and websiteUrl are required" });
@@ -585,6 +585,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📅 Génération du calendrier éditorial pour le site', websiteId);
       console.log('📊 Données SEO reçues:', seoAnalysis ? 'Oui' : 'Non');
       console.log('⏰ Période sélectionnée:', period);
+      
+      // Valider les dates si period est un objet avec startDate et endDate
+      if (period && typeof period === 'object' && period.startDate && period.endDate) {
+        console.log('📅 Date de début:', period.startDate);
+        console.log('📅 Date de fin:', period.endDate);
+        
+        const startDate = new Date(period.startDate);
+        const endDate = new Date(period.endDate);
+        
+        if (endDate <= startDate) {
+          return res.status(400).json({ 
+            message: "La date de fin doit être postérieure à la date de début" 
+          });
+        }
+        
+        // Calculer la durée
+        const durationMs = endDate.getTime() - startDate.getTime();
+        const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24));
+        console.log('📊 Durée de la période:', durationDays, 'jours');
+      } else if (!period) {
+        return res.status(400).json({ 
+          message: "La période avec dates de début et fin est requise" 
+        });
+      }
       console.log('🔍 JSON COMPLET ENVOYÉ AU WEBHOOK:');
       console.log('================================================');
       console.log('STRUCTURE JSON WEBHOOK:');
