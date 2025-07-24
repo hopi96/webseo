@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Calendar,
   Zap,
@@ -52,7 +53,10 @@ export function EditorialCalendarGeneratorDialog({
   const [currentStep, setCurrentStep] = useState('');
   const [generationResult, setGenerationResult] = useState<any>(null);
   
-  // États pour la sélection de période avec dates par défaut
+  // États pour la sélection de période
+  const [isMonthlyPeriod, setIsMonthlyPeriod] = useState(true);
+  
+  // Dates par défaut
   const today = new Date();
   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
   
@@ -120,7 +124,7 @@ export function EditorialCalendarGeneratorDialog({
         websiteName,
         websiteUrl,
         seoAnalysis: seoAnalysis || {},
-        period: {
+        period: isMonthlyPeriod ? 'monthly' : {
           startDate,
           endDate
         }
@@ -311,6 +315,17 @@ export function EditorialCalendarGeneratorDialog({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="monthly-period"
+                    checked={isMonthlyPeriod}
+                    onCheckedChange={(checked) => setIsMonthlyPeriod(checked === true)}
+                  />
+                  <Label htmlFor="monthly-period" className="text-sm">
+                    Génération mensuelle (recommandé)
+                  </Label>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="start-date" className="text-sm font-medium">
@@ -322,6 +337,7 @@ export function EditorialCalendarGeneratorDialog({
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       className="w-full"
+                      disabled={isMonthlyPeriod}
                     />
                   </div>
                   
@@ -336,15 +352,19 @@ export function EditorialCalendarGeneratorDialog({
                       onChange={(e) => setEndDate(e.target.value)}
                       className="w-full"
                       min={startDate}
+                      disabled={isMonthlyPeriod}
                     />
                   </div>
                 </div>
                 
-                {startDate && endDate && (
-                  <div className="text-xs text-gray-500 mt-2">
-                    Le calendrier sera généré du {new Date(startDate).toLocaleDateString('fr-FR')} au {new Date(endDate).toLocaleDateString('fr-FR')}
-                  </div>
-                )}
+                <div className="text-xs text-gray-500 mt-2">
+                  {isMonthlyPeriod 
+                    ? "Le calendrier sera généré pour 1 mois complet à partir d'aujourd'hui"
+                    : startDate && endDate 
+                      ? `Le calendrier sera généré du ${new Date(startDate).toLocaleDateString('fr-FR')} au ${new Date(endDate).toLocaleDateString('fr-FR')}`
+                      : "Veuillez sélectionner une période personnalisée"
+                  }
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -412,7 +432,7 @@ export function EditorialCalendarGeneratorDialog({
             {!generationResult && (
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating || !startDate || !endDate}
+                disabled={isGenerating || (!isMonthlyPeriod && (!startDate || !endDate))}
                 className="flex items-center gap-2"
               >
                 {isGenerating ? (
