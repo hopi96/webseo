@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Facebook, Instagram, Twitter, Youtube, Clock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Settings, Facebook, Instagram, Twitter, Youtube, Clock, Loader2, Eye, EyeOff, ExternalLink, HelpCircle } from "lucide-react";
 
 interface SocialParamsDialogProps {
   siteId: number;
@@ -64,6 +64,10 @@ const platformConfigs = [
     fields: [
       { name: 'page_id', label: 'Page ID', placeholder: 'ID de la page Facebook' },
       { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès Facebook' }
+    ],
+    helpLinks: [
+      { label: 'Générer un token d\'accès', url: 'https://developers.facebook.com/docs/facebook-login/guides/access-tokens/' },
+      { label: 'Trouver le Page ID', url: 'https://www.facebook.com/help/1503421039731588/' }
     ]
   },
   {
@@ -74,6 +78,9 @@ const platformConfigs = [
     fields: [
       { name: 'user_id', label: 'User ID', placeholder: 'ID utilisateur Instagram' },
       { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès Instagram' }
+    ],
+    helpLinks: [
+      { label: 'Gérer les tokens Instagram', url: 'https://developers.facebook.com/docs/instagram-platform/reference/access_token/' }
     ]
   },
   {
@@ -84,6 +91,9 @@ const platformConfigs = [
     fields: [
       { name: 'board_id', label: 'Board ID', placeholder: 'ID du tableau Pinterest' },
       { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès Pinterest' }
+    ],
+    helpLinks: [
+      { label: 'Configuration OAuth Pinterest', url: 'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/' }
     ]
   },
   {
@@ -95,6 +105,9 @@ const platformConfigs = [
       { name: 'account_id', label: 'Account ID', placeholder: 'ID du compte GMB' },
       { name: 'location_id', label: 'Location ID', placeholder: 'ID du lieu GMB' },
       { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès GMB' }
+    ],
+    helpLinks: [
+      { label: 'Implémenter OAuth GMB', url: 'https://developers.google.com/my-business/content/implement-oauth' }
     ]
   },
   {
@@ -104,6 +117,9 @@ const platformConfigs = [
     color: 'text-black',
     fields: [
       { name: 'access_token', label: 'Bearer Token', placeholder: 'Bearer Token X/Twitter' }
+    ],
+    helpLinks: [
+      { label: 'Générer un Bearer Token', url: 'https://developer.x.com/ja/docs/basics/authentication/guides/bearer-tokens' }
     ]
   },
   {
@@ -113,6 +129,9 @@ const platformConfigs = [
     color: 'text-black',
     fields: [
       { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès TikTok' }
+    ],
+    helpLinks: [
+      { label: 'Gestion des tokens TikTok', url: 'https://developers.tiktok.com/doc/oauth-user-access-token-management' }
     ]
   },
   {
@@ -123,6 +142,9 @@ const platformConfigs = [
     fields: [
       { name: 'base_url', label: 'URL de base', placeholder: 'URL de base Prestashop' },
       { name: 'api_key', label: 'Clé API', placeholder: 'Clé API Prestashop' }
+    ],
+    helpLinks: [
+      { label: 'Créer une clé Webservice', url: 'https://devdocs.prestashop-project.org/9/webservice/tutorials/creating-access/' }
     ]
   },
   {
@@ -132,6 +154,9 @@ const platformConfigs = [
     color: 'text-green-600',
     fields: [
       { name: 'api_key', label: 'Clé API', placeholder: 'Clé API Brevo' }
+    ],
+    helpLinks: [
+      { label: 'Générer une API Key Brevo', url: 'https://developers.brevo.com/docs/getting-started' }
     ]
   }
 ];
@@ -331,6 +356,30 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                             </div>
                           );
                         })}
+                        
+                        {/* Section d'aide avec liens de documentation */}
+                        {platform.helpLinks && platform.helpLinks.length > 0 && (
+                          <div className="pt-2 border-t border-gray-100">
+                            <div className="flex items-center gap-2 mb-2">
+                              <HelpCircle className="h-4 w-4 text-blue-500" />
+                              <span className="text-xs font-medium text-gray-600">Documentation officielle</span>
+                            </div>
+                            <div className="space-y-1">
+                              {platform.helpLinks.map((link, index) => (
+                                <a
+                                  key={index}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 text-xs text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                  {link.label}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
