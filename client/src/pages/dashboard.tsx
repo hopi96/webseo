@@ -14,6 +14,7 @@ import { WebsiteSelector } from "@/components/website/website-selector";
 import { SocialMediaProgramDialog } from "@/components/social-media/social-media-program-dialog";
 import { EditorialCalendarGeneratorDialog } from "@/components/editorial/editorial-calendar-generator-dialog";
 import { SEOAIAgent } from "@/components/dashboard/seo-ai-agent";
+import { SocialParamsDialog } from "@/components/social/social-params-dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -33,7 +34,8 @@ import {
   Plus,
   RefreshCw,
   Loader2,
-  Share2
+  Share2,
+  Settings
 } from "lucide-react";
 
 type WebsiteType = {
@@ -233,6 +235,21 @@ export default function DashboardWebhook() {
                     <Share2 className="h-4 w-4" />
                     Réseaux sociaux
                   </Button>
+
+                  {/* Nouveau bouton pour les paramètres des réseaux sociaux */}
+                  {website && (
+                    <SocialParamsDialog siteId={selectedWebsiteId} siteName={website.name}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                        disabled={!selectedWebsiteId}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Tokens réseaux sociaux
+                      </Button>
+                    </SocialParamsDialog>
+                  )}
                   
                   <Button
                     onClick={() => setIsCalendarGeneratorOpen(true)}
