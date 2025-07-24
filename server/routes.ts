@@ -569,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Route pour générer un calendrier éditorial via webhook n8n
   app.post("/api/generate-editorial-calendar", async (req, res) => {
     try {
-      const { websiteId, websiteName, websiteUrl, seoAnalysis } = req.body;
+      const { websiteId, websiteName, websiteUrl, seoAnalysis, period = 'monthly' } = req.body;
       
       if (!websiteId || !websiteName || !websiteUrl) {
         return res.status(400).json({ message: "websiteId, websiteName, and websiteUrl are required" });
@@ -578,11 +578,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Préparer les données pour le webhook n8n selon le format attendu
       const webhookData = {
         id_site: websiteId,
-        analyse_seo: seoAnalysis || null
+        analyse_seo: seoAnalysis || null,
+        period: period
       };
       
       console.log('📅 Génération du calendrier éditorial pour le site', websiteId);
       console.log('📊 Données SEO reçues:', seoAnalysis ? 'Oui' : 'Non');
+      console.log('⏰ Période sélectionnée:', period);
       console.log('🔍 JSON COMPLET ENVOYÉ AU WEBHOOK:');
       console.log('================================================');
       console.log('STRUCTURE JSON WEBHOOK:');

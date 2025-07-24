@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { 
   Calendar,
   Zap,
@@ -49,6 +52,11 @@ export function EditorialCalendarGeneratorDialog({
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [generationResult, setGenerationResult] = useState<any>(null);
+  
+  // États pour la sélection de période
+  const [isMonthlyPeriod, setIsMonthlyPeriod] = useState(true);
+  const [customPeriod, setCustomPeriod] = useState('2-weeks');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -109,7 +117,8 @@ export function EditorialCalendarGeneratorDialog({
         websiteId,
         websiteName,
         websiteUrl,
-        seoAnalysis: seoAnalysis || {}
+        seoAnalysis: seoAnalysis || {},
+        period: isMonthlyPeriod ? 'monthly' : customPeriod
       });
       
       // Webhook lancé, commencer le polling intelligent
@@ -282,6 +291,63 @@ export function EditorialCalendarGeneratorDialog({
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <span className="text-sm">Contenu saisonnier</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Configuration de la période */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Période de génération
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="monthly-period"
+                    checked={isMonthlyPeriod}
+                    onCheckedChange={(checked) => setIsMonthlyPeriod(checked === true)}
+                  />
+                  <Label htmlFor="monthly-period" className="text-sm">
+                    Génération mensuelle (recommandé)
+                  </Label>
+                </div>
+                
+                {!isMonthlyPeriod && (
+                  <div className="ml-6 space-y-2">
+                    <Label htmlFor="custom-period" className="text-sm font-medium">
+                      Sélectionner une période personnalisée :
+                    </Label>
+                    <Select value={customPeriod} onValueChange={setCustomPeriod}>
+                      <SelectTrigger id="custom-period" className="w-full">
+                        <SelectValue placeholder="Choisir une période" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-week">1 semaine</SelectItem>
+                        <SelectItem value="2-weeks">2 semaines</SelectItem>
+                        <SelectItem value="3-weeks">3 semaines</SelectItem>
+                        <SelectItem value="2-months">2 mois</SelectItem>
+                        <SelectItem value="3-months">3 mois (trimestre)</SelectItem>
+                        <SelectItem value="6-months">6 mois (semestre)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                <div className="text-xs text-gray-500 mt-2">
+                  {isMonthlyPeriod 
+                    ? "Le calendrier sera généré pour 1 mois complet"
+                    : `Le calendrier sera généré pour ${customPeriod === '1-week' ? '1 semaine' : 
+                        customPeriod === '2-weeks' ? '2 semaines' : 
+                        customPeriod === '3-weeks' ? '3 semaines' :
+                        customPeriod === '2-months' ? '2 mois' :
+                        customPeriod === '3-months' ? '3 mois' :
+                        customPeriod === '6-months' ? '6 mois' : customPeriod}`
+                  }
                 </div>
               </div>
             </CardContent>
