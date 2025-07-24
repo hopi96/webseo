@@ -1,0 +1,20 @@
+| Plateforme                | Documentation officielle pour créer / récupérer vos identifiants                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Facebook (Page)**       | • Générer un **User/Page Access Token** via le guide Facebook Login ([Développeurs Facebook][1]) <br>• Trouver le **Page ID** depuis l’interface Business ou via l’aide Meta ([Facebook][2]) |
+| **Instagram (Graph API)** | Convertir un **short‑lived token** en **long‑lived token** et récupérer l’`instagram_user_id` ([Développeurs Facebook][3])                                                                   |
+| **Pinterest**             | Tutoriel OAuth 2 pour obtenir un **access\_token** après consentement utilisateur ([Pinterest Developers][4])                                                                                |
+| **Google My Business**    | Implémenter OAuth 2.0 pour obtenir un **access\_token** et lier vos `account_id` / `location_id` ([Google for Developers][5])                                                                |
+| **X / Twitter v2**        | Générer un **Bearer Token** (app‑only ou user context) via le guide Auth basics ([Developer X][6])                                                                                           |
+| **TikTok for Developers** | Gestion complète des **user access tokens** (fetch, refresh, revoke) via OAuth 2 ([TikTok pour les développeurs][7])                                                                         |
+| **PrestaShop Webservice** | Créer une **Webservice API Key** depuis le back‑office (« Ajouter une clé webservice ») ([PrestaShop][8])                                                                                    |
+| **Brevo / Sendinblue**    | Générer une **API Key v3** depuis « SMTP & API » dans votre profil Brevo ([developers.brevo.com][9])                                                                                         |
+
+[1]: https://developers.facebook.com/docs/facebook-login/guides/access-tokens/?utm_source=chatgpt.com "Access Token Guide - Facebook Login - Meta for Developers"
+[2]: https://www.facebook.com/help/1503421039731588/?utm_source=chatgpt.com "Find your Facebook Page ID | Facebook Help Center"
+[3]: https://developers.facebook.com/docs/instagram-platform/reference/access_token/?utm_source=chatgpt.com "Access Token - Instagram Platform - Meta for Developers"
+[4]: https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/?utm_source=chatgpt.com "Set up authentication and authorization - Pinterest Developers"
+[5]: https://developers.google.com/my-business/content/implement-oauth?utm_source=chatgpt.com "Implement OAuth with Business Profile APIs - Google for Developers"
+[6]: https://developer.x.com/ja/docs/basics/authentication/guides/bearer-tokens?utm_source=chatgpt.com "Using Bearer Tokens | Docs | Twitter Developer Platform"
+[7]: https://developers.tiktok.com/doc/oauth-user-access-token-management?enter_method=left_navigation&utm_source=chatgpt.com "TikTok API Documentation: Access Token Management"
+[8]: https://devdocs.prestashop-project.org/9/webservice/tutorials/creating-access/?utm_source=chatgpt.com "Creating access to the Webservice"
+[9]: https://developers.brevo.com/docs/getting-started?utm_source=chatgpt.com "API Key Authentication - Brevo API"
