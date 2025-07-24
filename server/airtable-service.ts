@@ -543,6 +543,106 @@ export class AirtableService {
   }
 
   /**
+   * Met à jour les paramètres des réseaux sociaux pour un site
+   */
+  async updateSocialParams(siteId: number, socialParams: any): Promise<void> {
+    try {
+      const { base } = initializeAirtable();
+      const analyseSeoTable = base('analyse SEO');
+      
+      console.log('🔄 Mise à jour des paramètres réseaux sociaux pour le site', siteId);
+      console.log('Paramètres à sauvegarder:', socialParams);
+      
+      // Trouver le record du site
+      const records = await analyseSeoTable.select({
+        filterByFormula: `{ID site} = "${siteId}"`
+      }).all();
+      
+      if (records.length === 0) {
+        throw new Error(`Site avec ID ${siteId} non trouvé`);
+      }
+      
+      // Valider et formater les paramètres
+      const formattedParams = {
+        access_tokens: socialParams.access_tokens || {}
+      };
+      
+      // Mettre à jour le champ parametre_rs
+      await analyseSeoTable.update(records[0].id, {
+        'parametre_rs': JSON.stringify(formattedParams)
+      });
+      
+      console.log('✅ Paramètres réseaux sociaux mis à jour pour le site', siteId);
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour des paramètres réseaux sociaux:', error);
+      throw new Error('Impossible de mettre à jour les paramètres des réseaux sociaux');
+    }
+  }
+
+  /**
+   * Récupère les paramètres des réseaux sociaux pour un site
+   */
+  async getSocialParams(siteId: number): Promise<any> {
+    try {
+      const { base } = initializeAirtable();
+      const analyseSeoTable = base('analyse SEO');
+      
+      console.log('🔍 Récupération des paramètres réseaux sociaux pour le site', siteId);
+      
+      // Trouver le record du site
+      const records = await analyseSeoTable.select({
+        filterByFormula: `{ID site} = "${siteId}"`
+      }).all();
+      
+      if (records.length === 0) {
+        throw new Error(`Site avec ID ${siteId} non trouvé`);
+      }
+      
+      const parametreRs = records[0].fields['parametre_rs'];
+      
+      if (!parametreRs) {
+        // Retourner la structure par défaut si aucun paramètre n'est configuré
+        return {
+          access_tokens: {
+            facebook: "",
+            instagram: "",
+            pinterest: "",
+            google_my_business: "",
+            xtwitter: "",
+            tiktok: "",
+            prestashop_blog: "",
+            brevo_newsletter: ""
+          }
+        };
+      }
+      
+      try {
+        const parsed = JSON.parse(parametreRs as string);
+        console.log('✅ Paramètres récupérés pour le site', siteId);
+        return parsed;
+      } catch (parseError) {
+        console.error('❌ Erreur lors du parsing des paramètres JSON:', parseError);
+        // Retourner la structure par défaut en cas d'erreur de parsing
+        return {
+          access_tokens: {
+            facebook: "",
+            instagram: "",
+            pinterest: "",
+            google_my_business: "",
+            xtwitter: "",
+            tiktok: "",
+            prestashop_blog: "",
+            brevo_newsletter: ""
+          }
+        };
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des paramètres réseaux sociaux:', error);
+      throw new Error('Impossible de récupérer les paramètres des réseaux sociaux');
+    }
+  }
+
+  /**
    * Teste la connexion Airtable
    */
   async testConnection(): Promise<boolean> {

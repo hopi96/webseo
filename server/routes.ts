@@ -522,6 +522,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Routes pour gérer les paramètres des réseaux sociaux
+  app.get("/api/sites-airtable/:id/social-params", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+      
+      console.log(`🔍 Récupération des paramètres réseaux sociaux pour le site ${siteId}`);
+      
+      const socialParams = await airtableService.getSocialParams(siteId);
+      res.json(socialParams);
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des paramètres réseaux sociaux:', error);
+      res.status(500).json({ 
+        message: "Impossible de récupérer les paramètres des réseaux sociaux" 
+      });
+    }
+  });
+
+  app.put("/api/sites-airtable/:id/social-params", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const socialParams = req.body;
+      
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+      
+      // Validation basique de la structure
+      if (!socialParams.access_tokens || typeof socialParams.access_tokens !== 'object') {
+        return res.status(400).json({ 
+          message: "Structure des paramètres invalide. Attendu: { access_tokens: { ... } }" 
+        });
+      }
+      
+      console.log(`🔄 Mise à jour des paramètres réseaux sociaux pour le site ${siteId}`);
+      
+      await airtableService.updateSocialParams(siteId, socialParams);
+      res.json({ message: "Paramètres des réseaux sociaux mis à jour avec succès" });
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour des paramètres réseaux sociaux:', error);
+      res.status(500).json({ 
+        message: "Impossible de mettre à jour les paramètres des réseaux sociaux" 
+      });
+    }
+  });
+
   // Route pour vérifier le statut de génération du calendrier éditorial
   app.get("/api/check-generation-status/:siteId", async (req, res) => {
     try {
