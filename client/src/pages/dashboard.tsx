@@ -224,7 +224,7 @@ export default function DashboardWebhook() {
                 </div>
                 
                 {/* Boutons d'action */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button
                     onClick={() => setIsSocialProgramOpen(true)}
                     variant="outline"
@@ -235,21 +235,6 @@ export default function DashboardWebhook() {
                     <Share2 className="h-4 w-4" />
                     Réseaux sociaux
                   </Button>
-
-                  {/* Nouveau bouton pour les paramètres des réseaux sociaux */}
-                  {website && (
-                    <SocialParamsDialog siteId={selectedWebsiteId} siteName={website.name}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
-                        disabled={!selectedWebsiteId}
-                      >
-                        <Settings className="h-4 w-4" />
-                        Tokens réseaux sociaux
-                      </Button>
-                    </SocialParamsDialog>
-                  )}
                   
                   <Button
                     onClick={() => setIsCalendarGeneratorOpen(true)}
@@ -283,10 +268,26 @@ export default function DashboardWebhook() {
             {/* Deuxième ligne : Informations du site sélectionné */}
             {website && (
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lg text-blue-600 font-medium">{website.name}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{website.url}</p>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="text-lg text-blue-600 font-medium">{website.name}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{website.url}</p>
+                  </div>
+                  
+                  {/* Bouton Tokens réseaux sociaux intégré discrètement */}
+                  <SocialParamsDialog siteId={selectedWebsiteId} siteName={website.name}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                      disabled={!selectedWebsiteId}
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span className="text-xs">Tokens API</span>
+                    </Button>
+                  </SocialParamsDialog>
                 </div>
+                
                 <div className="text-right">
                   <div className="text-3xl font-bold text-green-600 transition-all duration-500 animate-in zoom-in-50">{webhookData?.seoScore || 'N/A'}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Score SEO</div>

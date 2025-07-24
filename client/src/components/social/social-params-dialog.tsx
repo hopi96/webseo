@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -197,9 +198,9 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto smart-scroll-vertical">
         <DialogHeader>
           <DialogTitle>Paramètres des réseaux sociaux</DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             Configurez les tokens d'accès pour {siteName}
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
