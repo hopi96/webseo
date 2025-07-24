@@ -562,10 +562,9 @@ export class AirtableService {
         throw new Error(`Site avec ID ${siteId} non trouvé`);
       }
       
-      // Valider et formater les paramètres
-      const formattedParams = {
-        access_tokens: socialParams.access_tokens || {}
-      };
+      // Utiliser directement la nouvelle structure JSON
+      // Les paramètres arrivent déjà dans le bon format depuis le frontend
+      const formattedParams = socialParams;
       
       // Mettre à jour le champ parametre_rs
       await analyseSeoTable.update(records[0].id, {
@@ -601,19 +600,8 @@ export class AirtableService {
       const parametreRs = records[0].fields['parametre_rs'];
       
       if (!parametreRs) {
-        // Retourner la structure par défaut si aucun paramètre n'est configuré
-        return {
-          access_tokens: {
-            facebook: "",
-            instagram: "",
-            pinterest: "",
-            google_my_business: "",
-            xtwitter: "",
-            tiktok: "",
-            prestashop_blog: "",
-            brevo_newsletter: ""
-          }
-        };
+        // Retourner la structure par défaut vide
+        return {};
       }
       
       try {
@@ -622,19 +610,8 @@ export class AirtableService {
         return parsed;
       } catch (parseError) {
         console.error('❌ Erreur lors du parsing des paramètres JSON:', parseError);
-        // Retourner la structure par défaut en cas d'erreur de parsing
-        return {
-          access_tokens: {
-            facebook: "",
-            instagram: "",
-            pinterest: "",
-            google_my_business: "",
-            xtwitter: "",
-            tiktok: "",
-            prestashop_blog: "",
-            brevo_newsletter: ""
-          }
-        };
+        // Retourner une structure vide en cas d'erreur de parsing
+        return {};
       }
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des paramètres réseaux sociaux:', error);

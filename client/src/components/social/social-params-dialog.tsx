@@ -23,15 +23,35 @@ interface SocialParamsDialogProps {
 }
 
 interface SocialParams {
-  access_tokens: {
-    facebook: string;
-    instagram: string;
-    pinterest: string;
-    google_my_business: string;
-    xtwitter: string;
-    tiktok: string;
-    prestashop_blog: string;
-    brevo_newsletter: string;
+  facebook?: {
+    page_id: string;
+    access_token: string;
+  };
+  instagram?: {
+    user_id: string;
+    access_token: string;
+  };
+  pinterest?: {
+    board_id: string;
+    access_token: string;
+  };
+  google_my_business?: {
+    account_id: string;
+    location_id: string;
+    access_token: string;
+  };
+  xtwitter?: {
+    access_token: string;
+  };
+  tiktok?: {
+    access_token: string;
+  };
+  prestashop_blog?: {
+    base_url: string;
+    api_key: string;
+  };
+  brevo_newsletter?: {
+    api_key: string;
   };
 }
 
@@ -41,73 +61,84 @@ const platformConfigs = [
     name: 'Facebook',
     icon: Facebook,
     color: 'text-blue-600',
-    placeholder: 'Token d\'accès Facebook'
+    fields: [
+      { name: 'page_id', label: 'Page ID', placeholder: 'ID de la page Facebook' },
+      { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès Facebook' }
+    ]
   },
   {
     key: 'instagram',
     name: 'Instagram',
     icon: Instagram,
     color: 'text-pink-600',
-    placeholder: 'Token d\'accès Instagram'
+    fields: [
+      { name: 'user_id', label: 'User ID', placeholder: 'ID utilisateur Instagram' },
+      { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès Instagram' }
+    ]
   },
   {
     key: 'pinterest',
     name: 'Pinterest',
     icon: Settings,
     color: 'text-red-600',
-    placeholder: 'Token d\'accès Pinterest'
+    fields: [
+      { name: 'board_id', label: 'Board ID', placeholder: 'ID du tableau Pinterest' },
+      { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès Pinterest' }
+    ]
   },
   {
     key: 'google_my_business',
     name: 'Google My Business',
     icon: Settings,
     color: 'text-blue-500',
-    placeholder: 'Clé API Google My Business'
+    fields: [
+      { name: 'account_id', label: 'Account ID', placeholder: 'ID du compte GMB' },
+      { name: 'location_id', label: 'Location ID', placeholder: 'ID du lieu GMB' },
+      { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès GMB' }
+    ]
   },
   {
     key: 'xtwitter',
     name: 'X (Twitter)',
     icon: Twitter,
     color: 'text-black',
-    placeholder: 'Bearer Token X/Twitter'
+    fields: [
+      { name: 'access_token', label: 'Bearer Token', placeholder: 'Bearer Token X/Twitter' }
+    ]
   },
   {
     key: 'tiktok',
     name: 'TikTok',
     icon: Clock,
     color: 'text-black',
-    placeholder: 'Token d\'accès TikTok'
+    fields: [
+      { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès TikTok' }
+    ]
   },
   {
     key: 'prestashop_blog',
     name: 'Blog Prestashop',
     icon: Settings,
     color: 'text-blue-700',
-    placeholder: 'Clé API Prestashop'
+    fields: [
+      { name: 'base_url', label: 'URL de base', placeholder: 'URL de base Prestashop' },
+      { name: 'api_key', label: 'Clé API', placeholder: 'Clé API Prestashop' }
+    ]
   },
   {
     key: 'brevo_newsletter',
     name: 'Newsletter Brevo',
     icon: Settings,
     color: 'text-green-600',
-    placeholder: 'Clé API Brevo'
+    fields: [
+      { name: 'api_key', label: 'Clé API', placeholder: 'Clé API Brevo' }
+    ]
   }
 ];
 
 export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsDialogProps) {
   const [open, setOpen] = useState(false);
-  const [socialParams, setSocialParams] = useState<SocialParams>({
-    access_tokens: {
-      facebook: "",
-      instagram: "",
-      pinterest: "",
-      google_my_business: "",
-      xtwitter: "",
-      tiktok: "",
-      prestashop_blog: "",
-      brevo_newsletter: ""
-    }
-  });
+  const [socialParams, setSocialParams] = useState<SocialParams>({});
   const [showTokens, setShowTokens] = useState<{[key: string]: boolean}>({});
   
   const { toast } = useToast();
@@ -160,20 +191,20 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
     },
   });
 
-  const handleTokenChange = (platform: string, value: string) => {
+  const handleFieldChange = (platform: string, fieldName: string, value: string) => {
     setSocialParams(prev => ({
       ...prev,
-      access_tokens: {
-        ...prev.access_tokens,
-        [platform]: value
+      [platform]: {
+        ...prev[platform as keyof SocialParams],
+        [fieldName]: value
       }
     }));
   };
 
-  const toggleTokenVisibility = (platform: string) => {
+  const toggleTokenVisibility = (key: string) => {
     setShowTokens(prev => ({
       ...prev,
-      [platform]: !prev[platform]
+      [key]: !prev[key]
     }));
   };
 
@@ -182,7 +213,11 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
   };
 
   const getConfiguredCount = () => {
-    return Object.values(socialParams.access_tokens).filter(token => token.trim() !== '').length;
+    return Object.keys(socialParams).filter(platform => {
+      const config = socialParams[platform as keyof SocialParams];
+      if (!config) return false;
+      return Object.values(config).some(value => value && value.toString().trim() !== '');
+    }).length;
   };
 
   return (
@@ -240,8 +275,8 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {platformConfigs.map((platform) => {
                 const Icon = platform.icon;
-                const isConfigured = socialParams.access_tokens[platform.key as keyof typeof socialParams.access_tokens]?.trim() !== '';
-                const isVisible = showTokens[platform.key];
+                const platformData = socialParams[platform.key as keyof SocialParams];
+                const isConfigured = platformData && Object.values(platformData).some(value => value && value.toString().trim() !== '');
                 
                 return (
                   <Card key={platform.key} className={`border-2 ${isConfigured ? 'border-green-200 bg-green-50' : 'border-gray-200'}`}>
@@ -257,33 +292,45 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <div className="space-y-2">
-                        <Label htmlFor={platform.key} className="text-sm">
-                          Token d'accès
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id={platform.key}
-                            type={isVisible ? "text" : "password"}
-                            placeholder={platform.placeholder}
-                            value={socialParams.access_tokens[platform.key as keyof typeof socialParams.access_tokens]}
-                            onChange={(e) => handleTokenChange(platform.key, e.target.value)}
-                            className="pr-10"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                            onClick={() => toggleTokenVisibility(platform.key)}
-                          >
-                            {isVisible ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
+                      <div className="space-y-3">
+                        {platform.fields.map((field) => {
+                          const fieldKey = `${platform.key}_${field.name}`;
+                          const isVisible = showTokens[fieldKey];
+                          const currentValue = platformData?.[field.name as keyof typeof platformData] || '';
+                          
+                          return (
+                            <div key={field.name} className="space-y-2">
+                              <Label htmlFor={fieldKey} className="text-sm">
+                                {field.label}
+                              </Label>
+                              <div className="relative">
+                                <Input
+                                  id={fieldKey}
+                                  type={field.name.includes('token') || field.name.includes('key') ? (isVisible ? "text" : "password") : "text"}
+                                  placeholder={field.placeholder}
+                                  value={currentValue}
+                                  onChange={(e) => handleFieldChange(platform.key, field.name, e.target.value)}
+                                  className={field.name.includes('token') || field.name.includes('key') ? "pr-10" : ""}
+                                />
+                                {(field.name.includes('token') || field.name.includes('key')) && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                                    onClick={() => toggleTokenVisibility(fieldKey)}
+                                  >
+                                    {isVisible ? (
+                                      <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                      <Eye className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
