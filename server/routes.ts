@@ -586,8 +586,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📊 Données SEO reçues:', seoAnalysis ? 'Oui' : 'Non');
       console.log('⏰ Période sélectionnée:', period);
       
-      // Valider les dates si period est un objet avec startDate et endDate
-      if (period && typeof period === 'object' && period.startDate && period.endDate) {
+      // Valider les dates selon le mode sélectionné
+      if (period === 'monthly') {
+        console.log('📅 Mode mensuel sélectionné');
+      } else if (period && typeof period === 'object' && period.startDate && period.endDate) {
+        console.log('📅 Mode dates personnalisées sélectionné');
         console.log('📅 Date de début:', period.startDate);
         console.log('📅 Date de fin:', period.endDate);
         
@@ -604,9 +607,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const durationMs = endDate.getTime() - startDate.getTime();
         const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24));
         console.log('📊 Durée de la période:', durationDays, 'jours');
-      } else if (!period) {
+      } else {
         return res.status(400).json({ 
-          message: "La période avec dates de début et fin est requise" 
+          message: "La période (mensuelle ou dates personnalisées) est requise" 
         });
       }
       console.log('🔍 JSON COMPLET ENVOYÉ AU WEBHOOK:');
