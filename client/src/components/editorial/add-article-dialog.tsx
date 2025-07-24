@@ -289,6 +289,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
             <div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                  <Label htmlFor="contentText">Contenu *</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
@@ -297,7 +298,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       <p>Le texte principal de votre publication. Saisissez directement ou utilisez l'IA pour générer du contenu optimisé.</p>
                     </TooltipContent>
                   </Tooltip>
-                  <Label htmlFor="contentText">Contenu *</Label>
                 </div>
                 <Button
                   type="button"
@@ -326,6 +326,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="typeContent">Type de contenu</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
@@ -334,7 +335,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       <p>Choisissez la plateforme ou le type de publication (réseau social, article de blog, newsletter).</p>
                     </TooltipContent>
                   </Tooltip>
-                  <Label htmlFor="typeContent">Type de contenu</Label>
                 </div>
                 <Select
                   value={form.watch("typeContent")}
@@ -357,6 +357,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
               <div>
                 <div className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="statut">Statut</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
@@ -365,7 +366,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       <p>État d'avancement de votre contenu : en attente, à réviser, en cours de création ou déjà publié.</p>
                     </TooltipContent>
                   </Tooltip>
-                  <Label htmlFor="statut">Statut</Label>
                 </div>
                 <Select
                   value={form.watch("statut")}
@@ -386,6 +386,10 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
             <div>
               <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="siteId" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Site web *
+                </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
@@ -394,10 +398,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <p>Sélectionnez le site web pour lequel vous créez ce contenu. Utilisé pour la stratégie SEO et l'organisation.</p>
                   </TooltipContent>
                 </Tooltip>
-                <Label htmlFor="siteId" className="flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  Site web *
-                </Label>
               </div>
               <Select
                 value={form.watch("siteId")?.toString()}
@@ -423,6 +423,10 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
             <div>
               <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="dateDePublication" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Date de publication
+                </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
@@ -431,10 +435,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <p>Planifiez quand ce contenu sera publié. Utilisé pour organiser votre calendrier éditorial et suivre les deadlines.</p>
                   </TooltipContent>
                 </Tooltip>
-                <Label htmlFor="dateDePublication" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Date de publication
-                </Label>
               </div>
               <Input
                 id="dateDePublication"
@@ -445,6 +445,9 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
+                <Label htmlFor="hasImage" className="text-sm font-medium">
+                  Contient une image
+                </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
@@ -453,9 +456,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <p>Activez cette option si votre contenu inclut une image. Vous pourrez ensuite la générer avec l'IA ou l'uploader.</p>
                   </TooltipContent>
                 </Tooltip>
-                <Label htmlFor="hasImage" className="text-sm font-medium">
-                  Contient une image
-                </Label>
               </div>
               <Switch
                 id="hasImage"
