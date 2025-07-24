@@ -293,7 +293,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-[200px] text-xs">
                       <p>Le texte principal de votre publication. Saisissez directement ou utilisez l'IA pour générer du contenu optimisé.</p>
                     </TooltipContent>
                   </Tooltip>
@@ -330,7 +330,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-[200px] text-xs">
                       <p>Choisissez la plateforme ou le type de publication (réseau social, article de blog, newsletter).</p>
                     </TooltipContent>
                   </Tooltip>
@@ -361,7 +361,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-[200px] text-xs">
                       <p>État d'avancement de votre contenu : en attente, à réviser, en cours de création ou déjà publié.</p>
                     </TooltipContent>
                   </Tooltip>
@@ -390,7 +390,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="max-w-[200px] text-xs">
                     <p>Sélectionnez le site web pour lequel vous créez ce contenu. Utilisé pour la stratégie SEO et l'organisation.</p>
                   </TooltipContent>
                 </Tooltip>
@@ -427,7 +427,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="max-w-[200px] text-xs">
                     <p>Planifiez quand ce contenu sera publié. Utilisé pour organiser votre calendrier éditorial et suivre les deadlines.</p>
                   </TooltipContent>
                 </Tooltip>
@@ -449,7 +449,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="max-w-[200px] text-xs">
                     <p>Activez cette option si votre contenu inclut une image. Vous pourrez ensuite la générer avec l'IA ou l'uploader.</p>
                   </TooltipContent>
                 </Tooltip>
