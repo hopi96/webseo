@@ -14,8 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
   Calendar,
@@ -53,9 +52,12 @@ export function EditorialCalendarGeneratorDialog({
   const [currentStep, setCurrentStep] = useState('');
   const [generationResult, setGenerationResult] = useState<any>(null);
   
-  // États pour la sélection de période
-  const [isMonthlyPeriod, setIsMonthlyPeriod] = useState(true);
-  const [customPeriod, setCustomPeriod] = useState('2-weeks');
+  // États pour la sélection de période avec dates par défaut
+  const today = new Date();
+  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+  
+  const [startDate, setStartDate] = useState(today.toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(nextMonth.toISOString().split('T')[0]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -118,7 +120,10 @@ export function EditorialCalendarGeneratorDialog({
         websiteName,
         websiteUrl,
         seoAnalysis: seoAnalysis || {},
-        period: isMonthlyPeriod ? 'monthly' : customPeriod
+        period: {
+          startDate,
+          endDate
+        }
       });
       
       // Webhook lancé, commencer le polling intelligent
@@ -306,49 +311,40 @@ export function EditorialCalendarGeneratorDialog({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="monthly-period"
-                    checked={isMonthlyPeriod}
-                    onCheckedChange={(checked) => setIsMonthlyPeriod(checked === true)}
-                  />
-                  <Label htmlFor="monthly-period" className="text-sm">
-                    Génération mensuelle (recommandé)
-                  </Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start-date" className="text-sm font-medium">
+                      Date de début
+                    </Label>
+                    <Input 
+                      id="start-date"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="end-date" className="text-sm font-medium">
+                      Date de fin
+                    </Label>
+                    <Input 
+                      id="end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full"
+                      min={startDate}
+                    />
+                  </div>
                 </div>
                 
-                {!isMonthlyPeriod && (
-                  <div className="ml-6 space-y-2">
-                    <Label htmlFor="custom-period" className="text-sm font-medium">
-                      Sélectionner une période personnalisée :
-                    </Label>
-                    <Select value={customPeriod} onValueChange={setCustomPeriod}>
-                      <SelectTrigger id="custom-period" className="w-full">
-                        <SelectValue placeholder="Choisir une période" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1-week">1 semaine</SelectItem>
-                        <SelectItem value="2-weeks">2 semaines</SelectItem>
-                        <SelectItem value="3-weeks">3 semaines</SelectItem>
-                        <SelectItem value="2-months">2 mois</SelectItem>
-                        <SelectItem value="3-months">3 mois (trimestre)</SelectItem>
-                        <SelectItem value="6-months">6 mois (semestre)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                {startDate && endDate && (
+                  <div className="text-xs text-gray-500 mt-2">
+                    Le calendrier sera généré du {new Date(startDate).toLocaleDateString('fr-FR')} au {new Date(endDate).toLocaleDateString('fr-FR')}
                   </div>
                 )}
-                
-                <div className="text-xs text-gray-500 mt-2">
-                  {isMonthlyPeriod 
-                    ? "Le calendrier sera généré pour 1 mois complet"
-                    : `Le calendrier sera généré pour ${customPeriod === '1-week' ? '1 semaine' : 
-                        customPeriod === '2-weeks' ? '2 semaines' : 
-                        customPeriod === '3-weeks' ? '3 semaines' :
-                        customPeriod === '2-months' ? '2 mois' :
-                        customPeriod === '3-months' ? '3 mois' :
-                        customPeriod === '6-months' ? '6 mois' : customPeriod}`
-                  }
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -416,7 +412,7 @@ export function EditorialCalendarGeneratorDialog({
             {!generationResult && (
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating}
+                disabled={isGenerating || !startDate || !endDate}
                 className="flex items-center gap-2"
               >
                 {isGenerating ? (
