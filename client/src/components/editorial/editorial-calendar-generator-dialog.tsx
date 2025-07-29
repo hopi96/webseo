@@ -90,18 +90,15 @@ export function EditorialCalendarGeneratorDialog({
         const progressPercent = Math.min((elapsed / progressDuration) * 100, 100);
         setProgress(progressPercent);
         
-        const elapsedMinutes = Math.floor(elapsed / (1000 * 60));
-        const totalMinutes = 60; // Toujours 60 minutes
-        
         if (elapsed >= progressDuration) {
           // Exactement 1 heure écoulée
           clearInterval(progressInterval);
-          setCurrentStep('Génération terminée (1h complète)');
+          setCurrentStep('Génération terminée');
           setProgress(100);
           console.log('⏰ Génération terminée après exactement 1 heure');
           resolve({ completed: true, duration: '1 heure' });
         } else {
-          setCurrentStep(`Génération IA en cours... (${elapsedMinutes}/${totalMinutes} min)`);
+          setCurrentStep('Génération de contenu par IA en cours...');
         }
       }, 1000); // Mise à jour chaque seconde
     });
@@ -152,7 +149,7 @@ export function EditorialCalendarGeneratorDialog({
       
       toast({
         title: "Génération terminée",
-        description: "La génération de 1 heure est terminée. Vérifiez votre table Airtable pour voir les contenus générés.",
+        description: "Vérifiez votre table Airtable pour voir les contenus générés.",
       });
       
       // Invalider le cache pour forcer le rechargement des données
