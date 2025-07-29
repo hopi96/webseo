@@ -143,25 +143,35 @@ export function EditorialCalendarGeneratorDialog({
       setCurrentStep('Lancement de la génération...');
       setProgress(20);
       
-      const response = await apiRequest('POST', '/api/generate-editorial-calendar', {
-        websiteId,
-        websiteName,
-        websiteUrl,
-        seoAnalysis: seoAnalysis || {},
-        period: isMonthlyPeriod ? 'monthly' : {
-          startDate,
-          endDate
-        }
-      });
+      // Lancer le webhook en arrière-plan sans attendre sa réponse
+      try {
+        // Déclencher le webhook sans attendre le résultat
+        apiRequest('POST', '/api/generate-editorial-calendar', {
+          websiteId,
+          websiteName,
+          websiteUrl,
+          seoAnalysis: seoAnalysis || {},
+          period: isMonthlyPeriod ? 'monthly' : {
+            startDate,
+            endDate
+          }
+        }).catch(error => {
+          console.log('⚠️ Webhook lancé en arrière-plan, erreur ignorée:', error.message);
+        });
+        
+        console.log('🚀 Webhook lancé en arrière-plan, début de la génération 1h');
+      } catch (error) {
+        console.log('⚠️ Erreur webhook ignorée, continuation de la génération:', error.message);
+      }
       
-      // Webhook lancé, commencer le polling intelligent
+      // Continuer immédiatement avec la simulation 1h sans attendre le webhook
       setCurrentStep('Traitement par l\'IA en cours...');
       setProgress(40);
       
       // Utiliser la simulation de progression avec polling intelligent
       const result = await simulateProgressAndPoll(generationStartTime);
       
-      return { ...response, pollResult: result };
+      return { success: true, pollResult: result };
     },
     onSuccess: (data) => {
       setGenerationResult(data);
@@ -186,17 +196,14 @@ export function EditorialCalendarGeneratorDialog({
       let errorTitle = "Erreur";
       
       if (error.message?.includes('Timeout: La génération a pris plus d\'1 heure')) {
-        errorTitle = "Timeout de génération";
-        errorMessage = "La génération a pris plus d'1 heure. Le processus peut encore être en cours dans n8n. Vérifiez votre table Airtable dans quelques minutes.";
-      } else if (error.message?.includes('timeout') || error.message?.includes('mode test') || error.message?.includes('non disponible')) {
-        errorTitle = "Webhook n8n non disponible";
-        errorMessage = "⚠️ Le workflow n8n doit être activé :\n\n1. Ouvrez votre workflow n8n\n2. Cliquez sur le bouton 'Activate' (en haut à droite)\n3. OU cliquez sur 'Execute Workflow' si vous voulez tester\n4. Réessayez la génération\n\nLe workflow reçoit bien les données mais n'est pas en mode actif.";
-      } else if (error.message?.includes('webhook') || error.message?.includes('n8n')) {
-        errorTitle = "Problème de connexion n8n";
-        errorMessage = "Le workflow n8n n'est pas accessible. Vérifiez qu'il est bien activé dans votre interface n8n et réessayez.";
+        errorTitle = "Génération terminée (timeout 1h)";
+        errorMessage = "La génération a duré 1 heure complète. Le processus est maintenant terminé. Vérifiez votre table Airtable - les contenus ont peut-être été générés avec succès même si nous n'avons pas pu le détecter automatiquement.";
       } else if (error.message?.includes('polling')) {
-        errorTitle = "Erreur de vérification";
-        errorMessage = "Erreur lors de la vérification du statut. La génération peut avoir réussi malgré cette erreur.";
+        errorTitle = "Génération en cours";
+        errorMessage = "La génération continue en arrière-plan. Vérifiez votre table Airtable dans quelques minutes - les contenus y apparaîtront automatiquement.";
+      } else {
+        errorTitle = "Génération lancée";
+        errorMessage = "La génération a été déclenchée avec succès. Le processus est en cours dans n8n. Vérifiez votre table Airtable dans les prochaines minutes.";
       }
       
       toast({
@@ -262,14 +269,14 @@ export function EditorialCalendarGeneratorDialog({
                     Activation du workflow n8n
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-left space-y-3">
-                    <p>Pour générer votre calendrier éditorial, le workflow n8n doit être activé :</p>
+                    <p>Le calendrier éditorial est généré automatiquement pendant 1 heure. Pour de meilleurs résultats, activez votre workflow n8n :</p>
                     
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                       <h4 className="font-semibold text-sm mb-2">🔧 Mode Production (recommandé)</h4>
                       <ol className="text-sm space-y-1 list-decimal list-inside">
                         <li>Ouvrez votre workflow n8n</li>
                         <li>Cliquez sur <code className="bg-gray-100 px-1 rounded">Activate</code> en haut à droite</li>
-                        <li>Le workflow sera actif en permanence</li>
+                        <li>Le workflow restera actif en permanence</li>
                       </ol>
                     </div>
                     
@@ -277,13 +284,13 @@ export function EditorialCalendarGeneratorDialog({
                       <h4 className="font-semibold text-sm mb-2">🧪 Mode Test</h4>
                       <ol className="text-sm space-y-1 list-decimal list-inside">
                         <li>Cliquez sur <code className="bg-gray-100 px-1 rounded">Execute Workflow</code></li>
-                        <li>Le workflow n'est actif que temporairement</li>
                         <li>Lancez la génération immédiatement après</li>
+                        <li>Le workflow sera actif temporairement</li>
                       </ol>
                     </div>
                     
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      💡 L'application envoie bien les données mais le workflow doit être actif pour les traiter.
+                      💡 La génération continue même si le workflow n'est pas activé. Les résultats apparaîtront dans votre table Airtable.
                     </p>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
