@@ -718,14 +718,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error(`❌ Webhook error ${response.status}: ${errorText}`);
         
         // Gestion spécifique des erreurs
-        if (response.status === 524) {
-          throw new Error('Timeout webhook n8n: Le workflow n8n est peut-être en mode test ou non activé');
+        if (response.status === 524 || response.status === 502 || response.status === 503) {
+          throw new Error('Webhook n8n non disponible: Le workflow n8n est peut-être en mode test ou non activé. Activez-le en mode production ou cliquez sur \'Execute workflow\' pour le mode test.');
         } else if (response.status === 404) {
-          throw new Error('Webhook n8n non trouvé: Vérifiez l\'URL du webhook dans les paramètres');
+          throw new Error('Webhook n8n non trouvé: Vérifiez l\'URL du webhook dans les paramètres n8n');
         } else if (response.status === 500) {
-          throw new Error('Erreur interne n8n: Le workflow n8n a rencontré une erreur');
+          throw new Error('Erreur interne n8n: Le workflow n8n a rencontré une erreur pendant l\'exécution');
+        } else if (response.status === 400) {
+          throw new Error('Données invalides: Le webhook n8n a reçu des données qu\'il ne peut pas traiter');
         } else {
-          throw new Error(`Erreur webhook: ${response.status} ${response.statusText}`);
+          throw new Error(`Webhook n8n indisponible (${response.status}): Le workflow est peut-être en mode test ou non activé`);
         }
       }
       
