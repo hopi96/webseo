@@ -78,59 +78,32 @@ export function EditorialCalendarGeneratorDialog({
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
-  // Fonction de simulation de barre de progression sur 1 heure avec polling intelligent
-  const simulateProgressAndPoll = async (startTime: Date): Promise<any> => {
-    const maxPollingTime = 60 * 60 * 1000; // 1 heure maximum
-    const pollInterval = 10000; // Vérifier toutes les 10 secondes
+  // Fonction pour simuler la progression pendant exactement 1 heure
+  const simulateProgressFor1Hour = async (startTime: Date): Promise<any> => {
     const startPollingTime = Date.now();
-    const progressDuration = 60 * 60 * 1000; // 1 heure pour la barre de progression
+    const progressDuration = 60 * 60 * 1000; // Exactement 1 heure
     
-    // Commencer la simulation de progression
-    const progressInterval = setInterval(() => {
-      const elapsed = Date.now() - startPollingTime;
-      const progressPercent = Math.min((elapsed / progressDuration) * 100, 95); // Max 95% pendant l'attente
-      setProgress(progressPercent);
-      
-      const elapsedMinutes = Math.floor(elapsed / (1000 * 60));
-      const totalMinutes = Math.floor(progressDuration / (1000 * 60));
-      setCurrentStep(`Génération IA en cours... (${elapsedMinutes}/${totalMinutes} min)`);
-    }, 1000); // Mise à jour chaque seconde
-    
-    return new Promise((resolve, reject) => {
-      const poll = async () => {
-        try {
-          // Vérifier si on a dépassé le timeout maximum
-          if (Date.now() - startPollingTime > maxPollingTime) {
-            clearInterval(progressInterval);
-            reject(new Error('Timeout: La génération a pris plus d\'1 heure'));
-            return;
-          }
-          
-          // Vérifier le statut de génération
-          const response = await fetch(`/api/check-generation-status/${websiteId}?since=${startTime.toISOString()}`);
-          const status = await response.json();
-          
-          console.log('📊 Polling status:', status);
-          
-          if (status.hasNewContent && status.newContentCount > 0) {
-            console.log(`✅ Génération terminée ! ${status.newContentCount} nouveaux contenus détectés`);
-            clearInterval(progressInterval);
-            setCurrentStep(`Terminé ! ${status.newContentCount} contenus générés`);
-            setProgress(100);
-            resolve(status);
-          } else {
-            // Continuer le polling
-            setTimeout(poll, pollInterval);
-          }
-        } catch (error) {
-          console.error('Erreur lors du polling:', error);
+    return new Promise((resolve) => {
+      // Progression continue pendant exactement 1 heure
+      const progressInterval = setInterval(() => {
+        const elapsed = Date.now() - startPollingTime;
+        const progressPercent = Math.min((elapsed / progressDuration) * 100, 100);
+        setProgress(progressPercent);
+        
+        const elapsedMinutes = Math.floor(elapsed / (1000 * 60));
+        const totalMinutes = 60; // Toujours 60 minutes
+        
+        if (elapsed >= progressDuration) {
+          // Exactement 1 heure écoulée
           clearInterval(progressInterval);
-          reject(error);
+          setCurrentStep('Génération terminée (1h complète)');
+          setProgress(100);
+          console.log('⏰ Génération terminée après exactement 1 heure');
+          resolve({ completed: true, duration: '1 heure' });
+        } else {
+          setCurrentStep(`Génération IA en cours... (${elapsedMinutes}/${totalMinutes} min)`);
         }
-      };
-      
-      // Commencer le polling après un délai initial
-      setTimeout(poll, 5000); // Attendre 5s avant le premier check
+      }, 1000); // Mise à jour chaque seconde
     });
   };
 
@@ -161,15 +134,15 @@ export function EditorialCalendarGeneratorDialog({
         
         console.log('🚀 Webhook lancé en arrière-plan, début de la génération 1h');
       } catch (error) {
-        console.log('⚠️ Erreur webhook ignorée, continuation de la génération:', error.message);
+        console.log('⚠️ Erreur webhook ignorée, continuation de la génération:', (error as Error).message);
       }
       
       // Continuer immédiatement avec la simulation 1h sans attendre le webhook
       setCurrentStep('Traitement par l\'IA en cours...');
       setProgress(40);
       
-      // Utiliser la simulation de progression avec polling intelligent
-      const result = await simulateProgressAndPoll(generationStartTime);
+      // Utiliser la simulation de progression pendant exactement 1 heure
+      const result = await simulateProgressFor1Hour(generationStartTime);
       
       return { success: true, pollResult: result };
     },
@@ -177,10 +150,9 @@ export function EditorialCalendarGeneratorDialog({
       setGenerationResult(data);
       setIsGenerating(false);
       
-      const contentCount = data.pollResult?.newContentCount || 0;
       toast({
-        title: "Calendrier généré avec succès",
-        description: `${contentCount} contenus éditoriaux ont été générés automatiquement`,
+        title: "Génération terminée",
+        description: "La génération de 1 heure est terminée. Vérifiez votre table Airtable pour voir les contenus générés.",
       });
       
       // Invalider le cache pour forcer le rechargement des données
