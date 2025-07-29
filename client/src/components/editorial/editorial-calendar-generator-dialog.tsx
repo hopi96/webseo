@@ -67,18 +67,31 @@ export function EditorialCalendarGeneratorDialog({
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
-  // Fonction de polling intelligent pour détecter la fin de génération
-  const pollGenerationStatus = async (startTime: Date): Promise<any> => {
-    const maxPollingTime = 15 * 60 * 1000; // 15 minutes maximum
+  // Fonction de simulation de barre de progression sur 1 heure avec polling intelligent
+  const simulateProgressAndPoll = async (startTime: Date): Promise<any> => {
+    const maxPollingTime = 60 * 60 * 1000; // 1 heure maximum
     const pollInterval = 10000; // Vérifier toutes les 10 secondes
     const startPollingTime = Date.now();
+    const progressDuration = 60 * 60 * 1000; // 1 heure pour la barre de progression
+    
+    // Commencer la simulation de progression
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startPollingTime;
+      const progressPercent = Math.min((elapsed / progressDuration) * 100, 95); // Max 95% pendant l'attente
+      setProgress(progressPercent);
+      
+      const elapsedMinutes = Math.floor(elapsed / (1000 * 60));
+      const totalMinutes = Math.floor(progressDuration / (1000 * 60));
+      setCurrentStep(`Génération IA en cours... (${elapsedMinutes}/${totalMinutes} min)`);
+    }, 1000); // Mise à jour chaque seconde
     
     return new Promise((resolve, reject) => {
       const poll = async () => {
         try {
           // Vérifier si on a dépassé le timeout maximum
           if (Date.now() - startPollingTime > maxPollingTime) {
-            reject(new Error('Timeout: La génération a pris plus de 15 minutes'));
+            clearInterval(progressInterval);
+            reject(new Error('Timeout: La génération a pris plus d\'1 heure'));
             return;
           }
           
@@ -90,17 +103,17 @@ export function EditorialCalendarGeneratorDialog({
           
           if (status.hasNewContent && status.newContentCount > 0) {
             console.log(`✅ Génération terminée ! ${status.newContentCount} nouveaux contenus détectés`);
+            clearInterval(progressInterval);
             setCurrentStep(`Terminé ! ${status.newContentCount} contenus générés`);
             setProgress(100);
             resolve(status);
           } else {
             // Continuer le polling
-            const elapsedMinutes = Math.floor((Date.now() - startPollingTime) / (1000 * 60));
-            setCurrentStep(`Génération en cours... (${elapsedMinutes}min)`);
             setTimeout(poll, pollInterval);
           }
         } catch (error) {
           console.error('Erreur lors du polling:', error);
+          clearInterval(progressInterval);
           reject(error);
         }
       };
@@ -134,8 +147,8 @@ export function EditorialCalendarGeneratorDialog({
       setCurrentStep('Traitement par l\'IA en cours...');
       setProgress(40);
       
-      // Utiliser le polling intelligent au lieu d'attendre 1h
-      const result = await pollGenerationStatus(generationStartTime);
+      // Utiliser la simulation de progression avec polling intelligent
+      const result = await simulateProgressAndPoll(generationStartTime);
       
       return { ...response, pollResult: result };
     },
@@ -161,9 +174,9 @@ export function EditorialCalendarGeneratorDialog({
       let errorMessage = error.message || "Impossible de générer le calendrier éditorial";
       let errorTitle = "Erreur";
       
-      if (error.message?.includes('Timeout: La génération a pris plus de 15 minutes')) {
+      if (error.message?.includes('Timeout: La génération a pris plus d\'1 heure')) {
         errorTitle = "Timeout de génération";
-        errorMessage = "La génération a pris plus de 15 minutes. Le processus peut encore être en cours dans n8n. Vérifiez votre table Airtable dans quelques minutes.";
+        errorMessage = "La génération a pris plus d'1 heure. Le processus peut encore être en cours dans n8n. Vérifiez votre table Airtable dans quelques minutes.";
       } else if (error.message?.includes('timeout') || error.message?.includes('mode test')) {
         errorTitle = "Webhook n8n non disponible";
         errorMessage = "Le workflow n8n est peut-être en mode test ou non activé. Activez-le en mode production ou cliquez sur 'Execute workflow' pour le mode test.";
