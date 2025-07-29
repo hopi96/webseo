@@ -28,8 +28,19 @@ import {
   ExternalLink,
   FileText,
   Globe,
-  TrendingUp
+  TrendingUp,
+  HelpCircle
 } from "lucide-react";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface EditorialCalendarGeneratorDialogProps {
   open: boolean;
@@ -177,12 +188,12 @@ export function EditorialCalendarGeneratorDialog({
       if (error.message?.includes('Timeout: La génération a pris plus d\'1 heure')) {
         errorTitle = "Timeout de génération";
         errorMessage = "La génération a pris plus d'1 heure. Le processus peut encore être en cours dans n8n. Vérifiez votre table Airtable dans quelques minutes.";
-      } else if (error.message?.includes('timeout') || error.message?.includes('mode test')) {
+      } else if (error.message?.includes('timeout') || error.message?.includes('mode test') || error.message?.includes('non disponible')) {
         errorTitle = "Webhook n8n non disponible";
-        errorMessage = "Le workflow n8n est peut-être en mode test ou non activé. Activez-le en mode production ou cliquez sur 'Execute workflow' pour le mode test.";
+        errorMessage = "⚠️ Le workflow n8n doit être activé :\n\n1. Ouvrez votre workflow n8n\n2. Cliquez sur le bouton 'Activate' (en haut à droite)\n3. OU cliquez sur 'Execute Workflow' si vous voulez tester\n4. Réessayez la génération\n\nLe workflow reçoit bien les données mais n'est pas en mode actif.";
       } else if (error.message?.includes('webhook') || error.message?.includes('n8n')) {
-        errorTitle = "Erreur de connexion n8n";
-        errorMessage = "Erreur de connexion avec n8n. Vérifiez que le webhook est correctement configuré.";
+        errorTitle = "Problème de connexion n8n";
+        errorMessage = "Le workflow n8n n'est pas accessible. Vérifiez qu'il est bien activé dans votre interface n8n et réessayez.";
       } else if (error.message?.includes('polling')) {
         errorTitle = "Erreur de vérification";
         errorMessage = "Erreur lors de la vérification du statut. La génération peut avoir réussi malgré cette erreur.";
@@ -231,9 +242,56 @@ export function EditorialCalendarGeneratorDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-blue-600" />
-            Génération du calendrier éditorial
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              Génération du calendrier éditorial
+            </div>
+            
+            {/* Bouton d'aide pour n8n */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <HelpCircle className="h-4 w-4 text-gray-500" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-md">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-yellow-500" />
+                    Activation du workflow n8n
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-left space-y-3">
+                    <p>Pour générer votre calendrier éditorial, le workflow n8n doit être activé :</p>
+                    
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                      <h4 className="font-semibold text-sm mb-2">🔧 Mode Production (recommandé)</h4>
+                      <ol className="text-sm space-y-1 list-decimal list-inside">
+                        <li>Ouvrez votre workflow n8n</li>
+                        <li>Cliquez sur <code className="bg-gray-100 px-1 rounded">Activate</code> en haut à droite</li>
+                        <li>Le workflow sera actif en permanence</li>
+                      </ol>
+                    </div>
+                    
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
+                      <h4 className="font-semibold text-sm mb-2">🧪 Mode Test</h4>
+                      <ol className="text-sm space-y-1 list-decimal list-inside">
+                        <li>Cliquez sur <code className="bg-gray-100 px-1 rounded">Execute Workflow</code></li>
+                        <li>Le workflow n'est actif que temporairement</li>
+                        <li>Lancez la génération immédiatement après</li>
+                      </ol>
+                    </div>
+                    
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      💡 L'application envoie bien les données mais le workflow doit être actif pour les traiter.
+                    </p>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction>Compris</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </DialogTitle>
           <DialogDescription>
             Générez un calendrier éditorial personnalisé basé sur l'analyse SEO de votre site web
