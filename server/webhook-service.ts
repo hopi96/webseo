@@ -37,9 +37,7 @@ export interface WebhookSeoResponse {
 
 export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise<InsertSeoAnalysis> {
   try {
-    console.log(`Requesting SEO analysis for ${websiteUrl} from webhook (GET method)...`);
-    
-    // Construire l'URL avec les paramètres pour une requête GET (confirmé par tests)
+    // Construire l'URL avec les paramètres pour une requête GET
     const webhookUrlWithParams = new URL(WEBHOOK_URL);
     webhookUrlWithParams.searchParams.append('url', websiteUrl);
     webhookUrlWithParams.searchParams.append('timestamp', new Date().toISOString());
@@ -53,7 +51,7 @@ export async function requestSeoAnalysisFromWebhook(websiteUrl: string): Promise
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Webhook error response:`, errorText);
+      console.error(`Webhook error (${response.status}):`, errorText);
       
       // Créer une erreur spécifique pour les erreurs 404 n8n
       if (response.status === 404) {
@@ -104,14 +102,12 @@ Note: En mode test, le webhook ne fonctionne que pour un seul appel après activ
     }
 
     const webhookData: any = await response.json();
-    console.log(`Webhook response received for ${websiteUrl}`);
     
     // Vérifier si le webhook retourne des données pour le bon site
     const returnedUrl = webhookData.url;
     const isCorrectSite = returnedUrl && returnedUrl.includes(new URL(websiteUrl).hostname);
     
     if (!isCorrectSite) {
-      console.warn(`⚠️ Webhook returned data for ${returnedUrl} instead of ${websiteUrl}. Adapting data...`);
       
       // Adapter les données pour le site demandé
       const hostname = new URL(websiteUrl).hostname.replace('www.', '');
@@ -343,7 +339,6 @@ Note: En mode test, le webhook ne fonctionne que pour un seul appel après activ
     // Ajouter les données JSON complètes du webhook
     (seoAnalysis as any).rawWebhookData = JSON.stringify(webhookData);
     
-    console.log(`SEO analysis received: Score ${overallScore}, Traffic ${organicTraffic}, Keywords ${keywordsRanking}, Backlinks ${backlinks}`);
     return seoAnalysis as InsertSeoAnalysis;
 
   } catch (error) {
