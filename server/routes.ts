@@ -553,9 +553,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Validation basique de la structure
-      if (!socialParams.access_tokens || typeof socialParams.access_tokens !== 'object') {
+      if (!socialParams || typeof socialParams !== 'object') {
         return res.status(400).json({ 
-          message: "Structure des paramètres invalide. Attendu: { access_tokens: { ... } }" 
+          message: "Structure des paramètres invalide. Les paramètres doivent être un objet valide." 
         });
       }
       
