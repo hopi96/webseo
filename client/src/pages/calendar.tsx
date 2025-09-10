@@ -462,6 +462,8 @@ export default function Calendar() {
                               variant="ghost" 
                               size="sm" 
                               className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20"
+                              data-testid={`delete-article-${event.id}`}
+                              title="Supprimer cet article"
                               onClick={() => handleDeleteArticle(event)}
                             >
                               <Trash2 className="h-3 w-3 text-red-500" />

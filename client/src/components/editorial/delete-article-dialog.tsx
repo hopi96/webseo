@@ -43,26 +43,45 @@ export function DeleteArticleDialog({ open, onOpenChange, article }: DeleteArtic
     deleteMutation.mutate();
   };
 
+  // Fonction pour truncater le texte si nécessaire
+  const truncateText = (text: string, maxLength: number = 200): string => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-h-[80vh] overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle>Supprimer l'article</AlertDialogTitle>
-          <AlertDialogDescription>
-            Êtes-vous sûr de vouloir supprimer cet article ?
-            <br />
-            <br />
-            <strong>Contenu :</strong> {article.contentText}
-            <br />
-            <strong>Type :</strong> {article.typeContent}
-            <br />
-            <strong>Statut :</strong> {article.statut}
-            <br />
-            <br />
-            Cette action est irréversible.
-          </AlertDialogDescription>
+          <div className="space-y-3">
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cet article ?
+            </AlertDialogDescription>
+            
+            <div className="bg-gray-50 p-3 rounded border max-h-48 overflow-y-auto">
+              <div className="space-y-2 text-sm">
+                <div>
+                  <strong>Type :</strong> {article.typeContent}
+                </div>
+                <div>
+                  <strong>Statut :</strong> {article.statut}
+                </div>
+                <div>
+                  <strong>Contenu :</strong>
+                  <div className="mt-1 p-2 bg-white rounded border text-xs max-h-32 overflow-y-auto">
+                    {truncateText(article.contentText, 300)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <AlertDialogDescription className="text-red-600 font-medium">
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </div>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="flex-shrink-0">
           <AlertDialogCancel disabled={deleteMutation.isPending}>
             Annuler
           </AlertDialogCancel>
