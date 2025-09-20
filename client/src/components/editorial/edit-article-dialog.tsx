@@ -573,10 +573,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 )}
 
 
-                {/* Options d'image - Choix exclusif - Seulement si pas d'erreur de chargement */}
-                {!imageLoadError && (
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600">Choisissez l'une des deux options :</p>
+                {/* Options d'image - Choix exclusif */}
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">Choisissez l'une des deux options :</p>
                   
                   <div className="grid grid-cols-2 gap-4">
                     {/* Génération par IA */}
@@ -642,7 +641,6 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                     </div>
                   </div>
                 </div>
-                )}
               </div>
             )}
 
