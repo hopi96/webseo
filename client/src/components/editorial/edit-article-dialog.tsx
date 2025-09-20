@@ -537,15 +537,6 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                   </div>
                 )}
 
-                {/* Debug information */}
-                <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-                  <p><strong>Debug:</strong></p>
-                  <p>hasImage: {form.watch("hasImage") ? "true" : "false"}</p>
-                  <p>imageUrl: {form.watch("imageUrl") || "vide"}</p>
-                  <p>imageState.generatedImageUrl: {imageState.generatedImageUrl || "vide"}</p>
-                  <p>imageState.uploadedImageUrl: {imageState.uploadedImageUrl || "vide"}</p>
-                  <p>displayUrl: {getDisplayImageUrl(imageState) || "vide"}</p>
-                </div>
 
                 {/* Options d'image - Choix exclusif */}
                 <div className="space-y-3">
