@@ -37,7 +37,9 @@ import {
   Save,
   Loader2,
   FileText,
-  Image
+  Image,
+  CheckCircle,
+  HelpCircle
 } from "lucide-react";
 
 // Schéma de validation pour le formulaire
@@ -218,6 +220,44 @@ export function SocialMediaProgramDialog({
             Pour moins de 4 publications/mois, utilisez le mode mensuel.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Message informatif si aucun programme n'est configuré */}
+        {!currentProgram && (
+          <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <HelpCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                  Aucun programme configuré
+                </h3>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                  Ce site n'a pas encore de programme de réseaux sociaux. Configurez les fréquences de publication ci-dessous pour commencer.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Message informatif si un programme existe */}
+        {currentProgram && (
+          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  Programme existant détecté
+                </h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                  Voici le programme de publications actuellement configuré pour ce site. Vous pouvez le modifier ci-dessous.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-center mb-4">
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
