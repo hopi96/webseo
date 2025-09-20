@@ -219,6 +219,34 @@ export class AirtableService {
   }
 
   /**
+   * Récupère le programme des réseaux sociaux pour un site spécifique
+   */
+  async getSocialMediaProgram(siteId: number): Promise<string | null> {
+    try {
+      const { base } = initializeAirtable();
+      const analyseSeoTable = base('analyse SEO');
+      
+      const records = await analyseSeoTable.select({
+        filterByFormula: `{ID site} = ${siteId}`,
+        fields: ['programme_rs'],
+        maxRecords: 1
+      }).firstPage();
+      
+      if (records.length === 0) {
+        throw new Error(`Site avec ID ${siteId} non trouvé`);
+      }
+      
+      const programmeRs = records[0].fields['programme_rs'] as string | undefined;
+      console.log(`✅ Programme RS récupéré pour le site ${siteId}:`, programmeRs ? 'Configuré' : 'Non configuré');
+      
+      return programmeRs || null;
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération du programme RS:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Récupère tous les sites depuis la table analyse SEO d'Airtable avec données d'analyse SEO
    */
   async getAllSites(): Promise<AirtableSite[]> {
