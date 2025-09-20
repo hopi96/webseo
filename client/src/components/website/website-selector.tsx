@@ -21,7 +21,7 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteA
 
   if (isLoading) {
     return (
-      <div className="px-4 py-3 bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="animate-pulse">
           <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
         </div>
@@ -31,7 +31,7 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteA
 
   return (
     <>
-      <div className="px-4 py-3 bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <Select
