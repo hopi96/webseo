@@ -42,6 +42,28 @@ function normalizeContentType(type: string): string {
   return type || 'xtwitter';
 }
 
+// Fonction de mapping pour les statuts entre formulaire et Airtable
+function mapStatusToAirtable(status: string): string {
+  const statusMapping: Record<string, string> = {
+    'en attente': 'en attente',
+    'à réviser': 'à réviser', 
+    'en cours': 'validé',  // Mapping: "en cours" → "validé" dans Airtable
+    'publié': 'publié'
+  };
+  return statusMapping[status] || 'en attente';
+}
+
+// Fonction de mapping inverse pour lire depuis Airtable
+function mapStatusFromAirtable(airtableStatus: string): string {
+  const reverseMapping: Record<string, string> = {
+    'en attente': 'en attente',
+    'à réviser': 'à réviser',
+    'validé': 'en cours',  // Mapping inverse: "validé" → "en cours" pour l'affichage
+    'publié': 'publié'
+  };
+  return reverseMapping[airtableStatus] || 'en attente';
+}
+
 /**
  * Extrait l'URL de l'image depuis les champs Airtable avec support des deux champs
  */
@@ -319,7 +341,7 @@ export class AirtableService {
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
           imageSource: imageData.imageSource,
-          statut: fields.statut || 'en attente',
+          statut: mapStatusFromAirtable(fields.statut || 'en attente'),
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
         } as EditorialContent;
@@ -362,7 +384,7 @@ export class AirtableService {
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
           imageSource: imageData.imageSource,
-          statut: fields.statut || 'en attente',
+          statut: mapStatusFromAirtable(fields.statut || 'en attente'),
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
         } as EditorialContent;
@@ -396,7 +418,7 @@ export class AirtableService {
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
           imageSource: imageData.imageSource,
-          statut: fields.statut || 'en attente',
+          statut: mapStatusFromAirtable(fields.statut || 'en attente'),
           dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
           createdAt: new Date()
         } as EditorialContent;
@@ -421,7 +443,7 @@ export class AirtableService {
       const fieldsToCreate: Record<string, any> = {
         type_contenu: contentData.typeContent,
         contenu_text: contentData.contentText,
-        statut: contentData.statut || 'en attente',
+        statut: mapStatusToAirtable(contentData.statut || 'en attente'),
         ID_SITE: (contentData.idSite || 1).toString()  // Convertir en string pour Airtable
       };
 
@@ -500,7 +522,7 @@ export class AirtableService {
         fieldsToUpdate.contenu_text = updateData.contentText;
       }
       if (updateData.statut) {
-        fieldsToUpdate.statut = updateData.statut;
+        fieldsToUpdate.statut = mapStatusToAirtable(updateData.statut);
       }
       // Gestion avancée des images avec support des deux champs
       await this.handleImageFieldsForUpdate(updateData, fieldsToUpdate);
