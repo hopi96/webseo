@@ -495,6 +495,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                           onError={(e) => {
                             console.error("Erreur lors du chargement de l'image:", getDisplayImageUrl(imageState));
                             setImageLoadError(true);
+                            // Décocher automatiquement "Contient une image" si l'image expire
+                            form.setValue("hasImage", false);
                           }}
                           onLoad={() => setImageLoadError(false)}
                         />
