@@ -67,7 +67,7 @@ const platformGroups = {
     title: "Création de contenu",
     description: "Plateformes de contenu et blog",
     priority: "medium", 
-    platforms: ['tiktok', 'youtube', 'pinterest', 'prestashop_blog']
+    platforms: ['tiktok', 'pinterest', 'prestashop_blog']
   },
   marketing: {
     title: "Marketing et newsletter",
