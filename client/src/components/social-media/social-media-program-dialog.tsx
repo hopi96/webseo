@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -95,27 +95,35 @@ export function SocialMediaProgramDialog({
 
   const existingProgram = parseExistingProgram(currentProgram);
 
+  const getDefaultValues = (program: any) => ({
+    newsletter_semaine: program?.newsletter?.par_semaine || 0,
+    newsletter_mois: program?.newsletter?.par_mois || 0,
+    tiktok_semaine: program?.tiktok?.par_semaine || 0,
+    tiktok_mois: program?.tiktok?.par_mois || 0,
+    instagram_semaine: program?.instagram?.par_semaine || 0,
+    instagram_mois: program?.instagram?.par_mois || 0,
+    xtwitter_semaine: program?.xtwitter?.par_semaine || 0,
+    xtwitter_mois: program?.xtwitter?.par_mois || 0,
+    youtube_semaine: program?.youtube?.par_semaine || 0,
+    youtube_mois: program?.youtube?.par_mois || 0,
+    facebook_semaine: program?.facebook?.par_semaine || 0,
+    facebook_mois: program?.facebook?.par_mois || 0,
+    blog_semaine: program?.blog?.par_semaine || 0,
+    blog_mois: program?.blog?.par_mois || 0,
+    pinterest_semaine: program?.pinterest?.par_semaine || 0,
+    pinterest_mois: program?.pinterest?.par_mois || 0,
+  });
+
   const form = useForm<SocialMediaProgramForm>({
     resolver: zodResolver(socialMediaProgramSchema),
-    defaultValues: {
-      newsletter_semaine: existingProgram?.newsletter?.par_semaine || 1,
-      newsletter_mois: existingProgram?.newsletter?.par_mois || 4,
-      tiktok_semaine: existingProgram?.tiktok?.par_semaine || 4,
-      tiktok_mois: existingProgram?.tiktok?.par_mois || 16,
-      instagram_semaine: existingProgram?.instagram?.par_semaine || 5,
-      instagram_mois: existingProgram?.instagram?.par_mois || 20,
-      xtwitter_semaine: existingProgram?.xtwitter?.par_semaine || 7,
-      xtwitter_mois: existingProgram?.xtwitter?.par_mois || 28,
-      youtube_semaine: existingProgram?.youtube?.par_semaine || 2,
-      youtube_mois: existingProgram?.youtube?.par_mois || 8,
-      facebook_semaine: existingProgram?.facebook?.par_semaine || 3,
-      facebook_mois: existingProgram?.facebook?.par_mois || 12,
-      blog_semaine: existingProgram?.blog?.par_semaine || 2,
-      blog_mois: existingProgram?.blog?.par_mois || 8,
-      pinterest_semaine: existingProgram?.pinterest?.par_semaine || 3,
-      pinterest_mois: existingProgram?.pinterest?.par_mois || 12,
-    },
+    defaultValues: getDefaultValues(existingProgram),
   });
+
+  // Reset le formulaire quand currentProgram change (changement de site)
+  useEffect(() => {
+    const newProgram = parseExistingProgram(currentProgram);
+    form.reset(getDefaultValues(newProgram));
+  }, [currentProgram, form.reset]);
 
   // Fonction pour calculer la fréquence optimale
   const calculateFrequency = (semaine: number, mois: number) => {
