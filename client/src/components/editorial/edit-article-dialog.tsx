@@ -68,6 +68,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [customPrompt, setCustomPrompt] = useState<string>("");
+  const [imageLoadError, setImageLoadError] = useState(false);
   
   // État des images utilisant la nouvelle logique
   const [imageState, setImageState] = useState<FormImageState>(() => 
@@ -108,13 +109,6 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     }
   });
 
-  // Debug pour voir les données de l'article
-  console.log("Article data:", {
-    hasImage: article.hasImage,
-    imageUrl: article.imageUrl,
-    formImageUrl: form.watch("imageUrl"),
-    formHasImage: form.watch("hasImage")
-  });
 
   // Fonction pour générer une image avec l'IA
   const generateImageWithAI = async (contentText: string, typeContent: string, customPrompt?: string) => {
@@ -149,6 +143,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
           formImageUrl: result.imageUrl,
           formHasImage: true
         }));
+        setImageLoadError(false);
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
         
@@ -217,6 +212,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
           formImageUrl: result.imageUrl,
           formHasImage: true
         }));
+        setImageLoadError(false);
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
 
@@ -490,34 +486,72 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 {/* Aperçu des images existantes */}
                 {getDisplayImageUrl(imageState) && (
                   <div className="mb-4">
-                    <div className="relative">
-                      <img
-                        src={getDisplayImageUrl(imageState)!}
-                        alt="Image de l'article"
-                        className="w-full h-32 object-cover rounded-lg"
-                        onError={(e) => {
-                          console.error("Erreur lors du chargement de l'image:", getDisplayImageUrl(imageState));
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      {(() => {
-                        const imageUrl = getDisplayImageUrl(imageState)!;
-                        const { label, color } = getImageSourceLabel(imageUrl);
-                        const colorClass = color === 'purple' ? 'bg-purple-500' : 
-                                          color === 'blue' ? 'bg-blue-500' : 'bg-green-500';
-                        return (
-                          <span className={`absolute top-2 left-2 ${colorClass} text-white px-2 py-1 rounded text-xs`}>
-                            {label}
-                          </span>
-                        );
-                      })()}
-                      <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                    {!imageLoadError ? (
+                      <div className="relative">
+                        <img
+                          src={getDisplayImageUrl(imageState)!}
+                          alt="Image de l'article"
+                          className="w-full h-32 object-cover rounded-lg"
+                          onError={(e) => {
+                            console.error("Erreur lors du chargement de l'image:", getDisplayImageUrl(imageState));
+                            setImageLoadError(true);
+                          }}
+                          onLoad={() => setImageLoadError(false)}
+                        />
                         {(() => {
-                          const url = getDisplayImageUrl(imageState) || "";
-                          return url.length > 30 ? `${url.substring(0, 30)}...` : url;
+                          const imageUrl = getDisplayImageUrl(imageState)!;
+                          const { label, color } = getImageSourceLabel(imageUrl);
+                          const colorClass = color === 'purple' ? 'bg-purple-500' : 
+                                            color === 'blue' ? 'bg-blue-500' : 'bg-green-500';
+                          return (
+                            <span className={`absolute top-2 left-2 ${colorClass} text-white px-2 py-1 rounded text-xs`}>
+                              {label}
+                            </span>
+                          );
                         })()}
+                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                          {(() => {
+                            const url = getDisplayImageUrl(imageState) || "";
+                            return url.length > 30 ? `${url.substring(0, 30)}...` : url;
+                          })()}
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                        <div className="flex flex-col items-center space-y-3">
+                          <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <X className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Image expirée ou non disponible</p>
+                            <p className="text-xs text-gray-500 mt-1">L'image précédente ne peut plus être chargée</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"), customPrompt)}
+                              disabled={generatingImage}
+                              className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                            >
+                              <Sparkles className="h-4 w-4" />
+                              Régénérer avec DALL-E 3
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => document.getElementById('image-upload-edit')?.click()}
+                              className="flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                            >
+                              <Upload className="h-4 w-4" />
+                              Uploader une image
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <div className="mt-2 flex justify-center">
                       <Button
                         type="button"
@@ -525,6 +559,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         size="sm"
                         onClick={() => {
                           setImageState(resetImageState());
+                          setImageLoadError(false);
                           form.setValue("hasImage", false);
                           form.setValue("imageUrl", "");
                         }}
