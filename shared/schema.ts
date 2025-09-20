@@ -53,7 +53,7 @@ export const editorialContent = pgTable("editorial_content", {
   hasImage: boolean("has_image").default(false),
   imageUrl: text("image_url"), // URL de l'image (DALL-E ou upload)
   imageSource: text("image_source"), // 'upload', 'ai', ou null
-  statut: text("statut").notNull(), // en attente, à réviser, en cours, publié
+  statut: text("statut").notNull(), // en attente, à réviser, validé
   dateDePublication: timestamp("date_de_publication").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
