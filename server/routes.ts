@@ -63,6 +63,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour récupérer le programme des réseaux sociaux d'un site
+  app.get("/api/sites-airtable/:id/social-program", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+      
+      console.log(`🔍 Récupération du programme RS pour le site ${siteId}`);
+      
+      const programme = await airtableService.getSocialMediaProgram(siteId);
+      res.json({ programme_rs: programme });
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération du programme RS:', error);
+      res.status(500).json({ 
+        message: "Impossible de récupérer le programme des réseaux sociaux" 
+      });
+    }
+  });
+
   // Route pour mettre à jour le programme des réseaux sociaux
   app.put("/api/sites-airtable/:id/social-program", async (req, res) => {
     try {
