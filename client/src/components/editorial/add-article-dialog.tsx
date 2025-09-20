@@ -377,8 +377,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   <SelectContent className="smart-scroll-vertical max-h-60">
                     <SelectItem value="en attente">En attente</SelectItem>
                     <SelectItem value="à réviser">À réviser</SelectItem>
-                    <SelectItem value="en cours">En cours</SelectItem>
-                    <SelectItem value="publié">Publié</SelectItem>
+                    <SelectItem value="validé">Validé</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
