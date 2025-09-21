@@ -24,7 +24,7 @@ import {
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
   typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter", "facebook", "pinterest", "google my business"]),
-  statut: z.enum(["en attente", "à réviser", "en cours", "publié"]),
+  statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
   dateDePublication: z.string(),
@@ -378,6 +378,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <SelectItem value="en attente">En attente</SelectItem>
                     <SelectItem value="à réviser">À réviser</SelectItem>
                     <SelectItem value="validé">Validé</SelectItem>
+                    <SelectItem value="publié">Publié</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
