@@ -355,7 +355,8 @@ export default function Calendar() {
           
           {/* Filtres */}
           <div className="space-y-4 mb-4">
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4 justify-between">
+              <div className="flex flex-wrap items-center gap-4">
               {/* Filtre par site */}
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -403,7 +404,87 @@ export default function Calendar() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {/* Bouton Mode Sélection */}
+              <div className="flex items-center gap-2">
+                {!isSelectionMode ? (
+                  <Button
+                    variant="outline"
+                    onClick={enterSelectionMode}
+                    className="text-sm"
+                    data-testid="enable-selection-mode"
+                  >
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Mode sélection
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={exitSelectionMode}
+                    className="text-sm"
+                    data-testid="disable-selection-mode"
+                  >
+                    <Square className="h-4 w-4 mr-2" />
+                    Annuler sélection
+                  </Button>
+                )}
+              </div>
+              </div>
             </div>
+            
+            {/* Barre d'actions pour la sélection en lot */}
+            {isSelectionMode && selectedArticles.size > 0 && (
+              <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
+                <Card className="bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {selectedArticles.size} article(s) sélectionné(s)
+                      </span>
+                      
+                      <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                        <SelectTrigger className="w-48" data-testid="bulk-status-select">
+                          <SelectValue placeholder="Nouveau statut" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="en attente">En attente</SelectItem>
+                          <SelectItem value="à réviser">À réviser</SelectItem>
+                          <SelectItem value="validé">Validé</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button
+                        onClick={handleBulkUpdate}
+                        disabled={!bulkStatus || bulkUpdateMutation.isPending}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        data-testid="apply-bulk-update"
+                      >
+                        {bulkUpdateMutation.isPending ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Mise à jour...
+                          </>
+                        ) : (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Appliquer
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        onClick={clearSelection}
+                        size="sm"
+                        data-testid="clear-selection"
+                      >
+                        Tout désélectionner
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
             
             {/* Compteur de résultats */}
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -546,11 +627,31 @@ export default function Calendar() {
                 <CardContent className="p-4">
                   <div className="space-y-3 smart-scroll-vertical max-h-80">
                     {getEventsForDate(selectedDate).map(event => (
-                      <div key={event.id} className="p-3 border border-gray-100 dark:border-gray-700 rounded-lg">
+                      <div 
+                        key={event.id} 
+                        className={`p-3 border rounded-lg transition-colors ${
+                          isSelectionMode && selectedArticles.has(event.id)
+                            ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20'
+                            : 'border-gray-100 dark:border-gray-700'
+                        }`}
+                      >
                         <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-medium text-gray-900 dark:text-white">
-                            {event.title}
-                          </h4>
+                          <div className="flex items-start gap-3 flex-1">
+                            {isSelectionMode && (
+                              <div className="pt-1">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedArticles.has(event.id)}
+                                  onChange={() => toggleArticleSelection(event.id)}
+                                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                  data-testid={`checkbox-article-${event.id}`}
+                                />
+                              </div>
+                            )}
+                            <h4 className="font-medium text-gray-900 dark:text-white">
+                              {event.title}
+                            </h4>
+                          </div>
                           <div className="flex gap-1">
                             <Button 
                               variant="ghost" 
