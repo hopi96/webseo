@@ -38,8 +38,8 @@ export interface AirtableContentRecord {
 
 // Fonction utilitaire pour normaliser les types de contenu
 function normalizeContentType(type: string): string {
-  // Garder les types d'Airtable : newsletter, tiktok, instagram, xtwitter, youtube, facebook, blog
-  const validTypes = ['newsletter', 'tiktok', 'instagram', 'xtwitter', 'youtube', 'facebook', 'blog'];
+  // Garder les types d'Airtable : newsletter, tiktok, instagram, xtwitter, youtube, facebook, blog, google my business, pinterest
+  const validTypes = ['newsletter', 'tiktok', 'instagram', 'xtwitter', 'youtube', 'facebook', 'blog', 'google my business', 'pinterest'];
   return validTypes.includes(type) ? type : 'newsletter';
 }
 
