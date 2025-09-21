@@ -1172,6 +1172,160 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
     }
   });
 
+  // ================================================
+  // ROUTES POUR LA GESTION DES PROMPTS SYSTÈME
+  // ================================================
+
+  // Récupérer tous les prompts système
+  app.get("/api/system-prompts", async (req, res) => {
+    try {
+      console.log('🔍 Récupération de tous les prompts système');
+      const prompts = await airtableService.getAllSystemPrompts();
+      console.log(`✅ ${prompts.length} prompts système récupérés`);
+      res.json(prompts);
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la récupération des prompts système:', error);
+      res.status(500).json({ 
+        message: "Impossible de récupérer les prompts système",
+        error: error.message 
+      });
+    }
+  });
+
+  // Récupérer le prompt système actif
+  app.get("/api/system-prompts/active", async (req, res) => {
+    try {
+      console.log('🔍 Récupération du prompt système actif');
+      const activePrompt = await airtableService.getActiveSystemPrompt();
+      
+      if (!activePrompt) {
+        return res.status(404).json({ 
+          message: "Aucun prompt système actif trouvé" 
+        });
+      }
+      
+      console.log('✅ Prompt système actif récupéré:', activePrompt.nom || 'Sans nom');
+      res.json(activePrompt);
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la récupération du prompt système actif:', error);
+      res.status(500).json({ 
+        message: "Impossible de récupérer le prompt système actif",
+        error: error.message 
+      });
+    }
+  });
+
+  // Créer un nouveau prompt système
+  app.post("/api/system-prompts", async (req, res) => {
+    try {
+      const { promptSystem, structureSortie, nom, description, actif } = req.body;
+      
+      console.log('🆕 Création d\'un nouveau prompt système');
+      console.log('Données reçues:', { nom, description, actif, promptLength: promptSystem?.length });
+      
+      if (!promptSystem || promptSystem.trim() === '') {
+        return res.status(400).json({ 
+          message: "Le prompt système est obligatoire" 
+        });
+      }
+
+      const promptData = {
+        promptSystem: promptSystem.trim(),
+        structureSortie: structureSortie || '',
+        nom: nom || '',
+        description: description || '',
+        actif: actif || false
+      };
+
+      const createdPrompt = await airtableService.createSystemPrompt(promptData);
+      
+      console.log('✅ Prompt système créé avec succès:', createdPrompt.id);
+      res.status(201).json(createdPrompt);
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la création du prompt système:', error);
+      res.status(500).json({ 
+        message: "Impossible de créer le prompt système",
+        error: error.message 
+      });
+    }
+  });
+
+  // Mettre à jour un prompt système
+  app.put("/api/system-prompts/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { promptSystem, structureSortie, nom, description, actif } = req.body;
+      
+      console.log('🔄 Mise à jour du prompt système:', id);
+      console.log('Données reçues:', { nom, description, actif, promptLength: promptSystem?.length });
+      
+      if (!id) {
+        return res.status(400).json({ 
+          message: "ID du prompt système manquant" 
+        });
+      }
+
+      const updateData: any = {};
+      
+      if (promptSystem !== undefined) {
+        if (promptSystem.trim() === '') {
+          return res.status(400).json({ 
+            message: "Le prompt système ne peut pas être vide" 
+          });
+        }
+        updateData.promptSystem = promptSystem.trim();
+      }
+      
+      if (structureSortie !== undefined) updateData.structureSortie = structureSortie;
+      if (nom !== undefined) updateData.nom = nom;
+      if (description !== undefined) updateData.description = description;
+      if (actif !== undefined) updateData.actif = actif;
+
+      const updatedPrompt = await airtableService.updateSystemPrompt(id, updateData);
+      
+      console.log('✅ Prompt système mis à jour avec succès');
+      res.json(updatedPrompt);
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la mise à jour du prompt système:', error);
+      res.status(500).json({ 
+        message: "Impossible de mettre à jour le prompt système",
+        error: error.message 
+      });
+    }
+  });
+
+  // Supprimer un prompt système
+  app.delete("/api/system-prompts/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      console.log('🗑️ Suppression du prompt système:', id);
+      
+      if (!id) {
+        return res.status(400).json({ 
+          message: "ID du prompt système manquant" 
+        });
+      }
+
+      const deleted = await airtableService.deleteSystemPrompt(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ 
+          message: "Prompt système non trouvé" 
+        });
+      }
+      
+      console.log('✅ Prompt système supprimé avec succès');
+      res.json({ message: "Prompt système supprimé avec succès" });
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la suppression du prompt système:', error);
+      res.status(500).json({ 
+        message: "Impossible de supprimer le prompt système",
+        error: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
