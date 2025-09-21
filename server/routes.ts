@@ -514,6 +514,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nouvel endpoint pour la mise à jour en lot des statuts
+  app.put("/api/editorial-content/bulk-update", async (req, res) => {
+    try {
+      const { ids, statut } = req.body;
+      
+      console.log(`🔄 Mise à jour en lot demandée pour ${ids?.length || 0} contenus`);
+      console.log('IDs reçus:', ids);
+      console.log('Nouveau statut:', statut);
+      
+      // Validation des données
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ 
+          message: "Le champ 'ids' doit être un tableau non vide d'identifiants" 
+        });
+      }
+      
+      if (!statut || typeof statut !== 'string') {
+        return res.status(400).json({ 
+          message: "Le champ 'statut' est requis" 
+        });
+      }
+      
+      const validStatuses = ['en attente', 'à réviser', 'validé'];
+      if (!validStatuses.includes(statut)) {
+        return res.status(400).json({ 
+          message: `Statut invalide: ${statut}. Statuts valides: ${validStatuses.join(', ')}` 
+        });
+      }
+      
+      // Effectuer la mise à jour en lot via Airtable
+      const updatedContents = await airtableService.bulkUpdateStatus(ids, statut);
+      
+      const successCount = updatedContents.length;
+      const totalCount = ids.length;
+      
+      console.log(`✅ Mise à jour en lot terminée: ${successCount}/${totalCount} réussies`);
+      
+      res.json({ 
+        success: true,
+        updated: successCount,
+        total: totalCount,
+        message: `${successCount} article(s) mis à jour avec le statut "${statut}"`,
+        updatedContents
+      });
+      
+    } catch (error: any) {
+      console.error('Erreur lors de la mise à jour en lot:', error);
+      res.status(500).json({ 
+        message: 'Erreur lors de la mise à jour en lot',
+        error: error.message 
+      });
+    }
+  });
+
   // Route pour générer des images avec DALL-E 3
   app.post("/api/generate-image", async (req, res) => {
     try {
