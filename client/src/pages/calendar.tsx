@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import '@n8n/chat/style.css';
 import { createChat } from '@n8n/chat';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +21,11 @@ import {
   Tag,
   ChevronLeft,
   ChevronRight,
-  Trash2
+  Trash2,
+  Check,
+  Square,
+  CheckSquare,
+  MoreHorizontal
 } from "lucide-react";
 import type { EditorialContent } from "@shared/schema";
 
@@ -46,6 +52,12 @@ export default function Calendar() {
   const [addDialogDate, setAddDialogDate] = useState<string>("");
   const [selectedSiteFilter, setSelectedSiteFilter] = useState<number | null>(null);
   const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string | null>(null);
+
+  // États pour l'édition en lot
+  const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState<string>("");
+  const { toast } = useToast();
 
   // Initialiser le chatbot n8n
   useEffect(() => {
@@ -187,6 +199,95 @@ export default function Calendar() {
   const handleCloseDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
     setDeletingArticle(null);
+  };
+
+  // Fonctions pour la gestion de la sélection en lot
+  const toggleArticleSelection = (articleId: number) => {
+    const newSelection = new Set(selectedArticles);
+    if (newSelection.has(articleId)) {
+      newSelection.delete(articleId);
+    } else {
+      newSelection.add(articleId);
+    }
+    setSelectedArticles(newSelection);
+  };
+
+  const selectAllVisible = () => {
+    const visibleArticleIds = new Set(events.map(event => event.id));
+    setSelectedArticles(visibleArticleIds);
+  };
+
+  const clearSelection = () => {
+    setSelectedArticles(new Set());
+  };
+
+  const enterSelectionMode = () => {
+    setIsSelectionMode(true);
+    clearSelection();
+  };
+
+  const exitSelectionMode = () => {
+    setIsSelectionMode(false);
+    clearSelection();
+    setBulkStatus("");
+  };
+
+  // Mutation pour la mise à jour en lot
+  const bulkUpdateMutation = useMutation({
+    mutationFn: async (data: { ids: string[], statut: string }) => {
+      const response = await apiRequest("PUT", "/api/editorial-content/bulk-update", data);
+      return response.json();
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Mise à jour réussie",
+        description: `${result.updated} article(s) mis à jour avec le statut "${result.message.split('"')[1]}"`,
+      });
+      
+      // Rafraîchir les données
+      queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
+      
+      // Réinitialiser la sélection
+      exitSelectionMode();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de mettre à jour les articles.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleBulkUpdate = () => {
+    if (selectedArticles.size === 0) {
+      toast({
+        title: "Aucun article sélectionné",
+        description: "Veuillez sélectionner au moins un article.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!bulkStatus) {
+      toast({
+        title: "Statut requis",
+        description: "Veuillez choisir un nouveau statut.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Convertir les IDs en strings pour l'API
+    const selectedIds = Array.from(selectedArticles).map(id => {
+      const article = editorialContent.find(content => content.id === id);
+      return article?.airtableId || article?.id.toString() || id.toString();
+    });
+
+    bulkUpdateMutation.mutate({
+      ids: selectedIds,
+      statut: bulkStatus
+    });
   };
 
   // Fonction pour obtenir la couleur selon le type
