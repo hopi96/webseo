@@ -763,44 +763,94 @@ export default function Calendar() {
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-center justify-between">
+                      <div 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                        onClick={() => {
+                          const count = monthlyEvents.filter(e => e.status === 'en attente').length;
+                          if (count > 0) {
+                            setStatsFilter({kind: 'status', value: 'en attente'});
+                            setStatsDialogOpen(true);
+                          }
+                        }}
+                        data-testid="stat-en-attente"
+                      >
                         <span className="text-sm text-gray-600 dark:text-gray-300">
                           Contenu en attente
                         </span>
                         <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                          {events.filter(e => e.status === 'en attente').length}
+                          {monthlyEvents.filter(e => e.status === 'en attente').length}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                        onClick={() => {
+                          const count = monthlyEvents.filter(e => e.status === 'à réviser').length;
+                          if (count > 0) {
+                            setStatsFilter({kind: 'status', value: 'à réviser'});
+                            setStatsDialogOpen(true);
+                          }
+                        }}
+                        data-testid="stat-a-reviser"
+                      >
                         <span className="text-sm text-gray-600 dark:text-gray-300">
                           À réviser
                         </span>
                         <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                          {events.filter(e => e.status === 'à réviser').length}
+                          {monthlyEvents.filter(e => e.status === 'à réviser').length}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                        onClick={() => {
+                          const count = monthlyEvents.filter(e => e.status === 'validé').length;
+                          if (count > 0) {
+                            setStatsFilter({kind: 'status', value: 'validé'});
+                            setStatsDialogOpen(true);
+                          }
+                        }}
+                        data-testid="stat-valide"
+                      >
                         <span className="text-sm text-gray-600 dark:text-gray-300">
-                          En cours
+                          Validé
                         </span>
                         <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {events.filter(e => e.status === 'en cours').length}
+                          {monthlyEvents.filter(e => e.status === 'validé').length}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                        onClick={() => {
+                          const count = monthlyEvents.filter(e => e.status === 'publié').length;
+                          if (count > 0) {
+                            setStatsFilter({kind: 'status', value: 'publié'});
+                            setStatsDialogOpen(true);
+                          }
+                        }}
+                        data-testid="stat-publie"
+                      >
                         <span className="text-sm text-gray-600 dark:text-gray-300">
                           Publié
                         </span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                          {events.filter(e => e.status === 'publié').length}
+                          {monthlyEvents.filter(e => e.status === 'publié').length}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                        onClick={() => {
+                          const count = monthlyEvents.filter(e => e.hasImage).length;
+                          if (count > 0) {
+                            setStatsFilter({kind: 'type', value: 'hasImage'});
+                            setStatsDialogOpen(true);
+                          }
+                        }}
+                        data-testid="stat-avec-images"
+                      >
                         <span className="text-sm text-gray-600 dark:text-gray-300">
                           Avec images
                         </span>
                         <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                          {events.filter(e => e.hasImage).length}
+                          {monthlyEvents.filter(e => e.hasImage).length}
                         </Badge>
                       </div>
                     </>
