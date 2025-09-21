@@ -663,6 +663,71 @@ export class AirtableService {
       return false;
     }
   }
+  /**
+   * Met à jour le statut de plusieurs contenus en lot
+   */
+  async bulkUpdateStatus(airtableIds: string[], statut: string): Promise<EditorialContent[]> {
+    console.log(`🔄 Mise à jour en lot de ${airtableIds.length} contenus avec statut: ${statut}`);
+    console.log('IDs à mettre à jour:', airtableIds);
+
+    try {
+      const { table } = initializeAirtable();
+      
+      // Validation du statut
+      const validStatuses = ['en attente', 'à réviser', 'validé'];
+      if (!validStatuses.includes(statut)) {
+        throw new Error(`Statut invalide: ${statut}. Statuts valides: ${validStatuses.join(', ')}`);
+      }
+
+      // Traitement en parallèle avec limitation pour éviter les erreurs de rate limiting
+      const updatePromises = airtableIds.map(async (airtableId) => {
+        try {
+          const fieldsToUpdate = { statut };
+          console.log(`Mise à jour du contenu ${airtableId} avec statut: ${statut}`);
+          
+          const record = await table.update(airtableId, fieldsToUpdate);
+          const fields = record.fields as any;
+          const imageData = extractImageData(fields);
+          
+          return {
+            id: record.id,
+            airtableId: record.id,
+            idSite: parseInt(fields.ID_SITE) || 1,
+            typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
+            contentText: fields.contenu_text || '',
+            hasImage: imageData.hasImage,
+            imageUrl: imageData.imageUrl,
+            imageSource: imageData.imageSource,
+            statut: fields.statut || 'en attente',
+            dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
+            createdAt: new Date()
+          } as EditorialContent;
+        } catch (error) {
+          console.error(`Erreur lors de la mise à jour du contenu ${airtableId}:`, error);
+          // Retourner null pour les échecs, on les filtrera après
+          return null;
+        }
+      });
+
+      // Attendre toutes les mises à jour
+      const results = await Promise.all(updatePromises);
+      
+      // Filtrer les résultats réussis
+      const successfulUpdates = results.filter((result): result is EditorialContent => result !== null);
+      
+      console.log(`✅ ${successfulUpdates.length}/${airtableIds.length} contenus mis à jour avec succès`);
+      
+      if (successfulUpdates.length < airtableIds.length) {
+        const failedCount = airtableIds.length - successfulUpdates.length;
+        console.warn(`⚠️ ${failedCount} mises à jour ont échoué`);
+      }
+
+      return successfulUpdates;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour en lot:', error);
+      throw new Error('Impossible de mettre à jour les contenus en lot');
+    }
+  }
 }
 
 export const airtableService = new AirtableService();
