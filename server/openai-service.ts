@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { airtableService } from "./airtable-service";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -21,17 +22,58 @@ export interface GeneratedArticle {
 }
 
 export class OpenAIService {
+  
+  /**
+   * Récupère le prompt système actif depuis Airtable ou utilise un fallback
+   */
+  private async getSystemPrompt(): Promise<{ systemMessage: string; outputStructure: string }> {
+    try {
+      console.log('🔍 Récupération du prompt système actif depuis Airtable...');
+      const activePrompt = await airtableService.getActiveSystemPrompt();
+      
+      if (activePrompt && activePrompt.promptSystem) {
+        console.log('✅ Prompt système actif récupéré:', activePrompt.nom || 'Sans nom');
+        return {
+          systemMessage: activePrompt.promptSystem,
+          outputStructure: activePrompt.structureSortie || ''
+        };
+      } else {
+        console.log('⚠️ Aucun prompt système actif trouvé, utilisation du prompt par défaut');
+        return {
+          systemMessage: "Tu es un expert en création de contenu éditorial et SEO. Réponds toujours en JSON valide avec les champs demandés.",
+          outputStructure: ''
+        };
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération du prompt système, utilisation du fallback:', error);
+      return {
+        systemMessage: "Tu es un expert en création de contenu éditorial et SEO. Réponds toujours en JSON valide avec les champs demandés.",
+        outputStructure: ''
+      };
+    }
+  }
+
   /**
    * Génère ou régénère un article avec GPT-4o basé sur les mots-clés et paramètres
    */
   async generateArticle(request: ArticleGenerationRequest): Promise<GeneratedArticle> {
     try {
+      // Récupérer le prompt système depuis Airtable
+      const { systemMessage, outputStructure } = await this.getSystemPrompt();
+      
       const isRegeneration = !!request.existingContent;
       
       let prompt = "";
       
+      // Intégrer la structure de sortie si disponible
+      const outputFormat = outputStructure || `{
+  "title": "Titre ${isRegeneration ? 'optimisé' : 'accrocheur'} du contenu",
+  "content": "Contenu ${isRegeneration ? 'régénéré et optimisé' : 'complet généré'}",
+  "suggestions": ["3 suggestions d'${isRegeneration ? 'amélioration spécifiques' : 'optimisation SEO'}"]
+}`;
+      
       if (isRegeneration) {
-        prompt = `Tu es un expert en création de contenu éditorial et SEO. Régénère et améliore ce contenu existant en l'optimisant pour les mots-clés fournis.
+        prompt = `Régénère et améliore ce contenu existant en l'optimisant pour les mots-clés fournis.
 
 Contenu existant : "${request.existingContent}"
 
@@ -48,13 +90,9 @@ Instructions :
 - Adapte la longueur au type de contenu (court pour Twitter/Instagram, plus long pour articles/newsletters)
 
 Réponds en JSON avec ce format exact :
-{
-  "title": "Titre optimisé du contenu",
-  "content": "Contenu régénéré et optimisé",
-  "suggestions": ["3 suggestions d'amélioration spécifiques"]
-}`;
+${outputFormat}`;
       } else {
-        prompt = `Tu es un expert en création de contenu éditorial et SEO. Génère un nouveau contenu optimisé basé sur les paramètres fournis.
+        prompt = `Génère un nouveau contenu optimisé basé sur les paramètres fournis.
 
 Type de contenu : ${request.contentType}
 Mots-clés principaux : ${request.keywords.join(', ')}
@@ -70,11 +108,7 @@ Instructions :
 - Utilise un langage accessible et captivant
 
 Réponds en JSON avec ce format exact :
-{
-  "title": "Titre accrocheur du contenu",
-  "content": "Contenu complet généré",
-  "suggestions": ["3 suggestions d'optimisation SEO"]
-}`;
+${outputFormat}`;
       }
 
       const response = await openai.chat.completions.create({
@@ -82,7 +116,7 @@ Réponds en JSON avec ce format exact :
         messages: [
           {
             role: "system",
-            content: "Tu es un expert en création de contenu éditorial et SEO. Réponds toujours en JSON valide avec les champs demandés."
+            content: systemMessage
           },
           {
             role: "user",
@@ -113,6 +147,14 @@ Réponds en JSON avec ce format exact :
    */
   async suggestKeywords(topic: string, contentType: string): Promise<string[]> {
     try {
+      // Récupérer le prompt système depuis Airtable (avec un fallback spécialisé pour les mots-clés)
+      const { systemMessage } = await this.getSystemPrompt();
+      
+      // Si le prompt système est générique, utiliser un prompt spécialisé pour SEO
+      const keywordSystemPrompt = systemMessage.includes('mots-clés') || systemMessage.includes('SEO') 
+        ? systemMessage 
+        : "Tu es un expert SEO spécialisé dans la recherche de mots-clés. Réponds toujours en JSON valide.";
+
       const prompt = `Génère une liste de mots-clés pertinents pour un contenu de type "${contentType}" sur le sujet "${topic}".
 
 Instructions :
@@ -131,7 +173,7 @@ Réponds en JSON avec ce format exact :
         messages: [
           {
             role: "system",
-            content: "Tu es un expert SEO. Réponds toujours en JSON valide."
+            content: keywordSystemPrompt
           },
           {
             role: "user",
