@@ -862,6 +862,177 @@ export default function Calendar() {
         </div>
       </main>
 
+      {/* Dialog des statistiques cliquables */}
+      <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>
+              {statsFilter?.kind === 'status' && (
+                <>Contenu : {
+                  statsFilter.value === 'en attente' ? 'En attente' :
+                  statsFilter.value === 'à réviser' ? 'À réviser' :
+                  statsFilter.value === 'validé' ? 'Validé' :
+                  statsFilter.value === 'publié' ? 'Publié' : statsFilter.value
+                }</>
+              )}
+              {statsFilter?.kind === 'type' && statsFilter.value === 'hasImage' && (
+                <>Contenu avec images</>
+              )}
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                ({filteredList.length} élément{filteredList.length > 1 ? 's' : ''})
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Barre d'actions si mode sélection */}
+            {isSelectionMode && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">
+                    {selectedArticles.size} article{selectedArticles.size > 1 ? 's' : ''} sélectionné{selectedArticles.size > 1 ? 's' : ''}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const visibleIds = new Set(filteredList.slice(0, visibleCount).map(event => event.id));
+                      setSelectedArticles(visibleIds);
+                    }}
+                  >
+                    Tout sélectionner dans la liste
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={clearSelection}>
+                    Effacer
+                  </Button>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Nouveau statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en attente">En attente</SelectItem>
+                      <SelectItem value="à réviser">À réviser</SelectItem>
+                      <SelectItem value="validé">Validé</SelectItem>
+                      <SelectItem value="publié">Publié</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={handleBulkUpdate}
+                    disabled={selectedArticles.size === 0 || !bulkStatus || bulkUpdateMutation.isPending}
+                  >
+                    {bulkUpdateMutation.isPending ? "Mise à jour..." : "Appliquer"}
+                  </Button>
+                  <Button variant="ghost" onClick={exitSelectionMode}>
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Actions rapides */}
+            {!isSelectionMode && (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={enterSelectionMode}>
+                  <CheckSquare className="h-4 w-4 mr-2" />
+                  Mode sélection
+                </Button>
+              </div>
+            )}
+            
+            {/* Liste des contenus */}
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto smart-scroll-vertical">
+              {filteredList.slice(0, visibleCount).map((event) => {
+                const content = editorialContent.find(c => c.id === event.id);
+                if (!content) return null;
+                
+                return (
+                  <div key={event.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" data-testid={`row-content-${event.id}`}>
+                    {isSelectionMode && (
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => toggleArticleSelection(event.id)}
+                      >
+                        {selectedArticles.has(event.id) ? 
+                          <CheckSquare className="h-4 w-4 text-blue-600" /> : 
+                          <Square className="h-4 w-4 text-gray-400" />
+                        }
+                      </div>
+                    )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm mb-1 line-clamp-1">{event.title}</h4>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs">
+                              {getSiteName(event.siteId)}
+                            </Badge>
+                            <Badge className={getTypeColor(event.type)}>
+                              {event.type}
+                            </Badge>
+                            <Badge className={getStatusColor(event.status)}>
+                              {event.status}
+                            </Badge>
+                            {event.hasImage && (
+                              <Badge variant="outline" className="text-xs">
+                                <Tag className="h-3 w-3 mr-1" />
+                                Image
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {event.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </p>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 ml-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditArticle(event)}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteArticle(event)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {/* Bouton "Charger plus" */}
+              {filteredList.length > visibleCount && (
+                <div className="text-center pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setVisibleCount(prev => prev + 50)}
+                  >
+                    Charger plus ({filteredList.length - visibleCount} restant{filteredList.length - visibleCount > 1 ? 's' : ''})
+                  </Button>
+                </div>
+              )}
+              
+              {filteredList.length === 0 && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucun contenu trouvé pour ce filtre</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog d'édition d'article */}
       {editingArticle && (
         <EditArticleDialog
