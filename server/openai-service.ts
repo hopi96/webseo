@@ -221,6 +221,12 @@ Réponds en JSON avec ce format exact :
         case "blog":
           imagePrompt = `Créer une image d'en-tête de blog professionnelle illustrant : "${contentText}". Style : éditorial, moderne, couleurs neutres, format bannière, qualité web.`;
           break;
+        case "google my business":
+          imagePrompt = `Créer une image professionnelle pour Google My Business illustrant : "${contentText}". Style : professionnel, crédible, couleurs corporate, format adapté aux entreprises.`;
+          break;
+        case "pinterest":
+          imagePrompt = `Créer une image verticale inspirante pour Pinterest représentant : "${contentText}". Style : esthétique, inspirant, couleurs douces, composition verticale, haute qualité visuelle.`;
+          break;
         case "newsletter":
           imagePrompt = `Créer une image d'en-tête pour newsletter représentant : "${contentText}". Style : professionnel, clean, couleurs de marque, format email, lisible.`;
           break;
