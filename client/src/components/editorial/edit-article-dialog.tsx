@@ -52,7 +52,7 @@ interface EditArticleDialogProps {
 const editArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est obligatoire"),
   statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
-  typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter", "facebook", "pinterest", "google my business"]),
+  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
   imageSource: z.enum(["upload", "ai"]).optional(),
@@ -91,9 +91,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     return validStatuts.includes(statut) ? statut as any : "en attente";
   };
   
-  const normalizeTypeContent = (type: string): "xtwitter" | "instagram" | "article" | "newsletter" | "facebook" | "pinterest" | "google my business" => {
-    const validTypes = ["xtwitter", "instagram", "article", "newsletter", "facebook", "pinterest", "google my business"];
-    return validTypes.includes(type) ? type as any : "xtwitter";
+  const normalizeTypeContent = (type: string): "newsletter" | "tiktok" | "instagram" | "xtwitter" | "youtube" | "facebook" | "blog" => {
+    const validTypes = ["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog"];
+    return validTypes.includes(type) ? type as any : "newsletter";
   };
   
   const form = useForm<EditArticleFormData>({
@@ -290,7 +290,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       form.reset({
         contentText: "",
         statut: "en attente",
-        typeContent: "xtwitter",
+        typeContent: "newsletter",
         hasImage: false,
         imageUrl: "",
         dateDePublication: new Date().toISOString().split('T')[0],
@@ -322,13 +322,13 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'xtwitter': return 'X (Twitter)';
-      case 'instagram': return 'Instagram';
-      case 'facebook': return 'Facebook';
-      case 'pinterest': return 'Pinterest';
-      case 'google my business': return 'Google My Business';
-      case 'article': return 'Article';
       case 'newsletter': return 'Newsletter';
+      case 'tiktok': return 'TikTok';
+      case 'instagram': return 'Instagram';
+      case 'xtwitter': return 'X (Twitter)';
+      case 'youtube': return 'YouTube';
+      case 'facebook': return 'Facebook';
+      case 'blog': return 'Blog';
       default: return type;
     }
   };
@@ -396,13 +396,13 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="smart-scroll-vertical max-h-60">
-                        <SelectItem value="xtwitter">X (Twitter)</SelectItem>
-                        <SelectItem value="instagram">Instagram</SelectItem>
-                        <SelectItem value="facebook">Facebook</SelectItem>
-                        <SelectItem value="pinterest">Pinterest</SelectItem>
-                        <SelectItem value="google my business">Google My Business</SelectItem>
-                        <SelectItem value="article">Article</SelectItem>
                         <SelectItem value="newsletter">Newsletter</SelectItem>
+                        <SelectItem value="tiktok">TikTok</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="xtwitter">X (Twitter)</SelectItem>
+                        <SelectItem value="youtube">YouTube</SelectItem>
+                        <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="blog">Blog</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
