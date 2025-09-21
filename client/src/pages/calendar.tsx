@@ -64,6 +64,7 @@ export default function Calendar() {
           footer: '',
           getStarted: 'Nouvelle conversation',
           inputPlaceholder: 'Tapez votre question...',
+          closeButtonTooltip: 'Fermer le chat',
         },
       },
     });
