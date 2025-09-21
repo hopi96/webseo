@@ -25,11 +25,8 @@ import { Switch } from "@/components/ui/switch";
 import type { SystemPrompt } from "@shared/schema";
 
 const editPromptSchema = z.object({
-  nom: z.string().min(1, "Le nom est obligatoire"),
-  description: z.string().optional(),
   promptSystem: z.string().min(10, "Le prompt système doit contenir au moins 10 caractères"),
   structureSortie: z.string().optional(),
-  actif: z.boolean(),
 });
 
 type EditPromptFormData = z.infer<typeof editPromptSchema>;
@@ -47,11 +44,8 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
   const form = useForm<EditPromptFormData>({
     resolver: zodResolver(editPromptSchema),
     defaultValues: {
-      nom: prompt.nom || "",
-      description: prompt.description || "",
       promptSystem: prompt.promptSystem || "",
       structureSortie: prompt.structureSortie || "",
-      actif: prompt.actif || false,
     },
   });
 
@@ -59,11 +53,8 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
   useEffect(() => {
     if (prompt) {
       form.reset({
-        nom: prompt.nom || "",
-        description: prompt.description || "",
         promptSystem: prompt.promptSystem || "",
         structureSortie: prompt.structureSortie || "",
-        actif: prompt.actif || false,
       });
     }
   }, [prompt, form]);
@@ -92,45 +83,6 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="nom"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom du prompt</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ex: Prompt principal pour génération de contenu"
-                      {...field}
-                      data-testid="input-prompt-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Description courte du prompt et de son utilisation"
-                      {...field}
-                      data-testid="input-prompt-description"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Décrivez brièvement l'objectif et l'utilisation de ce prompt
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="promptSystem"
@@ -171,28 +123,6 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
                     Format JSON attendu pour la réponse de l'IA (optionnel)
                   </FormDescription>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="actif"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Prompt actif</FormLabel>
-                    <FormDescription>
-                      Ce prompt sera utilisé par défaut pour toutes les générations IA
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      data-testid="switch-prompt-active"
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />

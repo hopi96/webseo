@@ -857,15 +857,6 @@ export class AirtableService {
       if (updateData.structureSortie !== undefined) {
         fieldsToUpdate['structure_sortie'] = updateData.structureSortie;
       }
-      if (updateData.nom !== undefined) {
-        fieldsToUpdate['nom'] = updateData.nom;
-      }
-      if (updateData.description !== undefined) {
-        fieldsToUpdate['description'] = updateData.description;
-      }
-      if (updateData.actif !== undefined) {
-        fieldsToUpdate['actif'] = updateData.actif;
-      }
 
       console.log('🔄 Mise à jour du prompt système:', id);
       console.log('Champs à mettre à jour:', fieldsToUpdate);
