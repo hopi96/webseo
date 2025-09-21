@@ -48,7 +48,7 @@ export const editorialContent = pgTable("editorial_content", {
   id: serial("id").primaryKey(),
   airtableId: text("airtable_id"), // ID Airtable pour synchronisation
   idSite: integer("id_site").notNull(),
-  typeContent: text("type_content").notNull(), // newsletter, tiktok, instagram, xtwitter, youtube, facebook, blog
+  typeContent: text("type_content").notNull(), // newsletter, tiktok, instagram, xtwitter, youtube, facebook, blog, google my business, pinterest
   contentText: text("content_text").notNull(),
   hasImage: boolean("has_image").default(false),
   imageUrl: text("image_url"), // URL de l'image (DALL-E ou upload)
