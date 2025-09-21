@@ -23,7 +23,7 @@ import {
 
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
-  typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter", "facebook", "pinterest", "google my business"]),
+  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog"]),
   statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
@@ -60,7 +60,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
     resolver: zodResolver(addArticleSchema),
     defaultValues: {
       contentText: "",
-      typeContent: "xtwitter",
+      typeContent: "newsletter",
       statut: "en attente",
       hasImage: false,
       imageUrl: "",
@@ -219,7 +219,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
       // Réinitialiser complètement le formulaire
       form.reset({
         contentText: "",
-        typeContent: "xtwitter",
+        typeContent: "newsletter",
         statut: "en attente",
         hasImage: false,
         imageUrl: "",
@@ -254,20 +254,20 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
   const getTypeDisplayName = (type: string) => {
     switch (type) {
-      case "xtwitter":
-        return "X (Twitter)";
-      case "instagram":
-        return "Instagram";
-      case "facebook":
-        return "Facebook";
-      case "pinterest":
-        return "Pinterest";
-      case "google my business":
-        return "Google My Business";
-      case "article":
-        return "Article";
       case "newsletter":
         return "Newsletter";
+      case "tiktok":
+        return "TikTok";
+      case "instagram":
+        return "Instagram";
+      case "xtwitter":
+        return "X (Twitter)";
+      case "youtube":
+        return "YouTube";
+      case "facebook":
+        return "Facebook";
+      case "blog":
+        return "Blog";
       default:
         return type;
     }
@@ -344,13 +344,13 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <SelectValue placeholder="Sélectionnez le type" />
                   </SelectTrigger>
                   <SelectContent className="smart-scroll-vertical max-h-60">
-                    <SelectItem value="xtwitter">X (Twitter)</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="facebook">Facebook</SelectItem>
-                    <SelectItem value="pinterest">Pinterest</SelectItem>
-                    <SelectItem value="google my business">Google My Business</SelectItem>
-                    <SelectItem value="article">Article</SelectItem>
                     <SelectItem value="newsletter">Newsletter</SelectItem>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="xtwitter">X (Twitter)</SelectItem>
+                    <SelectItem value="youtube">YouTube</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="blog">Blog</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

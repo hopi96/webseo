@@ -9,7 +9,7 @@ const openai = new OpenAI({
 export interface ArticleGenerationRequest {
   keywords: string[];
   topic?: string;
-  contentType: string; // xtwitter, instagram, facebook, pinterest, google my business, article, newsletter
+  contentType: string; // newsletter, tiktok, instagram, xtwitter, youtube, facebook, blog
   targetAudience?: string;
   tone?: string;
   existingContent?: string;
@@ -212,14 +212,14 @@ Réponds en JSON avec ce format exact :
         case "facebook":
           imagePrompt = `Créer une image accrocheuse pour Facebook qui illustre clairement : "${contentText}". Style : moderne, accessible, couleurs harmonieuses, format rectangulaire, adapté au partage social.`;
           break;
-        case "pinterest":
-          imagePrompt = `Créer une image verticale inspirante pour Pinterest représentant : "${contentText}". Style : esthétique, inspirant, couleurs douces, composition verticale, haute qualité visuelle.`;
+        case "tiktok":
+          imagePrompt = `Créer une image verticale et dynamique pour TikTok représentant : "${contentText}". Style : moderne, vibrant, couleurs vives, format vertical, tendance TikTok.`;
           break;
-        case "google my business":
-          imagePrompt = `Créer une image professionnelle pour Google My Business illustrant : "${contentText}". Style : professionnel, crédible, couleurs corporate, format adapté aux entreprises.`;
+        case "youtube":
+          imagePrompt = `Créer une miniature YouTube accrocheuse illustrant : "${contentText}". Style : professionnel, couleurs vives, format rectangulaire, haute qualité.`;
           break;
-        case "article":
-          imagePrompt = `Créer une image d'en-tête d'article de blog professionnelle illustrant : "${contentText}". Style : éditorial, moderne, couleurs neutres, format bannière, qualité web.`;
+        case "blog":
+          imagePrompt = `Créer une image d'en-tête de blog professionnelle illustrant : "${contentText}". Style : éditorial, moderne, couleurs neutres, format bannière, qualité web.`;
           break;
         case "newsletter":
           imagePrompt = `Créer une image d'en-tête pour newsletter représentant : "${contentText}". Style : professionnel, clean, couleurs de marque, format email, lisible.`;

@@ -452,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validation des données
       const contentData = {
         idSite: req.body.siteId || 1, // Site par défaut
-        typeContent: req.body.typeContent || 'xtwitter',
+        typeContent: req.body.typeContent || 'newsletter',
         contentText: req.body.contentText,
         statut: req.body.statut || 'en attente',
         hasImage: req.body.hasImage || false,

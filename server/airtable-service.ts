@@ -38,8 +38,9 @@ export interface AirtableContentRecord {
 
 // Fonction utilitaire pour normaliser les types de contenu
 function normalizeContentType(type: string): string {
-  // Garder xtwitter tel quel puisque c'est la valeur autorisée en base
-  return type || 'xtwitter';
+  // Garder les types d'Airtable : newsletter, tiktok, instagram, xtwitter, youtube, facebook, blog
+  const validTypes = ['newsletter', 'tiktok', 'instagram', 'xtwitter', 'youtube', 'facebook', 'blog'];
+  return validTypes.includes(type) ? type : 'newsletter';
 }
 
 
@@ -315,7 +316,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: parseInt(fields.ID_SITE) || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
+          typeContent: normalizeContentType(fields.type_contenu || 'newsletter'),
           contentText: fields.contenu_text || '',
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
@@ -358,7 +359,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: parseInt(fields.ID_SITE) || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
+          typeContent: normalizeContentType(fields.type_contenu || 'newsletter'),
           contentText: fields.contenu_text || '',
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
@@ -392,7 +393,7 @@ export class AirtableService {
           id: record.id, // Utilisation de l'ID Airtable unique
           airtableId: record.id, // Stockage de l'ID Airtable pour les mises à jour
           idSite: parseInt(fields.ID_SITE) || 1,
-          typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
+          typeContent: normalizeContentType(fields.type_contenu || 'newsletter'),
           contentText: fields.contenu_text || '',
           hasImage: imageData.hasImage,
           imageUrl: imageData.imageUrl,
@@ -529,7 +530,7 @@ export class AirtableService {
         id: record.id,
         airtableId: record.id,
         idSite: parseInt(fields.ID_SITE) || 1,
-        typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
+        typeContent: normalizeContentType(fields.type_contenu || 'newsletter'),
         contentText: fields.contenu_text || '',
         hasImage: imageData.hasImage,
         imageUrl: imageData.imageUrl,
@@ -710,7 +711,7 @@ export class AirtableService {
             id: record.id,
             airtableId: record.id,
             idSite: parseInt(fields.ID_SITE) || 1,
-            typeContent: normalizeContentType(fields.type_contenu || 'xtwitter'),
+            typeContent: normalizeContentType(fields.type_contenu || 'newsletter'),
             contentText: fields.contenu_text || '',
             hasImage: imageData.hasImage,
             imageUrl: imageData.imageUrl,
