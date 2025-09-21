@@ -1,5 +1,5 @@
 import Airtable from 'airtable';
-import { EditorialContent, AirtableSite } from '@shared/schema';
+import { EditorialContent, AirtableSite, SystemPrompt, InsertSystemPrompt } from '@shared/schema';
 
 let base: any = null;
 let table: any = null;
@@ -762,6 +762,194 @@ export class AirtableService {
       // et laisser la route gérer le cas où aucune mise à jour n'a réussi
       console.warn('❌ Aucune mise à jour n\'a pu être effectuée à cause d\'une erreur critique');
       return [];
+    }
+  }
+
+  /**
+   * GESTION DES PROMPTS SYSTÈME
+   */
+
+  /**
+   * Récupère tous les prompts système depuis la table "Gestion prompt"
+   */
+  async getAllSystemPrompts(): Promise<SystemPrompt[]> {
+    try {
+      const { base } = initializeAirtable();
+      const promptsTable = base('Gestion prompt');
+      
+      const records = await promptsTable.select({
+        sort: [{ field: 'Created time', direction: 'desc' }]
+      }).all();
+
+      console.log(`✅ ${records.length} prompts système récupérés depuis Airtable`);
+
+      return records.map((record: any) => {
+        const fields = record.fields as any;
+        
+        return {
+          id: record.id,
+          promptSystem: fields['Prompt system'] || '',
+          structureSortie: fields['structure_sortie'] || '',
+          nom: fields['nom'] || '',
+          description: fields['description'] || '',
+          actif: fields['actif'] || false,
+          createdAt: fields['Created time'] ? new Date(fields['Created time']) : undefined,
+          updatedAt: fields['Last modified time'] ? new Date(fields['Last modified time']) : undefined
+        } as SystemPrompt;
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des prompts système:', error);
+      throw new Error('Impossible de récupérer les prompts système depuis Airtable');
+    }
+  }
+
+  /**
+   * Récupère le prompt système actif (utilisé par défaut)
+   */
+  async getActiveSystemPrompt(): Promise<SystemPrompt | null> {
+    try {
+      const { base } = initializeAirtable();
+      const promptsTable = base('Gestion prompt');
+      
+      const records = await promptsTable.select({
+        filterByFormula: '{actif} = TRUE()',
+        maxRecords: 1,
+        sort: [{ field: 'Last modified time', direction: 'desc' }]
+      }).firstPage();
+
+      if (records.length === 0) {
+        console.log('⚠️ Aucun prompt système actif trouvé');
+        return null;
+      }
+
+      const record = records[0];
+      const fields = record.fields as any;
+      
+      console.log('✅ Prompt système actif récupéré:', fields['nom'] || 'Sans nom');
+      
+      return {
+        id: record.id,
+        promptSystem: fields['Prompt system'] || '',
+        structureSortie: fields['structure_sortie'] || '',
+        nom: fields['nom'] || '',
+        description: fields['description'] || '',
+        actif: fields['actif'] || false,
+        createdAt: fields['Created time'] ? new Date(fields['Created time']) : undefined,
+        updatedAt: fields['Last modified time'] ? new Date(fields['Last modified time']) : undefined
+      } as SystemPrompt;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du prompt système actif:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Met à jour un prompt système
+   */
+  async updateSystemPrompt(id: string, updateData: Partial<InsertSystemPrompt>): Promise<SystemPrompt> {
+    try {
+      const { base } = initializeAirtable();
+      const promptsTable = base('Gestion prompt');
+      
+      const fieldsToUpdate: any = {};
+      
+      if (updateData.promptSystem !== undefined) {
+        fieldsToUpdate['Prompt system'] = updateData.promptSystem;
+      }
+      if (updateData.structureSortie !== undefined) {
+        fieldsToUpdate['structure_sortie'] = updateData.structureSortie;
+      }
+      if (updateData.nom !== undefined) {
+        fieldsToUpdate['nom'] = updateData.nom;
+      }
+      if (updateData.description !== undefined) {
+        fieldsToUpdate['description'] = updateData.description;
+      }
+      if (updateData.actif !== undefined) {
+        fieldsToUpdate['actif'] = updateData.actif;
+      }
+
+      console.log('🔄 Mise à jour du prompt système:', id);
+      console.log('Champs à mettre à jour:', fieldsToUpdate);
+
+      const updatedRecord = await promptsTable.update(id, fieldsToUpdate);
+      const fields = updatedRecord.fields as any;
+
+      console.log('✅ Prompt système mis à jour avec succès');
+
+      return {
+        id: updatedRecord.id,
+        promptSystem: fields['Prompt system'] || '',
+        structureSortie: fields['structure_sortie'] || '',
+        nom: fields['nom'] || '',
+        description: fields['description'] || '',
+        actif: fields['actif'] || false,
+        createdAt: fields['Created time'] ? new Date(fields['Created time']) : undefined,
+        updatedAt: fields['Last modified time'] ? new Date(fields['Last modified time']) : undefined
+      } as SystemPrompt;
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour du prompt système:', error);
+      throw new Error('Impossible de mettre à jour le prompt système');
+    }
+  }
+
+  /**
+   * Crée un nouveau prompt système
+   */
+  async createSystemPrompt(promptData: InsertSystemPrompt): Promise<SystemPrompt> {
+    try {
+      const { base } = initializeAirtable();
+      const promptsTable = base('Gestion prompt');
+      
+      const fieldsToCreate: any = {
+        'Prompt system': promptData.promptSystem,
+        'structure_sortie': promptData.structureSortie || '',
+        'nom': promptData.nom || '',
+        'description': promptData.description || '',
+        'actif': promptData.actif || false
+      };
+
+      console.log('🆕 Création d\'un nouveau prompt système');
+      console.log('Données:', fieldsToCreate);
+
+      const createdRecord = await promptsTable.create(fieldsToCreate);
+      const fields = createdRecord.fields as any;
+
+      console.log('✅ Prompt système créé avec succès');
+
+      return {
+        id: createdRecord.id,
+        promptSystem: fields['Prompt system'] || '',
+        structureSortie: fields['structure_sortie'] || '',
+        nom: fields['nom'] || '',
+        description: fields['description'] || '',
+        actif: fields['actif'] || false,
+        createdAt: fields['Created time'] ? new Date(fields['Created time']) : undefined,
+        updatedAt: fields['Last modified time'] ? new Date(fields['Last modified time']) : undefined
+      } as SystemPrompt;
+    } catch (error) {
+      console.error('❌ Erreur lors de la création du prompt système:', error);
+      throw new Error('Impossible de créer le prompt système');
+    }
+  }
+
+  /**
+   * Supprime un prompt système
+   */
+  async deleteSystemPrompt(id: string): Promise<boolean> {
+    try {
+      const { base } = initializeAirtable();
+      const promptsTable = base('Gestion prompt');
+      
+      console.log('🗑️ Suppression du prompt système:', id);
+      
+      await promptsTable.destroy(id);
+      
+      console.log('✅ Prompt système supprimé avec succès');
+      return true;
+    } catch (error) {
+      console.error('❌ Erreur lors de la suppression du prompt système:', error);
+      throw new Error('Impossible de supprimer le prompt système');
     }
   }
 }
