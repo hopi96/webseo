@@ -777,9 +777,8 @@ export class AirtableService {
       const { base } = initializeAirtable();
       const promptsTable = base('Gestion prompt');
       
-      const records = await promptsTable.select({
-        sort: [{ field: 'Created time', direction: 'desc' }]
-      }).all();
+      // Récupération sans tri pour éviter les erreurs de champs inconnus
+      const records = await promptsTable.select().all();
 
       console.log(`✅ ${records.length} prompts système récupérés depuis Airtable`);
 
@@ -788,13 +787,13 @@ export class AirtableService {
         
         return {
           id: record.id,
-          promptSystem: fields['Prompt system'] || '',
+          promptSystem: fields['Prompt system'] || fields['prompt_system'] || '',
           structureSortie: fields['structure_sortie'] || '',
-          nom: fields['nom'] || '',
-          description: fields['description'] || '',
-          actif: fields['actif'] || false,
-          createdAt: fields['Created time'] ? new Date(fields['Created time']) : undefined,
-          updatedAt: fields['Last modified time'] ? new Date(fields['Last modified time']) : undefined
+          nom: fields['Name'] || fields['nom'] || fields['name'] || '',
+          description: fields['Description'] || fields['description'] || '',
+          actif: fields['Active'] || fields['actif'] || fields['active'] || false,
+          createdAt: new Date(), // Valeur par défaut
+          updatedAt: new Date()  // Valeur par défaut
         } as SystemPrompt;
       });
     } catch (error) {
@@ -813,8 +812,7 @@ export class AirtableService {
       
       const records = await promptsTable.select({
         filterByFormula: '{actif} = TRUE()',
-        maxRecords: 1,
-        sort: [{ field: 'Last modified time', direction: 'desc' }]
+        maxRecords: 1
       }).firstPage();
 
       if (records.length === 0) {
@@ -825,17 +823,17 @@ export class AirtableService {
       const record = records[0];
       const fields = record.fields as any;
       
-      console.log('✅ Prompt système actif récupéré:', fields['nom'] || 'Sans nom');
+      console.log('✅ Prompt système actif récupéré:', fields['Name'] || fields['nom'] || fields['name'] || 'Sans nom');
       
       return {
         id: record.id,
-        promptSystem: fields['Prompt system'] || '',
+        promptSystem: fields['Prompt system'] || fields['prompt_system'] || '',
         structureSortie: fields['structure_sortie'] || '',
-        nom: fields['nom'] || '',
-        description: fields['description'] || '',
-        actif: fields['actif'] || false,
-        createdAt: fields['Created time'] ? new Date(fields['Created time']) : undefined,
-        updatedAt: fields['Last modified time'] ? new Date(fields['Last modified time']) : undefined
+        nom: fields['Name'] || fields['nom'] || fields['name'] || '',
+        description: fields['Description'] || fields['description'] || '',
+        actif: fields['Active'] || fields['actif'] || fields['active'] || false,
+        createdAt: new Date(), // Valeur par défaut
+        updatedAt: new Date()  // Valeur par défaut
       } as SystemPrompt;
     } catch (error) {
       console.error('Erreur lors de la récupération du prompt système actif:', error);
@@ -904,9 +902,9 @@ export class AirtableService {
       const fieldsToCreate: any = {
         'Prompt system': promptData.promptSystem,
         'structure_sortie': promptData.structureSortie || '',
-        'nom': promptData.nom || '',
-        'description': promptData.description || '',
-        'actif': promptData.actif || false
+        'Name': promptData.nom || '', // Essayer 'Name' au lieu de 'nom'
+        'Description': promptData.description || '',
+        'Active': promptData.actif || false // Essayer 'Active' au lieu de 'actif'
       };
 
       console.log('🆕 Création d\'un nouveau prompt système');
