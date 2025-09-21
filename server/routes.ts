@@ -476,6 +476,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nouvel endpoint pour la mise à jour en lot des statuts (DOIT être défini AVANT la route avec :id)
+  app.put("/api/editorial-content/bulk-update", async (req, res) => {
+    try {
+      const { ids, statut } = req.body;
+      
+      console.log(`🔄 Mise à jour en lot demandée pour ${ids?.length || 0} contenus`);
+      console.log('IDs reçus:', ids);
+      console.log('Nouveau statut:', statut);
+      console.log('Type des IDs:', ids?.map(id => typeof id));
+      console.log('Détail complet de la requête:', JSON.stringify(req.body, null, 2));
+      
+      // Validation des données
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ 
+          message: "Le champ 'ids' doit être un tableau non vide d'identifiants" 
+        });
+      }
+      
+      if (!statut || typeof statut !== 'string') {
+        return res.status(400).json({ 
+          message: "Le champ 'statut' est requis" 
+        });
+      }
+      
+      const validStatuses = ['en attente', 'à réviser', 'validé'];
+      if (!validStatuses.includes(statut)) {
+        return res.status(400).json({ 
+          message: `Statut invalide: ${statut}. Statuts valides: ${validStatuses.join(', ')}` 
+        });
+      }
+      
+      // Effectuer la mise à jour en lot via Airtable
+      const updatedContents = await airtableService.bulkUpdateStatus(ids, statut);
+      
+      const successCount = updatedContents.length;
+      const totalCount = ids.length;
+      
+      console.log(`✅ Mise à jour en lot terminée: ${successCount}/${totalCount} réussies`);
+      
+      // Gérer le cas où aucune mise à jour n'a réussi
+      if (successCount === 0) {
+        console.warn(`⚠️ Aucun article n'a pu être mis à jour`);
+        return res.status(207).json({ // 207 Multi-Status pour succès partiel
+          success: false,
+          updated: 0,
+          total: totalCount,
+          message: `Aucun article n'a pu être mis à jour. Les enregistrements sont peut-être introuvables ou supprimés.`,
+          updatedContents: []
+        });
+      }
+      
+      // Succès total ou partiel
+      const isPartialSuccess = successCount < totalCount;
+      res.status(isPartialSuccess ? 207 : 200).json({ 
+        success: true,
+        updated: successCount,
+        total: totalCount,
+        message: isPartialSuccess 
+          ? `${successCount}/${totalCount} article(s) mis à jour avec le statut "${statut}". ${totalCount - successCount} article(s) n'ont pas pu être mis à jour.`
+          : `${successCount} article(s) mis à jour avec le statut "${statut}"`,
+        updatedContents
+      });
+      
+    } catch (error: any) {
+      console.error('Erreur lors de la mise à jour en lot:', error);
+      res.status(500).json({ 
+        message: 'Erreur lors de la mise à jour en lot',
+        error: error.message 
+      });
+    }
+  });
+
   app.put("/api/editorial-content/:id", async (req, res) => {
     try {
       const airtableId = decodeURIComponent(req.params.id); // Décoder l'ID Airtable
@@ -511,60 +583,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Erreur lors de la suppression du contenu éditorial:', error.message);
       res.status(500).json({ message: 'Failed to delete editorial content', error: error.message });
-    }
-  });
-
-  // Nouvel endpoint pour la mise à jour en lot des statuts
-  app.put("/api/editorial-content/bulk-update", async (req, res) => {
-    try {
-      const { ids, statut } = req.body;
-      
-      console.log(`🔄 Mise à jour en lot demandée pour ${ids?.length || 0} contenus`);
-      console.log('IDs reçus:', ids);
-      console.log('Nouveau statut:', statut);
-      
-      // Validation des données
-      if (!Array.isArray(ids) || ids.length === 0) {
-        return res.status(400).json({ 
-          message: "Le champ 'ids' doit être un tableau non vide d'identifiants" 
-        });
-      }
-      
-      if (!statut || typeof statut !== 'string') {
-        return res.status(400).json({ 
-          message: "Le champ 'statut' est requis" 
-        });
-      }
-      
-      const validStatuses = ['en attente', 'à réviser', 'validé'];
-      if (!validStatuses.includes(statut)) {
-        return res.status(400).json({ 
-          message: `Statut invalide: ${statut}. Statuts valides: ${validStatuses.join(', ')}` 
-        });
-      }
-      
-      // Effectuer la mise à jour en lot via Airtable
-      const updatedContents = await airtableService.bulkUpdateStatus(ids, statut);
-      
-      const successCount = updatedContents.length;
-      const totalCount = ids.length;
-      
-      console.log(`✅ Mise à jour en lot terminée: ${successCount}/${totalCount} réussies`);
-      
-      res.json({ 
-        success: true,
-        updated: successCount,
-        total: totalCount,
-        message: `${successCount} article(s) mis à jour avec le statut "${statut}"`,
-        updatedContents
-      });
-      
-    } catch (error: any) {
-      console.error('Erreur lors de la mise à jour en lot:', error);
-      res.status(500).json({ 
-        message: 'Erreur lors de la mise à jour en lot',
-        error: error.message 
-      });
     }
   });
 

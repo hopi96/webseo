@@ -680,16 +680,33 @@ export class AirtableService {
       }
 
       // Traitement en parallèle avec limitation pour éviter les erreurs de rate limiting
+      const updateResults: Array<{success: boolean, airtableId: string, content?: EditorialContent, error?: string}> = [];
+      
       const updatePromises = airtableIds.map(async (airtableId) => {
         try {
           const fieldsToUpdate = { statut };
           console.log(`Mise à jour du contenu ${airtableId} avec statut: ${statut}`);
+          console.log(`Tentative de mise à jour avec champs:`, fieldsToUpdate);
+          
+          // Vérifier que l'enregistrement existe avant la mise à jour
+          let existingRecord;
+          try {
+            existingRecord = await table.find(airtableId);
+            console.log(`✅ Record trouvé: ${airtableId}`, existingRecord.fields);
+          } catch (findError: any) {
+            console.error(`❌ Record non trouvé: ${airtableId}`, findError);
+            return {
+              success: false,
+              airtableId,
+              error: `Record ${airtableId} introuvable - il a peut-être été supprimé ou archivé`
+            };
+          }
           
           const record = await table.update(airtableId, fieldsToUpdate);
           const fields = record.fields as any;
           const imageData = extractImageData(fields);
           
-          return {
+          const content = {
             id: record.id,
             airtableId: record.id,
             idSite: parseInt(fields.ID_SITE) || 1,
@@ -702,30 +719,49 @@ export class AirtableService {
             dateDePublication: fields.date_de_publication ? new Date(fields.date_de_publication) : new Date(),
             createdAt: new Date()
           } as EditorialContent;
-        } catch (error) {
+          
+          return {
+            success: true,
+            airtableId,
+            content
+          };
+        } catch (error: any) {
           console.error(`Erreur lors de la mise à jour du contenu ${airtableId}:`, error);
-          // Retourner null pour les échecs, on les filtrera après
-          return null;
+          return {
+            success: false,
+            airtableId,
+            error: error.message || 'Erreur lors de la mise à jour'
+          };
         }
       });
 
       // Attendre toutes les mises à jour
       const results = await Promise.all(updatePromises);
       
-      // Filtrer les résultats réussis
-      const successfulUpdates = results.filter((result): result is EditorialContent => result !== null);
+      // Séparer les succès et les échecs
+      const successfulUpdates = results.filter(result => result.success);
+      const failedUpdates = results.filter(result => !result.success);
       
       console.log(`✅ ${successfulUpdates.length}/${airtableIds.length} contenus mis à jour avec succès`);
       
-      if (successfulUpdates.length < airtableIds.length) {
-        const failedCount = airtableIds.length - successfulUpdates.length;
-        console.warn(`⚠️ ${failedCount} mises à jour ont échoué`);
+      if (failedUpdates.length > 0) {
+        console.warn(`⚠️ ${failedUpdates.length} mises à jour ont échoué:`);
+        failedUpdates.forEach(failure => {
+          console.warn(`  - ${failure.airtableId}: ${failure.error}`);
+        });
       }
 
-      return successfulUpdates;
+      // Retourner seulement les contenus mis à jour avec succès
+      return successfulUpdates.map(result => result.content!).filter(Boolean);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour en lot:', error);
-      throw new Error('Impossible de mettre à jour les contenus en lot');
+      console.error('Erreur critique lors de la mise à jour en lot:', error);
+      console.error('Type d\'erreur:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('Message d\'erreur:', error instanceof Error ? error.message : String(error));
+      
+      // Au lieu de lancer une exception fatale, retourner un tableau vide
+      // et laisser la route gérer le cas où aucune mise à jour n'a réussi
+      console.warn('❌ Aucune mise à jour n\'a pu être effectuée à cause d\'une erreur critique');
+      return [];
     }
   }
 }
