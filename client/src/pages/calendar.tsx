@@ -864,7 +864,7 @@ export default function Calendar() {
 
       {/* Dialog des statistiques cliquables */}
       <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-4xl max-h-[90vh] sm:max-h-[85vh] p-3 sm:p-6">
           <DialogHeader>
             <DialogTitle>
               {statsFilter?.kind === 'status' && (
@@ -887,29 +887,37 @@ export default function Calendar() {
           <div className="space-y-4">
             {/* Barre d'actions si mode sélection */}
             {isSelectionMode && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="flex items-center gap-2 flex-1">
-                  <span className="text-sm text-blue-700 dark:text-blue-300">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
+                  <span className="text-sm text-blue-700 dark:text-blue-300 flex-shrink-0">
                     {selectedArticles.size} article{selectedArticles.size > 1 ? 's' : ''} sélectionné{selectedArticles.size > 1 ? 's' : ''}
                   </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const visibleIds = new Set(filteredList.slice(0, visibleCount).map(event => event.id));
-                      setSelectedArticles(visibleIds);
-                    }}
-                  >
-                    Tout sélectionner dans la liste
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={clearSelection}>
-                    Effacer
-                  </Button>
+                  <div className="flex flex-wrap gap-2 flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs sm:text-sm h-8 px-2 sm:px-3"
+                      onClick={() => {
+                        const visibleIds = new Set(filteredList.slice(0, visibleCount).map(event => event.id));
+                        setSelectedArticles(visibleIds);
+                      }}
+                    >
+                      Tout sélectionner
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs sm:text-sm h-8 px-2 sm:px-3"
+                      onClick={clearSelection}
+                    >
+                      Effacer
+                    </Button>
+                  </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Select value={bulkStatus} onValueChange={setBulkStatus}>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full sm:w-40 h-9">
                       <SelectValue placeholder="Nouveau statut" />
                     </SelectTrigger>
                     <SelectContent>
@@ -919,15 +927,22 @@ export default function Calendar() {
                       <SelectItem value="publié">Publié</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button 
-                    onClick={handleBulkUpdate}
-                    disabled={selectedArticles.size === 0 || !bulkStatus || bulkUpdateMutation.isPending}
-                  >
-                    {bulkUpdateMutation.isPending ? "Mise à jour..." : "Appliquer"}
-                  </Button>
-                  <Button variant="ghost" onClick={exitSelectionMode}>
-                    Annuler
-                  </Button>
+                  <div className="flex gap-2 flex-1 sm:flex-none">
+                    <Button 
+                      className="flex-1 sm:flex-none h-9"
+                      onClick={handleBulkUpdate}
+                      disabled={selectedArticles.size === 0 || !bulkStatus || bulkUpdateMutation.isPending}
+                    >
+                      {bulkUpdateMutation.isPending ? "Mise à jour..." : "Appliquer"}
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="flex-1 sm:flex-none h-9"
+                      onClick={exitSelectionMode}
+                    >
+                      Annuler
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -935,63 +950,69 @@ export default function Calendar() {
             {/* Actions rapides */}
             {!isSelectionMode && (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={enterSelectionMode}>
-                  <CheckSquare className="h-4 w-4 mr-2" />
-                  Mode sélection
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-9 px-3"
+                  onClick={enterSelectionMode}
+                >
+                  <CheckSquare className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Mode sélection</span>
                 </Button>
               </div>
             )}
             
             {/* Liste des contenus */}
-            <div className="space-y-2 max-h-[50vh] overflow-y-auto smart-scroll-vertical">
+            <div className="space-y-2 max-h-[55vh] overflow-y-auto smart-scroll-vertical">
               {filteredList.slice(0, visibleCount).map((event) => {
                 const content = editorialContent.find(c => c.id === event.id);
                 if (!content) return null;
                 
                 return (
-                  <div key={event.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" data-testid={`row-content-${event.id}`}>
+                  <div key={event.id} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" data-testid={`row-content-${event.id}`}>
                     {isSelectionMode && (
                       <div
-                        className="cursor-pointer"
+                        className="cursor-pointer pt-1 touch-manipulation"
                         onClick={() => toggleArticleSelection(event.id)}
                       >
                         {selectedArticles.has(event.id) ? 
-                          <CheckSquare className="h-4 w-4 text-blue-600" /> : 
-                          <Square className="h-4 w-4 text-gray-400" />
+                          <CheckSquare className="h-5 w-5 sm:h-4 sm:w-4 text-blue-600" /> : 
+                          <Square className="h-5 w-5 sm:h-4 sm:w-4 text-gray-400" />
                         }
                       </div>
                     )}
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm mb-1 line-clamp-1">{event.title}</h4>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="secondary" className="text-xs">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <h4 className="font-medium text-sm sm:text-base leading-tight">{event.title}</h4>
+                          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs px-2 py-1">
                               {getSiteName(event.siteId)}
                             </Badge>
-                            <Badge className={getTypeColor(event.type)}>
+                            <Badge className={`${getTypeColor(event.type)} text-xs px-2 py-1`}>
                               {event.type}
                             </Badge>
-                            <Badge className={getStatusColor(event.status)}>
+                            <Badge className={`${getStatusColor(event.status)} text-xs px-2 py-1`}>
                               {event.status}
                             </Badge>
                             {event.hasImage && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs px-2 py-1">
                                 <Tag className="h-3 w-3 mr-1" />
                                 Image
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-500">
                             {event.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
                         </div>
                         
-                        <div className="flex items-center gap-1 ml-2">
+                        <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-start">
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="h-8 w-8 sm:h-9 sm:w-9 p-0 touch-manipulation"
                             onClick={() => handleEditArticle(event)}
                           >
                             <Edit3 className="h-4 w-4" />
@@ -999,6 +1020,7 @@ export default function Calendar() {
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="h-8 w-8 sm:h-9 sm:w-9 p-0 touch-manipulation"
                             onClick={() => handleDeleteArticle(event)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -1015,6 +1037,7 @@ export default function Calendar() {
                 <div className="text-center pt-4">
                   <Button
                     variant="outline"
+                    className="h-10 px-4 text-sm touch-manipulation"
                     onClick={() => setVisibleCount(prev => prev + 50)}
                   >
                     Charger plus ({filteredList.length - visibleCount} restant{filteredList.length - visibleCount > 1 ? 's' : ''})
