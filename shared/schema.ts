@@ -88,3 +88,17 @@ export type AirtableSite = {
   programmeRs?: string; // Nouveau champ pour le programme des réseaux sociaux
   seoAnalysis?: any; // JSON d'analyse SEO
 };
+
+// Type pour la gestion des prompts système depuis Airtable
+export type SystemPrompt = {
+  id: string; // ID Airtable
+  promptSystem: string; // Le prompt système
+  structureSortie?: string; // Structure de sortie attendue (optionnel)
+  nom?: string; // Nom du prompt pour l'identifier
+  description?: string; // Description du prompt
+  actif?: boolean; // Si le prompt est actif
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export type InsertSystemPrompt = Omit<SystemPrompt, 'id' | 'createdAt' | 'updatedAt'>;
