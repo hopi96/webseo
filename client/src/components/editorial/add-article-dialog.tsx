@@ -23,7 +23,7 @@ import {
 
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
-  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog"]),
+  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog", "google my business", "pinterest"]),
   statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
@@ -268,6 +268,10 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
         return "Facebook";
       case "blog":
         return "Blog";
+      case "google my business":
+        return "Google My Business";
+      case "pinterest":
+        return "Pinterest";
       default:
         return type;
     }
@@ -351,6 +355,8 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     <SelectItem value="youtube">YouTube</SelectItem>
                     <SelectItem value="facebook">Facebook</SelectItem>
                     <SelectItem value="blog">Blog</SelectItem>
+                    <SelectItem value="google my business">Google My Business</SelectItem>
+                    <SelectItem value="pinterest">Pinterest</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
