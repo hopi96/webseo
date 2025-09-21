@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { BarChart3, FileText, Calendar, Settings } from "lucide-react";
+import { BarChart3, Calendar, Settings } from "lucide-react";
 
 export function BottomNavigation() {
   const [location] = useLocation();
@@ -7,7 +7,6 @@ export function BottomNavigation() {
   const navItems = [
     { href: "/", icon: BarChart3, label: "Tableau de bord", id: "dashboard" },
     { href: "/calendar", icon: Calendar, label: "Calendrier", id: "calendar" },
-    { href: "/reports", icon: FileText, label: "Rapports", id: "reports" },
     { href: "/settings", icon: Settings, label: "Paramètres", id: "settings" },
   ];
 
@@ -18,7 +17,7 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-slate-200 z-50">
-      <div className="grid grid-cols-5 h-16">
+      <div className="grid grid-cols-3 h-16">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
