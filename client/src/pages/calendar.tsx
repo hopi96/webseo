@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UnifiedHeader } from "@/components/layout/unified-header";
 
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
@@ -57,6 +58,11 @@ export default function Calendar() {
   const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [bulkStatus, setBulkStatus] = useState<string>("");
+
+  // États pour les statistiques cliquables
+  const [statsDialogOpen, setStatsDialogOpen] = useState(false);
+  const [statsFilter, setStatsFilter] = useState<{kind: 'status' | 'type', value: string} | null>(null);
+  const [visibleCount, setVisibleCount] = useState(50);
   const { toast } = useToast();
 
   // Initialiser le chatbot n8n
@@ -130,6 +136,32 @@ export default function Calendar() {
     const platformMatch = selectedPlatformFilter ? event.type === selectedPlatformFilter : true;
     return siteMatch && platformMatch;
   });
+
+  // Fonction helper pour vérifier si un événement appartient au mois courant
+  const isSameMonth = (eventDate: Date, referenceDate: Date) => {
+    return eventDate.getFullYear() === referenceDate.getFullYear() && 
+           eventDate.getMonth() === referenceDate.getMonth();
+  };
+
+  // Événements du mois courant uniquement (optimisé avec useMemo)
+  const monthlyEvents = useMemo(() => 
+    events.filter(event => isSameMonth(event.date, currentDate)), 
+    [events, currentDate]
+  );
+
+  // Liste filtrée pour le dialogue de statistiques (optimisé avec useMemo)
+  const filteredList = useMemo(() => {
+    if (!statsFilter) return [];
+    
+    return monthlyEvents.filter(event => {
+      if (statsFilter.kind === 'status') {
+        return event.status === statsFilter.value;
+      } else if (statsFilter.kind === 'type') {
+        return event.hasImage === (statsFilter.value === 'hasImage');
+      }
+      return false;
+    });
+  }, [monthlyEvents, statsFilter]);
 
   // Fonction pour obtenir les jours du mois
   const getDaysInMonth = (date: Date) => {
