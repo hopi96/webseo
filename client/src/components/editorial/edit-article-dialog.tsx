@@ -51,7 +51,7 @@ interface EditArticleDialogProps {
 
 const editArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est obligatoire"),
-  statut: z.enum(["en attente", "à réviser", "validé"]),
+  statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
   typeContent: z.enum(["xtwitter", "instagram", "article", "newsletter", "facebook", "pinterest", "google my business"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
@@ -86,8 +86,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   });
   
   // Normaliser les valeurs pour s'assurer qu'elles correspondent aux options du Select
-  const normalizeStatut = (statut: string): "en attente" | "à réviser" | "validé" => {
-    const validStatuts = ["en attente", "à réviser", "validé"];
+  const normalizeStatut = (statut: string): "en attente" | "à réviser" | "validé" | "publié" => {
+    const validStatuts = ["en attente", "à réviser", "validé", "publié"];
     return validStatuts.includes(statut) ? statut as any : "en attente";
   };
   
@@ -402,6 +402,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         <SelectItem value="en attente">En attente</SelectItem>
                         <SelectItem value="à réviser">À réviser</SelectItem>
                         <SelectItem value="validé">Validé</SelectItem>
+                        <SelectItem value="publié">Publié</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
