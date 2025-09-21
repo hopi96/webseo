@@ -896,19 +896,21 @@ export default function Calendar() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs sm:text-sm h-8 px-2 sm:px-3"
+                      className="text-xs sm:text-sm h-8 px-2 sm:px-3 touch-manipulation"
                       onClick={() => {
                         const visibleIds = new Set(filteredList.slice(0, visibleCount).map(event => event.id));
                         setSelectedArticles(visibleIds);
                       }}
+                      data-testid="select-all-visible"
                     >
                       Tout sélectionner
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="text-xs sm:text-sm h-8 px-2 sm:px-3"
+                      className="text-xs sm:text-sm h-8 px-2 sm:px-3 touch-manipulation"
                       onClick={clearSelection}
+                      data-testid="clear-selection"
                     >
                       Effacer
                     </Button>
@@ -917,7 +919,7 @@ export default function Calendar() {
                 
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Select value={bulkStatus} onValueChange={setBulkStatus}>
-                    <SelectTrigger className="w-full sm:w-40 h-9">
+                    <SelectTrigger className="w-full sm:w-40 h-9" data-testid="bulk-status-select">
                       <SelectValue placeholder="Nouveau statut" />
                     </SelectTrigger>
                     <SelectContent>
@@ -929,16 +931,18 @@ export default function Calendar() {
                   </Select>
                   <div className="flex gap-2 flex-1 sm:flex-none">
                     <Button 
-                      className="flex-1 sm:flex-none h-9"
+                      className="flex-1 sm:flex-none h-9 touch-manipulation"
                       onClick={handleBulkUpdate}
                       disabled={selectedArticles.size === 0 || !bulkStatus || bulkUpdateMutation.isPending}
+                      data-testid="apply-bulk-update-stats"
                     >
                       {bulkUpdateMutation.isPending ? "Mise à jour..." : "Appliquer"}
                     </Button>
                     <Button 
                       variant="ghost" 
-                      className="flex-1 sm:flex-none h-9"
+                      className="flex-1 sm:flex-none h-9 touch-manipulation"
                       onClick={exitSelectionMode}
+                      data-testid="cancel-bulk-update-stats"
                     >
                       Annuler
                     </Button>
