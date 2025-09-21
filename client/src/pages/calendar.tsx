@@ -426,13 +426,15 @@ export default function Calendar() {
                   </SelectTrigger>
                   <SelectContent className="smart-scroll-vertical max-h-60">
                     <SelectItem value="all">Toutes les plateformes</SelectItem>
-                    <SelectItem value="xtwitter">X (Twitter)</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="facebook">Facebook</SelectItem>
-                    <SelectItem value="pinterest">Pinterest</SelectItem>
-                    <SelectItem value="google my business">Google My Business</SelectItem>
-                    <SelectItem value="article">Article de blog</SelectItem>
                     <SelectItem value="newsletter">Newsletter</SelectItem>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="xtwitter">X (Twitter)</SelectItem>
+                    <SelectItem value="youtube">YouTube</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="blog">Article de blog</SelectItem>
+                    <SelectItem value="google my business">Google My Business</SelectItem>
+                    <SelectItem value="pinterest">Pinterest</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
