@@ -52,7 +52,7 @@ interface EditArticleDialogProps {
 const editArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est obligatoire"),
   statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
-  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog"]),
+  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog", "google my business", "pinterest"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
   imageSource: z.enum(["upload", "ai"]).optional(),
@@ -403,6 +403,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         <SelectItem value="youtube">YouTube</SelectItem>
                         <SelectItem value="facebook">Facebook</SelectItem>
                         <SelectItem value="blog">Blog</SelectItem>
+                        <SelectItem value="google my business">Google My Business</SelectItem>
+                        <SelectItem value="pinterest">Pinterest</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
