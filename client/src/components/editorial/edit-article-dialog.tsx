@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog, 
@@ -91,8 +91,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     return validStatuts.includes(statut) ? statut as any : "en attente";
   };
   
-  const normalizeTypeContent = (type: string): "xtwitter" | "instagram" | "article" | "newsletter" => {
-    const validTypes = ["xtwitter", "instagram", "article", "newsletter"];
+  const normalizeTypeContent = (type: string): "xtwitter" | "instagram" | "article" | "newsletter" | "facebook" | "pinterest" | "google my business" => {
+    const validTypes = ["xtwitter", "instagram", "article", "newsletter", "facebook", "pinterest", "google my business"];
     return validTypes.includes(type) ? type as any : "xtwitter";
   };
   
@@ -108,6 +108,30 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       idSite: article.idSite || 1
     }
   });
+
+  // Réinitialiser le formulaire quand l'article change (après invalidation du cache)
+  useEffect(() => {
+    if (article) {
+      const newValues = {
+        contentText: article.contentText || "",
+        statut: normalizeStatut(article.statut),
+        typeContent: normalizeTypeContent(article.typeContent),
+        hasImage: article.hasImage || false,
+        imageUrl: article.imageUrl || "",
+        dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0],
+        idSite: article.idSite || 1
+      };
+      
+      form.reset(newValues);
+      
+      // Réinitialiser l'état des images avec les nouvelles valeurs de l'article
+      setImageState(initializeImageFormState({
+        hasImage: article.hasImage ?? false,
+        imageUrl: article.imageUrl ?? null,
+        imageSource: article.imageSource ?? null
+      }));
+    }
+  }, [article.id, article.contentText, article.statut, article.typeContent, article.hasImage, article.imageUrl, article.dateDePublication, article.idSite, article.imageSource]);
 
 
   // Fonction pour générer une image avec l'IA
