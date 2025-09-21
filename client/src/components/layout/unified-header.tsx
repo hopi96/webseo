@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, FileText, Calendar, Settings, Menu } from "lucide-react";
+import { Home, Calendar, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -10,7 +10,6 @@ export function UnifiedHeader() {
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
     { href: "/calendar", icon: Calendar, label: "Calendrier" },
-    { href: "/reports", icon: FileText, label: "Rapports" },
     { href: "/settings", icon: Settings, label: "Paramètres" }
   ];
 
