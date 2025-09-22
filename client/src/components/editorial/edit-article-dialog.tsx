@@ -93,8 +93,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     return validStatuts.includes(statut) ? statut as any : "en attente";
   };
   
-  const normalizeTypeContent = (type: string): "newsletter" | "tiktok" | "instagram" | "xtwitter" | "youtube" | "facebook" | "blog" => {
-    const validTypes = ["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog"];
+  const normalizeTypeContent = (type: string): "newsletter" | "tiktok" | "instagram" | "xtwitter" | "youtube" | "facebook" | "blog" | "google my business" | "pinterest" => {
+    const validTypes = ["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog", "google my business", "pinterest"];
     return validTypes.includes(type) ? type as any : "newsletter";
   };
   
