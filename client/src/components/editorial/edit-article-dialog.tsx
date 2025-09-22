@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { EditorialContent } from "@shared/schema";
 import { Sparkles, Globe, Upload, X, RotateCcw } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
+import { ImageModal } from "@/components/ui/image-modal";
 import { 
   prepareImageDataForSubmission, 
   initializeImageFormState, 
@@ -69,6 +70,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const [generatingImage, setGeneratingImage] = useState(false);
   const [customPrompt, setCustomPrompt] = useState<string>("");
   const [imageLoadError, setImageLoadError] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   
   // État des images utilisant la nouvelle logique
   const [imageState, setImageState] = useState<FormImageState>(() => 
@@ -517,7 +519,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         <img
                           src={getDisplayImageUrl(imageState)!}
                           alt="Image de l'article"
-                          className="w-full h-32 object-cover rounded-lg"
+                          className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => setShowImageModal(true)}
                           onError={(e) => {
                             console.error("Erreur lors du chargement de l'image:", getDisplayImageUrl(imageState));
                             setImageLoadError(true);
@@ -525,6 +528,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                             form.setValue("hasImage", false);
                           }}
                           onLoad={() => setImageLoadError(false)}
+                          title="Cliquer pour agrandir l'image"
                         />
                         {(() => {
                           const imageUrl = getDisplayImageUrl(imageState)!;
@@ -697,6 +701,14 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         contentType={form.watch('typeContent')}
         existingContent={form.watch('contentText')}
         onGenerated={handleAIGeneration}
+      />
+
+      <ImageModal
+        isOpen={showImageModal}
+        onClose={() => setShowImageModal(false)}
+        imageUrl={getDisplayImageUrl(imageState) || ""}
+        imageTitle="Image de l'article"
+        imageSource={getDisplayImageUrl(imageState) ? getImageSourceLabel(getDisplayImageUrl(imageState)!).label : undefined}
       />
     </Dialog>
   );
