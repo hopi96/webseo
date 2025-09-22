@@ -15,9 +15,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Calendar, Plus, X, Sparkles, Globe, Upload, Image, HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AIGenerationDialog } from "./ai-generation-dialog";
+import { ImageModal } from "@/components/ui/image-modal";
 import { 
   prepareImageDataForSubmission, 
   resetImageState, 
+  getDisplayImageUrl,
+  getImageSourceLabel,
   type FormImageState 
 } from "@/lib/image-utils";
 
@@ -46,6 +49,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [customPrompt, setCustomPrompt] = useState<string>("");
+  const [showImageModal, setShowImageModal] = useState(false);
   
   // État des images utilisant la nouvelle logique
   const [imageState, setImageState] = useState<FormImageState>(resetImageState());
@@ -573,7 +577,9 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       <img
                         src={imageState.generatedImageUrl}
                         alt="Image générée par IA"
-                        className="w-full h-48 object-cover rounded-lg border"
+                        className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setShowImageModal(true)}
+                        title="Cliquer pour agrandir l'image"
                       />
                       <div className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-1 rounded text-xs">
                         DALL-E 3
@@ -592,7 +598,9 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       <img
                         src={imageState.uploadedImageUrl}
                         alt="Image uploadée"
-                        className="w-full h-48 object-cover rounded-lg border"
+                        className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setShowImageModal(true)}
+                        title="Cliquer pour agrandir l'image"
                       />
                       <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs">
                         UPLOADÉE
@@ -658,6 +666,14 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
         contentType={form.watch('typeContent')}
         existingContent={form.watch('contentText')}
         onGenerated={handleAIGeneration}
+      />
+
+      <ImageModal
+        isOpen={showImageModal}
+        onClose={() => setShowImageModal(false)}
+        imageUrl={getDisplayImageUrl(imageState) || ""}
+        imageTitle="Image de l'article"
+        imageSource={getDisplayImageUrl(imageState) ? getImageSourceLabel(getDisplayImageUrl(imageState)!).label : undefined}
       />
     </Dialog>
   );
