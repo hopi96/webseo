@@ -1,0 +1,30 @@
+Voici des tutos YouTube (clairs et à jour) pour configurer **Google My Business / Google Business Profile (API)** et **Brevo**.
+
+### Google My Business (Google Business Profile – API)
+
+* Trouver votre **Business Profile ID** et **Place ID** (indispensables pour Account/Location ID). ([YouTube][1])
+* Autres méthodes pour récupérer le **Place ID / CID**. ([YouTube][2])
+* Obtenir un **token OAuth 2.0** pour les APIs Google (démonstration avec Postman). ([YouTube][3])
+* Mettre en place un **flux OAuth 2.0** Google (exemple pas-à-pas). ([YouTube][4])
+
+> ⚠️ L’API **Business Profile** est **soumise à approbation** (accès restreint) et nécessite une implémentation OAuth spécifique. Détails officiels ici. ([Google for Developers][5])
+
+### Brevo (ex-Sendinblue)
+
+* **Créer/obtenir votre clé API Brevo** – guide rapide. ([YouTube][6])
+* **Get Brevo API Key (2025)** – autres pas-à-pas récents. ([YouTube][7])
+* Tutoriel Brevo complet pour débuter (configuration, listes, campagnes). ([YouTube][8])
+* Intégrer un **formulaire Brevo** sur votre site (capture d’emails). ([YouTube][9])
+* Connecter Brevo avec WordPress (intégration pratique). ([YouTube][10])
+
+
+[1]: https://www.youtube.com/watch?v=SEHhapS91_c&utm_source=chatgpt.com "How to Find Your Google Business Profile ID and Place ID"
+[2]: https://www.youtube.com/watch?v=-7E3WmGczWc&utm_source=chatgpt.com "How To Find GMB Place ID, CID, And GMB Business Profile ID?"
+[3]: https://www.youtube.com/watch?v=e-hOP3P-cW8&utm_source=chatgpt.com "Google OAuth 2.0: The Ultimate API Advantage"
+[4]: https://www.youtube.com/watch?v=1XUu7-yIoUY&utm_source=chatgpt.com "How to Setup a Google OAuth 2.0 API Connection - Bubble.io ..."
+[5]: https://developers.google.com/my-business/content/implement-oauth?utm_source=chatgpt.com "Implement OAuth with Business Profile APIs"
+[6]: https://www.youtube.com/watch?v=K_5y6-7K1VQ&utm_source=chatgpt.com "How to Get Brevo API Key (Full 2024 Guide)"
+[7]: https://www.youtube.com/watch?v=z6yCsHCcH_Q&utm_source=chatgpt.com "How to Get Brevo API Key [2025 Full Guide]"
+[8]: https://www.youtube.com/watch?v=0qMZRlSj2HY&utm_source=chatgpt.com "Tutoriel Brevo pour débutants 2025 - étape par étape"
+[9]: https://www.youtube.com/watch?pp=0gcJCfwAo7VqN5tD&v=dmFCVliq1pk&utm_source=chatgpt.com "Comment intégrer un formulaire Brevo sur son site internet et ..."
+[10]: https://www.youtube.com/watch?v=iAePirGnxyA&utm_source=chatgpt.com "How to Integrate WordPress with Brevo (formerly Sendinblue ..."
