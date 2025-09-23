@@ -131,6 +131,11 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Configuration OAuth Pinterest', url: 'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/' }
     ],
+    videoTutorials: [
+      { label: '📹 Trouver le Board ID', url: 'https://www.youtube.com/watch?v=VWrWf9ZDuAQ', description: 'Méthode rapide pour localiser l\'identifiant de votre board Pinterest' },
+      { label: '📹 Pinterest API – Getting Access', url: 'https://www.youtube.com/watch?v=4MSGXHtcpsM', description: 'Création d\'app et authentification complète sur Pinterest' },
+      { label: '📹 URL de redirection OAuth Pinterest', url: 'https://www.youtube.com/watch?v=DHF4LQYqNY4', description: 'Guide pour comprendre et configurer les redirections OAuth' }
+    ]
   },
   {
     key: 'google_my_business',
@@ -179,6 +184,11 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Gestion des tokens TikTok', url: 'https://developers.tiktok.com/doc/oauth-user-access-token-management' }
     ],
+    videoTutorials: [
+      { label: '📹 Créer une app TikTok Business', url: 'https://www.youtube.com/watch?v=N8lMo9HVmfA', description: 'Obtenir les access tokens pour TikTok Business API' },
+      { label: '📹 Login TikTok et access tokens', url: 'https://www.youtube.com/watch?v=XLWU1uiPhLA', description: 'Implémenter l\'authentification et gérer les tokens' },
+      { label: '📹 TikTok Ads API – Getting access', url: 'https://www.youtube.com/watch?v=NdpdLaHX-sk', description: 'Vue d\'ensemble de l\'accès développeur TikTok' }
+    ]
   },
   {
     key: 'prestashop_blog',
@@ -194,6 +204,11 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Créer une clé Webservice', url: 'https://devdocs.prestashop-project.org/9/webservice/tutorials/creating-access/' }
     ],
+    videoTutorials: [
+      { label: '📹 Générer une clé API PrestaShop', url: 'https://www.youtube.com/watch?v=kQdpJxK_MhI', description: 'Tutoriel en français - Guide pas à pas complet' },
+      { label: '📹 Créer une clé API de webservice', url: 'https://www.youtube.com/watch?v=fPNE_f6butw', description: 'YATEO - Création et accès aux clés API webservice' },
+      { label: '📹 PrestaShop 8 – Webservices (API)', url: 'https://www.youtube.com/watch?v=-UsuM1X6Low', description: 'Cours complet sur les webservices PrestaShop' }
+    ]
   },
   {
     key: 'brevo_newsletter',
