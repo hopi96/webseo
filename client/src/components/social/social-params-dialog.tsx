@@ -92,6 +92,10 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Générer un token d\'accès', url: 'https://developers.facebook.com/docs/facebook-login/guides/access-tokens/' },
       { label: 'Trouver le Page ID', url: 'https://www.facebook.com/help/1503421039731588/' }
+    ],
+    videoTutorials: [
+      { label: '🎥 Guide Graph API Explorer', url: 'https://developers.facebook.com/tools/explorer/', description: 'Tester et générer des tokens en temps réel' },
+      { label: '📺 Tutorial accès Facebook API', url: 'https://elfsight.com/blog/how-to-get-facebook-access-token/', description: 'Guide complet avec captures d\'écran' }
     ]
   },
   {
@@ -107,6 +111,10 @@ const platformConfigs = [
     ],
     helpLinks: [
       { label: 'Gérer les tokens Instagram', url: 'https://developers.facebook.com/docs/instagram-platform/reference/access_token/' }
+    ],
+    videoTutorials: [
+      { label: '🎥 Setup Instagram Graph API', url: 'https://developers.facebook.com/docs/instagram-platform/', description: 'Documentation officielle Meta avec exemples' },
+      { label: '📺 Guide complet Instagram API', url: 'https://www.getphyllo.com/post/how-to-use-instagram-basic-display-api', description: 'Tutorial étape par étape avec code' }
     ]
   },
   {
@@ -122,6 +130,10 @@ const platformConfigs = [
     ],
     helpLinks: [
       { label: 'Configuration OAuth Pinterest', url: 'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/' }
+    ],
+    videoTutorials: [
+      { label: '🎥 Pinterest API Quickstart', url: 'https://github.com/pinterest/api-quickstart', description: 'Dépôt GitHub officiel avec exemples de code' },
+      { label: '📺 Guide développeur Pinterest', url: 'https://developers.pinterest.com/', description: 'Documentation complète avec tutoriels intéractifs' }
     ]
   },
   {
@@ -138,6 +150,10 @@ const platformConfigs = [
     ],
     helpLinks: [
       { label: 'Implémenter OAuth GMB', url: 'https://developers.google.com/my-business/content/implement-oauth' }
+    ],
+    videoTutorials: [
+      { label: '🎥 Setup Google Business Profile API', url: 'https://developers.google.com/my-business/content/basic-setup', description: 'Guide officiel Google avec prérequis' },
+      { label: '📺 Exemples de code GMB', url: 'https://github.com/google/google-my-business-samples', description: 'Dépôt GitHub avec examples pratiques' }
     ]
   },
   {
@@ -152,6 +168,10 @@ const platformConfigs = [
     ],
     helpLinks: [
       { label: 'Générer un Bearer Token', url: 'https://developer.x.com/ja/docs/basics/authentication/guides/bearer-tokens' }
+    ],
+    videoTutorials: [
+      { label: '🎥 Tutorial X API Bearer Token', url: 'https://developer.x.com/en/docs/tutorials/step-by-step-guide-to-making-your-first-request-to-the-twitter-api-v2', description: 'Guide officiel étape par étape' },
+      { label: '📺 Twitter API 2024 Guide', url: 'https://www.tweetlio.com/blog/master-the-twitter-api-your-ultimate-guide-for-2024', description: 'Guide complet avec examples pratiques' }
     ]
   },
   {
@@ -166,6 +186,10 @@ const platformConfigs = [
     ],
     helpLinks: [
       { label: 'Gestion des tokens TikTok', url: 'https://developers.tiktok.com/doc/oauth-user-access-token-management' }
+    ],
+    videoTutorials: [
+      { label: '🎥 TikTok Developer Setup', url: 'https://developers.tiktok.com/doc/overview', description: 'Documentation officielle avec guide de démarrage' },
+      { label: '📺 Guide TikTok API 2024', url: 'https://www.getphyllo.com/post/introduction-to-tiktok-api', description: 'Tutorial complet pour développeurs' }
     ]
   },
   {
@@ -181,6 +205,10 @@ const platformConfigs = [
     ],
     helpLinks: [
       { label: 'Créer une clé Webservice', url: 'https://devdocs.prestashop-project.org/9/webservice/tutorials/creating-access/' }
+    ],
+    videoTutorials: [
+      { label: '🎥 Prestashop Webservice API', url: 'https://devdocs.prestashop-project.org/9/webservice/', description: 'Documentation officielle avec exemples' },
+      { label: '📺 Tutorial API Prestashop', url: 'https://devdocs.prestashop-project.org/9/webservice/tutorials/', description: 'Tutoriels officiels étape par étape' }
     ]
   },
   {
@@ -195,6 +223,10 @@ const platformConfigs = [
     ],
     helpLinks: [
       { label: 'Générer une API Key Brevo', url: 'https://developers.brevo.com/docs/getting-started' }
+    ],
+    videoTutorials: [
+      { label: '🎥 Tutorial Brevo 2024', url: 'https://www.classcentral.com/course/youtube-complete-brevo-tutorial-2024-email-marketing-for-beginners-336730', description: 'Guide complet Brevo pour débutants (58 min)' },
+      { label: '📺 Brevo API Node.js', url: 'https://www.suprsend.com/post/how-to-send-transactional-emails-with-brevo-api-in-node-js', description: 'Tutorial API avec exemples de code' }
     ]
   }
 ];
