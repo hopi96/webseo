@@ -152,6 +152,12 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Implémenter OAuth GMB', url: 'https://developers.google.com/my-business/content/implement-oauth' }
     ],
+    videoTutorials: [
+      { label: '📹 Trouver Business Profile ID et Place ID', url: 'https://www.youtube.com/watch?v=SEHhapS91_c', description: 'Indispensables pour Account/Location ID - Guide pratique' },
+      { label: '📹 Récupérer Place ID / CID', url: 'https://www.youtube.com/watch?v=-7E3WmGczWc', description: 'Autres méthodes pour localiser les identifiants GMB' },
+      { label: '📹 Token OAuth 2.0 Google APIs', url: 'https://www.youtube.com/watch?v=e-hOP3P-cW8', description: 'Démonstration complète avec Postman' },
+      { label: '📹 Flux OAuth 2.0 Google pas-à-pas', url: 'https://www.youtube.com/watch?v=1XUu7-yIoUY', description: 'Implémentation OAuth spécifique Google' }
+    ]
   },
   {
     key: 'xtwitter',
@@ -223,6 +229,13 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Générer une API Key Brevo', url: 'https://developers.brevo.com/docs/getting-started' }
     ],
+    videoTutorials: [
+      { label: '📹 Créer/obtenir votre clé API Brevo', url: 'https://www.youtube.com/watch?v=K_5y6-7K1VQ', description: 'Guide rapide 2024 - Configuration complète' },
+      { label: '📹 Get Brevo API Key (2025)', url: 'https://www.youtube.com/watch?v=z6yCsHCcH_Q', description: 'Méthode mise à jour pour 2025' },
+      { label: '📹 Tutoriel Brevo complet débutants', url: 'https://www.youtube.com/watch?v=0qMZRlSj2HY', description: 'Configuration, listes, campagnes - étape par étape' },
+      { label: '📹 Intégrer formulaire Brevo sur site', url: 'https://www.youtube.com/watch?v=dmFCVliq1pk', description: 'Capture d\'emails - intégration pratique' },
+      { label: '📹 Connecter Brevo avec WordPress', url: 'https://www.youtube.com/watch?v=iAePirGnxyA', description: 'Intégration WordPress complète' }
+    ]
   }
 ];
 
