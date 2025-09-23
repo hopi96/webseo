@@ -8,6 +8,7 @@ import Dashboard from "@/pages/dashboard";
 import Keywords from "@/pages/keywords";
 import Calendar from "@/pages/calendar";
 import Settings from "@/pages/settings";
+import DocumentationPDF from "@/pages/documentation-pdf";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/keywords" component={Keywords} />
       <Route path="/calendar" component={Calendar} />
       <Route path="/settings" component={Settings} />
+      <Route path="/documentation-pdf" component={DocumentationPDF} />
       <Route component={NotFound} />
     </Switch>
   );
