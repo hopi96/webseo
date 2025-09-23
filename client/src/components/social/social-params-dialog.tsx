@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Facebook, Instagram, Twitter, Youtube, Clock, Loader2, Eye, EyeOff, ExternalLink, HelpCircle, CheckCircle, AlertCircle, Info, Star, PlayCircle } from "lucide-react";
+import { Settings, Facebook, Instagram, Twitter, Youtube, Clock, Loader2, Eye, EyeOff, ExternalLink, HelpCircle, CheckCircle, AlertCircle, Info, Star } from "lucide-react";
 
 interface SocialParamsDialogProps {
   siteId: number;
@@ -93,10 +93,6 @@ const platformConfigs = [
       { label: 'Générer un token d\'accès', url: 'https://developers.facebook.com/docs/facebook-login/guides/access-tokens/' },
       { label: 'Trouver le Page ID', url: 'https://www.facebook.com/help/1503421039731588/' }
     ],
-    videoTutorials: [
-      { label: '🎥 Guide Graph API Explorer', url: 'https://developers.facebook.com/tools/explorer/', description: 'Tester et générer des tokens en temps réel' },
-      { label: '📺 Tutorial accès Facebook API', url: 'https://elfsight.com/blog/how-to-get-facebook-access-token/', description: 'Guide complet avec captures d\'écran' }
-    ]
   },
   {
     key: 'instagram',
@@ -112,10 +108,6 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Gérer les tokens Instagram', url: 'https://developers.facebook.com/docs/instagram-platform/reference/access_token/' }
     ],
-    videoTutorials: [
-      { label: '🎥 Setup Instagram Graph API', url: 'https://developers.facebook.com/docs/instagram-platform/', description: 'Documentation officielle Meta avec exemples' },
-      { label: '📺 Guide complet Instagram API', url: 'https://www.getphyllo.com/post/how-to-use-instagram-basic-display-api', description: 'Tutorial étape par étape avec code' }
-    ]
   },
   {
     key: 'pinterest',
@@ -131,10 +123,6 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Configuration OAuth Pinterest', url: 'https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/' }
     ],
-    videoTutorials: [
-      { label: '🎥 Pinterest API Quickstart', url: 'https://github.com/pinterest/api-quickstart', description: 'Dépôt GitHub officiel avec exemples de code' },
-      { label: '📺 Guide développeur Pinterest', url: 'https://developers.pinterest.com/', description: 'Documentation complète avec tutoriels intéractifs' }
-    ]
   },
   {
     key: 'google_my_business',
@@ -151,10 +139,6 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Implémenter OAuth GMB', url: 'https://developers.google.com/my-business/content/implement-oauth' }
     ],
-    videoTutorials: [
-      { label: '🎥 Setup Google Business Profile API', url: 'https://developers.google.com/my-business/content/basic-setup', description: 'Guide officiel Google avec prérequis' },
-      { label: '📺 Exemples de code GMB', url: 'https://github.com/google/google-my-business-samples', description: 'Dépôt GitHub avec examples pratiques' }
-    ]
   },
   {
     key: 'xtwitter',
@@ -169,10 +153,6 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Générer un Bearer Token', url: 'https://developer.x.com/ja/docs/basics/authentication/guides/bearer-tokens' }
     ],
-    videoTutorials: [
-      { label: '🎥 Tutorial X API Bearer Token', url: 'https://developer.x.com/en/docs/tutorials/step-by-step-guide-to-making-your-first-request-to-the-twitter-api-v2', description: 'Guide officiel étape par étape' },
-      { label: '📺 Twitter API 2024 Guide', url: 'https://www.tweetlio.com/blog/master-the-twitter-api-your-ultimate-guide-for-2024', description: 'Guide complet avec examples pratiques' }
-    ]
   },
   {
     key: 'tiktok',
@@ -187,10 +167,6 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Gestion des tokens TikTok', url: 'https://developers.tiktok.com/doc/oauth-user-access-token-management' }
     ],
-    videoTutorials: [
-      { label: '🎥 TikTok Developer Setup', url: 'https://developers.tiktok.com/doc/overview', description: 'Documentation officielle avec guide de démarrage' },
-      { label: '📺 Guide TikTok API 2024', url: 'https://www.getphyllo.com/post/introduction-to-tiktok-api', description: 'Tutorial complet pour développeurs' }
-    ]
   },
   {
     key: 'prestashop_blog',
@@ -206,10 +182,6 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Créer une clé Webservice', url: 'https://devdocs.prestashop-project.org/9/webservice/tutorials/creating-access/' }
     ],
-    videoTutorials: [
-      { label: '🎥 Prestashop Webservice API', url: 'https://devdocs.prestashop-project.org/9/webservice/', description: 'Documentation officielle avec exemples' },
-      { label: '📺 Tutorial API Prestashop', url: 'https://devdocs.prestashop-project.org/9/webservice/tutorials/', description: 'Tutoriels officiels étape par étape' }
-    ]
   },
   {
     key: 'brevo_newsletter',
@@ -224,10 +196,6 @@ const platformConfigs = [
     helpLinks: [
       { label: 'Générer une API Key Brevo', url: 'https://developers.brevo.com/docs/getting-started' }
     ],
-    videoTutorials: [
-      { label: '🎥 Tutorial Brevo 2024', url: 'https://www.classcentral.com/course/youtube-complete-brevo-tutorial-2024-email-marketing-for-beginners-336730', description: 'Guide complet Brevo pour débutants (58 min)' },
-      { label: '📺 Brevo API Node.js', url: 'https://www.suprsend.com/post/how-to-send-transactional-emails-with-brevo-api-in-node-js', description: 'Tutorial API avec exemples de code' }
-    ]
   }
 ];
 
@@ -563,40 +531,6 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                               </div>
                             )}
 
-                            {/* Section tutoriels vidéo */}
-                            {platform.videoTutorials && platform.videoTutorials.length > 0 && (
-                              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <PlayCircle className="h-4 w-4 text-purple-500" />
-                                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Tutoriels vidéo et guides</span>
-                                </div>
-                                <div className="space-y-2">
-                                  {platform.videoTutorials.map((tutorial, index) => (
-                                    <a
-                                      key={index}
-                                      href={tutorial.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="block p-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-md border border-purple-100 dark:border-purple-800 hover:border-purple-200 dark:hover:border-purple-700 transition-colors group"
-                                      data-testid={`video-tutorial-${platform.key}-${index}`}
-                                    >
-                                      <div className="flex items-start gap-2">
-                                        <PlayCircle className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors" />
-                                        <div className="min-w-0 flex-1">
-                                          <div className="text-xs font-medium text-purple-800 dark:text-purple-200 mb-1 line-clamp-1">
-                                            {tutorial.label}
-                                          </div>
-                                          <div className="text-xs text-purple-600 dark:text-purple-400 line-clamp-2">
-                                            {tutorial.description}
-                                          </div>
-                                        </div>
-                                        <ExternalLink className="h-3 w-3 text-purple-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                      </div>
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
                           </div>
                         </CardContent>
                       </Card>
