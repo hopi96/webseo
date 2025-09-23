@@ -1,0 +1,29 @@
+### Pinterest
+
+* Trouver le **Board ID** (méthode rapide). ([YouTube][1])
+* **Pinterest API – Getting Access** (création d’app + authentification). ([YouTube][2])
+* Comprendre l’**URL de redirection OAuth** Pinterest (utile pour les tokens). ([YouTube][3])
+
+### TikTok
+
+* Créer une **app TikTok Business** & obtenir les **access tokens**. ([YouTube][4])
+* Implémenter le **login TikTok** et gérer les **access tokens**. ([YouTube][5])
+* **TikTok Ads/API – Getting access** (vue d’ensemble de l’accès développeur). ([YouTube][6])
+
+### Blog PrestaShop
+
+* **Générer une clé API PrestaShop** (FR – pas à pas). ([YouTube][7])
+* **Créer une clé API de webservice et y accéder** (FR). ([YouTube][8])
+* **PrestaShop 8 – Webservices (API)** (cours/explications en FR). ([YouTube][9])
+
+Si tu veux, je peux aussi te résumer les étapes exactes à suivre pour chacun (où cliquer, quoi copier/coller dans “Token d’accès”, “Board ID”, “URL de base”, etc.).
+
+[1]: https://www.youtube.com/watch?v=VWrWf9ZDuAQ&utm_source=chatgpt.com "How to Quickly Find a Pinterest Board ID"
+[2]: https://www.youtube.com/watch?v=4MSGXHtcpsM&utm_source=chatgpt.com "Pinterest API: Getting Access - YouTube"
+[3]: https://www.youtube.com/watch?v=DHF4LQYqNY4&utm_source=chatgpt.com "Understanding the Pinterest Redirect URI: A Guide for API ..."
+[4]: https://www.youtube.com/watch?v=N8lMo9HVmfA&utm_source=chatgpt.com "How to Create TIkTok App & Access Tokens | TikTok Business ..."
+[5]: https://www.youtube.com/watch?v=XLWU1uiPhLA&utm_source=chatgpt.com "TikTok API Access Tokens and Login Dialog Implementation"
+[6]: https://www.youtube.com/watch?v=NdpdLaHX-sk&utm_source=chatgpt.com "TikTok Ads API Tutorial: Getting access"
+[7]: https://www.youtube.com/watch?v=kQdpJxK_MhI&utm_source=chatgpt.com "Générer une clé API pour Prestashop"
+[8]: https://www.youtube.com/watch?v=fPNE_f6butw&utm_source=chatgpt.com "YATEO - Créer une clé API de webservice et y accéder pour ..."
+[9]: https://www.youtube.com/watch?v=-UsuM1X6Low&utm_source=chatgpt.com "PrestaShop 8 : Webservices (API) (Prestashop Coach)"
