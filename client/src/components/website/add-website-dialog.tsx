@@ -33,7 +33,7 @@ interface AddWebsiteDialogProps {
 export function AddWebsiteDialog({ open, onOpenChange, onWebsiteAdded }: AddWebsiteDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const form = useForm<InsertWebsite>({
     resolver: zodResolver(insertWebsiteSchema),
     defaultValues: {
@@ -50,16 +50,16 @@ export function AddWebsiteDialog({ open, onOpenChange, onWebsiteAdded }: AddWebs
     onSuccess: (newWebsite) => {
       // Invalider les deux caches pour assurer la cohérence
       queryClient.invalidateQueries({ queryKey: ["/api/websites"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/sites-airtable"] });
-      
+      queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
+
       form.reset();
       onOpenChange(false);
-      
+
       toast({
         title: "Site web ajouté",
         description: "Le site web a été ajouté avec succès. L'analyse SEO en temps réel est en cours...",
       });
-      
+
       // Appeler le callback avec l'ID du nouveau site après un délai pour permettre aux données de se mettre à jour
       if (onWebsiteAdded && newWebsite?.id) {
         setTimeout(() => {
@@ -90,7 +90,7 @@ export function AddWebsiteDialog({ open, onOpenChange, onWebsiteAdded }: AddWebs
             Ajoutez un site web pour commencer à surveiller ses performances SEO avec de vraies données.
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -106,7 +106,7 @@ export function AddWebsiteDialog({ open, onOpenChange, onWebsiteAdded }: AddWebs
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="url"
@@ -114,17 +114,17 @@ export function AddWebsiteDialog({ open, onOpenChange, onWebsiteAdded }: AddWebs
                 <FormItem>
                   <FormLabel>URL du Site Web</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="https://monsite.com" 
+                    <Input
+                      placeholder="https://monsite.com"
                       type="url"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="flex justify-end space-x-2">
               <Button
                 type="button"

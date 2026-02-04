@@ -25,11 +25,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Instagram, 
-  Youtube, 
-  Facebook, 
-  Twitter, 
+import {
+  Instagram,
+  Youtube,
+  Facebook,
+  Twitter,
   Mail,
   Calendar,
   Eye,
@@ -71,11 +71,11 @@ interface SocialMediaProgramDialogProps {
   currentProgram?: string;
 }
 
-export function SocialMediaProgramDialog({ 
-  open, 
-  onOpenChange, 
-  websiteId, 
-  currentProgram 
+export function SocialMediaProgramDialog({
+  open,
+  onOpenChange,
+  websiteId,
+  currentProgram
 }: SocialMediaProgramDialogProps) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const { toast } = useToast();
@@ -84,7 +84,7 @@ export function SocialMediaProgramDialog({
   // Fonction pour parser le programme existant
   const parseExistingProgram = (programText?: string) => {
     if (!programText) return null;
-    
+
     try {
       const parsed = JSON.parse(programText);
       return parsed.frequence_publication?.plateformes || null;
@@ -163,13 +163,13 @@ export function SocialMediaProgramDialog({
   const updateProgramMutation = useMutation({
     mutationFn: async (data: SocialMediaProgramForm) => {
       const programJson = generateProgramJson(data);
-      const response = await apiRequest('PUT', `/api/sites-airtable/${websiteId}/social-program`, {
+      const response = await apiRequest('PUT', `/api/sites/${websiteId}/social-program`, {
         programme_rs: JSON.stringify(programJson)
       });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/sites-airtable'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sites'] });
       toast({
         title: "Programme mis à jour",
         description: "Le programme de publications des réseaux sociaux a été sauvegardé avec succès",
@@ -224,7 +224,7 @@ export function SocialMediaProgramDialog({
             Programme de publications réseaux sociaux
           </DialogTitle>
           <DialogDescription>
-            Configurez la fréquence de publication pour chaque plateforme. 
+            Configurez la fréquence de publication pour chaque plateforme.
             Pour moins de 4 publications/mois, utilisez le mode mensuel.
           </DialogDescription>
         </DialogHeader>
@@ -302,7 +302,7 @@ export function SocialMediaProgramDialog({
                       {platformIcons[key as keyof typeof platformIcons]}
                       <h3 className="font-medium text-lg">{name}</h3>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
@@ -374,7 +374,7 @@ export function SocialMediaProgramDialog({
                       {(() => {
                         const semaine = form.watch(`${key}_semaine` as keyof SocialMediaProgramForm);
                         const mois = form.watch(`${key}_mois` as keyof SocialMediaProgramForm);
-                        
+
                         if (mois < 4 && mois > 0) {
                           return (
                             <span className="text-blue-600 dark:text-blue-400">
@@ -448,7 +448,7 @@ export function SocialMediaProgramDialog({
                     const weeklyValue = currentValues[`${key}_semaine` as keyof SocialMediaProgramForm];
                     const monthlyValue = currentValues[`${key}_mois` as keyof SocialMediaProgramForm];
                     const finalFreq = calculateFrequency(weeklyValue, monthlyValue);
-                    
+
                     return (
                       <div key={key} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">

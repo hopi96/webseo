@@ -1,0 +1,491 @@
+{
+  "name": "module analyse SEO",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Voici le site à analyser : \n {{ $json.query.url }}\n\nLa réponse doit être uniquement en JSON.\nPas de de markdown \"```json\".\n\nUtilise l'outil http pour récupérer les analyse avec les données réel pour alimenter la structure du JSON.",
+        "options": {
+          "systemMessage": "=Tu es un excellent assistant IA .\nTon objectif est d'analyser un site web et de faire sortir un rapport SEO complet qui va suivre cette structure : \n{\n  \"meta\": {\n    \"pageAnalyzed\": \"https://lagrowthmachine.com/fr/tarifs/\",\n    \"crawlDate\": \"2025-06-17\",\n    \"locale\": \"fr-FR\"\n  },\n  \"overview\": {\n    \"httpStatus\": 200,\n    \"title\": \"Pricing – La Growth Machine\",\n    \"metaDescription\": null,\n    \"wordCount\": 6000,\n    \"mainH1\": \"Tarifs\"\n  },\n  \"technical\": {\n    \"coreWebVitals\": {\n      \"mobile\": { \"LCPs\": 3.4, \"CLS\": 0.14, \"INP\": 250 },\n      \"desktop\": { \"LCPs\": 2.2, \"CLS\": 0.05, \"INP\": 120 }\n    },\n    \"images\": {\n      \"count\": 75,\n      \"totalWeightMB\": 3.1,\n      \"lazyLoad\": true,\n      \"webpOrAvifRate\": 0.18\n    },\n    \"canonical\": { \"present\": false },\n    \"hreflang\": { \"present\": false, \"expected\": [\"fr-FR\", \"en-US\", \"de-DE\", \"es-ES\"] },\n    \"structuredData\": { \"typesDetected\": [], \"needed\": [\"Product\", \"Offer\", \"FAQPage\", \"AggregateRating\"] },\n    \"securityHeaders\": {\n      \"present\": [\"Strict-Transport-Security\", \"X-Content-Type-Options\"],\n      \"missing\": [\"Content-Security-Policy\", \"Permissions-Policy\"]\n    }\n  },\n  \"domainMetrics\": {\n    \"domainAuthorityMoz\": 34,\n    \"referringDomains\": 820,\n    \"totalBacklinks\": 4500,\n    \"totalOrganicKeywords\": 4400,\n    \"estOrganicTrafficMonthly\": 14000\n  },\n  \"keywordStats\": {\n    \"brandKeywords\": [\n      {\n        \"keyword\": \"la growth machine\",\n        \"globalVolume\": 5500,\n        \"frVolume\": 1200,\n        \"rankFR\": 1,\n        \"difficulty\": 8,\n        \"cpcUsd\": 0.35,\n        \"trafficSharePct\": 28\n      }\n    ],\n    \"nonBrandTop10FR\": [\n      { \"keyword\": \"prospection linkedin\", \"volume\": 3600, \"rank\": 7, \"difficulty\": 42, \"estimatedTraffic\": 190 },\n      { \"keyword\": \"outil prospection linkedin\", \"volume\": 800, \"rank\": 5, \"difficulty\": 45, \"estimatedTraffic\": 140 },\n      { \"keyword\": \"automatisation linkedin\", \"volume\": 400, \"rank\": 4, \"difficulty\": 38, \"estimatedTraffic\": 70 },\n      { \"keyword\": \"sales automation\", \"volume\": 2400, \"rank\": 15, \"difficulty\": 51, \"estimatedTraffic\": 50 },\n      { \"keyword\": \"outreach multicanal\", \"volume\": 250, \"rank\": 3, \"difficulty\": 28, \"estimatedTraffic\": 40 },\n      { \"keyword\": \"pricing linkedin automation\", \"volume\": 90, \"rank\": 2, \"difficulty\": 19, \"estimatedTraffic\": 15 },\n      { \"keyword\": \"lead generation linkedin outil\", \"volume\": 280, \"rank\": 9, \"difficulty\": 40, \"estimatedTraffic\": 12 },\n      { \"keyword\": \"séquences email linkedin\", \"volume\": 200, \"rank\": 6, \"difficulty\": 34, \"estimatedTraffic\": 18 },\n      { \"keyword\": \"growth hacking linkedin\", \"volume\": 650, \"rank\": 11, \"difficulty\": 48, \"estimatedTraffic\": 22 },\n      { \"keyword\": \"multichannel prospecting tool\", \"volume\": 120, \"rank\": 4, \"difficulty\": 33, \"estimatedTraffic\": 10 }\n    ],\n    \"questionKeywordsFR\": [\n      { \"keyword\": \"comment automatiser linkedin\", \"volume\": 320 },\n      { \"keyword\": \"quel outil pour prospection linkedin\", \"volume\": 210 },\n      { \"keyword\": \"comment envoyer message personnalisé linkedin\", \"volume\": 170 }\n    ]\n  },\n  \"competitors\": [\n    { \"domain\": \"lemlist.com\", \"trafficEst\": 67000, \"domainAuthority\": 62, \"overlapKeywords\": 420, \"positioning\": \"email + multicanal\" },\n    { \"domain\": \"waalaxy.com\", \"trafficEst\": 41000, \"domainAuthority\": 54, \"overlapKeywords\": 350, \"positioning\": \"LinkedIn automation\" },\n    { \"domain\": \"expandi.io\", \"trafficEst\": 32000, \"domainAuthority\": 49, \"overlapKeywords\": 290, \"positioning\": \"LinkedIn outreach SaaS\" },\n    { \"domain\": \"dripify.io\", \"trafficEst\": 26000, \"domainAuthority\": 45, \"overlapKeywords\": 210, \"positioning\": \"LinkedIn sequences\" }\n  ],\n  \"actionPlan90Days\": [\n    {\n      \"priority\": \"high\",\n      \"task\": \"Ajouter link rel=\\\"canonical\\\" + balises hreflang croisés\",\n      \"expectedImpact\": \"Réduction du contenu dupliqué, meilleur ciblage géographique\",\n      \"kpi\": \"-20 % pages dupliquées (Search Console)\"\n    },\n    {\n      \"priority\": \"high\",\n      \"task\": \"Compresser et servir toutes les images > 90 Ko en WebP/AVIF + lazy-load\",\n      \"expectedImpact\": \"LCP mobile < 2,5 s, CWV amélioré\",\n      \"kpi\": \"LCP mobile < 2,5 s\"\n    },\n    {\n      \"priority\": \"high\",\n      \"task\": \"Implémenter les données structurées Product, Offer & FAQPage\",\n      \"expectedImpact\": \"Rich Snippets (étoiles + FAQ) → CTR +2 pts\",\n      \"kpi\": \"Rich snippets affichés sur requêtes marque\"\n    },\n    {\n      \"priority\": \"medium\",\n      \"task\": \"Réécrire titres & meta-descriptions localisés (FR/EN/DE/ES)\",\n      \"expectedImpact\": \"Meilleure pertinence & CTR\",\n      \"kpi\": \"CTR +1 pt (Search Console)\"\n    },\n    {\n      \"priority\": \"medium\",\n      \"task\": \"Déplacer scripts tiers (HubSpot, Hotjar…) en defer/async\",\n      \"expectedImpact\": \"INP < 200 ms, UX fluide\",\n      \"kpi\": \"INP < 200 ms\"\n    },\n    {\n      \"priority\": \"low\",\n      \"task\": \"Campagne netlinking thématique (SaaS, Growth, Sales)\",\n      \"expectedImpact\": \"Autorité de domaine + RD\",\n      \"kpi\": \"+30 domaines référents (Ahrefs)\"\n    }\n  ],\n  \"recommendations\": {\n    \"onPage\": [\n      \"Ajouter un seul <h1> 'Tarifs | La Growth Machine' et réorganiser les H2/H3 pour refléter le parcours utilisateur : plans → fonctionnalités → FAQ.\",\n      \"Insérer les mots-clés secondaires ('outil prospection LinkedIn', 'logiciel emailing B2B') dans les sous-titres et ancres de lien.\",\n      \"Créer une section 'Étude de cas' avec schema Review pour renforcer l'E-E-A-T.\"\n    ],\n    \"content\": [\n      \"Publier un billet de blog 'Combien coûte un outil de prospection LinkedIn ?' pour cibler le mot-clé 'pricing linkedin automation' (volume 90).\",\n      \"Intégrer une vidéo explicative sous-titrée FR/EN avec transcript indexable pour capter le trafic YouTube + améliorer le time on page.\"\n    ],\n    \"technical\": [\n      \"Pré-charger la première image du héros : <link rel=\\\"preload\\\" as=\\\"image\\\" href=\\\"/hero.webp\\\">.\",\n      \"Activer la compression Brotli sur le CDN et mettre en place un cache max-age de 1 an pour les assets statiques.\"\n    ],\n    \"international\": [\n      \"Utiliser un sitemap index multilingue avec <xhtml:link rel=\\\"alternate\\\" hreflang=\\\"…\\\"> pour chaque URL.\",\n      \"Géolocaliser le serveur principal sur l’Europe (cloudflare.fr) pour réduire le TTFB FR.\"\n    ],\n    \"offPage\": [\n      \"Pitcher un guest-post sur le blog 'GrowthHacking.French.io' (DA 58) – thème 'Séquences multicanal vs séquences LinkedIn'.\",\n      \"Transformer les 519 avis G2 en témoignages vidéo microformatés (schema VideoObject) pour récupérer des featured snippets.\"\n    ],\n    \"coreWebVitals\": [\n      \"Supprimer le slider de logos (layout shift) ou fixer une hauteur min-height pour réduire le CLS : <style>.logo-slider{min-height:64px}</style>.\",\n      \"Monitorer les métriques en temps réel via l’API Chrome UX Report et fixer une alerte Slack si LCP > 2,6 s pendant 3 h.\"\n    ],\n    \"keywordStrategy\": [\n      {\n        \"cluster\": \"LinkedIn automation\",\n        \"newKeywords\": [\"bot linkedin sécurisé\", \"workflow linkedin email\"],\n        \"contentType\": \"guide + template workflow\",\n        \"internalLinking\": \"Ajouter liens depuis /blog/linkedin-prospection à /fr/tarifs/ avec ancre 'workflow multicanal'\"\n      },\n      {\n        \"cluster\": \"multichannel outreach\",\n        \"newKeywords\": [\"outreach multicanal exemple\", \"séquence multicanal B2B\"],\n        \"contentType\": \"checklist PDF téléchargeable\",\n        \"internalLinking\": \"Section ressources dans /fr/tarifs/ avec bouton CTA 'Télécharger la checklist'\"\n      }\n    ]\n  },\n  \"notes\": \"Mettez à jour les volumes et positions via Search Console ou l’API de votre outil (Semrush/Ahrefs) avant ingestion dans le dashboard.\"\n}\n\n\nVoici un documentation explicatif de cette structure : \n### Documentation de la structure JSON « SEO Dashboard »\n\nLe document est conçu pour alimenter un entrepôt de données ou un outil de visualisation (Looker Studio, Power BI, Metabase…).\nChaque clé suit une logique **fonctionnelle** : *meta → overview → technical → domainMetrics → keywordStats → competitors → actionPlan90Days → recommendations → notes*.\nVous pouvez la considérer comme un **data-model** modulaire ; chaque nœud peut être mis à jour indépendamment par des jobs (crawler, API, analyste…).\n\n---\n\n## Vue d’ensemble du format\n\n```text\nroot\n├── meta               # Contexte de la capture (page, date, langue)\n├── overview           # Informations basiques on-page\n├── technical          # Données techniques & Core Web Vitals\n├── domainMetrics      # Autorité globale du domaine\n├── keywordStats       # Performances & opportunités mot-clé\n├── competitors        # Paysage concurrentiel\n├── actionPlan90Days   # Roadmap prioritaire (tâches & KPI)\n├── recommendations    # Conseils détaillés (verticalisés)\n└── notes              # Remarques libres / TODO\n```\n\n---\n\n## 1. `meta`\n\n| Clé            | Type              | Obligatoire | Description                                         | Exemple                                    |\n| -------------- | ----------------- | ----------- | --------------------------------------------------- | ------------------------------------------ |\n| `pageAnalyzed` | string (URL)      | oui         | URL exacte crawlée, version canonique de préférence | `\"https://lagrowthmachine.com/fr/tarifs/\"` |\n| `crawlDate`    | string (ISO-8601) | oui         | Date de collecte des données                        | `\"2025-06-17\"`                             |\n| `locale`       | string (BCP-47)   | oui         | Langue/région de la page analysée                   | `\"fr-FR\"`                                  |\n\n---\n\n## 2. `overview`\n\n| Clé               | Type           | Description                               |\n| ----------------- | -------------- | ----------------------------------------- |\n| `httpStatus`      | integer        | Code HTTP obtenu (200, 301, 404…)         |\n| `title`           | string         | Contenu de `<title>`                      |\n| `metaDescription` | string \\| null | Contenu de `<meta name=\"description\">`    |\n| `wordCount`       | integer        | Nombre approximatif de mots visibles HTML |\n| `mainH1`          | string         | Texte du premier `<h1>` trouvé            |\n\n---\n\n## 3. `technical`\n\nSection orientée **performance, accessibilité, balisage**.\n\n| Clé               | Type  | Détails                                                                       |\n| ----------------- | ----- | ----------------------------------------------------------------------------- |\n| `coreWebVitals`   | objet | Sous-nœuds `mobile` et `desktop` avec champs `LCPs` (sec), `CLS`, `INP` (ms). |\n| `images`          | objet | `count`, `totalWeightMB`, `lazyLoad` (bool), `webpOrAvifRate` (0-1).          |\n| `canonical`       | objet | `{ \"present\": bool }` (future version : `href`).                              |\n| `hreflang`        | objet | `{ \"present\": bool, \"expected\": [lang-REGION] }`.                             |\n| `structuredData`  | objet | `typesDetected` (array), `needed` (array).                                    |\n| `securityHeaders` | objet | `present` / `missing` (arrays).                                               |\n\n---\n\n## 4. `domainMetrics`\n\nMesures d’**autorité et de popularité** rattachées au domaine racine.\n\n| Clé                        | Type    | Source typique      |\n| -------------------------- | ------- | ------------------- |\n| `domainAuthorityMoz`       | integer | Moz DA              |\n| `referringDomains`         | integer | Ahrefs / Majestic   |\n| `totalBacklinks`           | integer | Idem                |\n| `totalOrganicKeywords`     | integer | Semrush / Ahrefs    |\n| `estOrganicTrafficMonthly` | integer | Estimation outillée |\n\n---\n\n## 5. `keywordStats`\n\n### 5.1 Sous-noeud `brandKeywords`\n\nArray d’objets :\n\n| Champ             | Type    | Sens                                     |\n| ----------------- | ------- | ---------------------------------------- |\n| `keyword`         | string  | Mot-clé de marque                        |\n| `globalVolume`    | integer | Volume mondial mensuel moyen             |\n| `frVolume`        | integer | Volume France                            |\n| `rankFR`          | integer | Position Google FR                       |\n| `difficulty`      | integer | Difficulté (0-100)                       |\n| `cpcUsd`          | number  | CPC moyen (USD)                          |\n| `trafficSharePct` | number  | % trafic organique qu’apporte ce mot-clé |\n\n### 5.2 Sous-noeud `nonBrandTop10FR`\n\nTop 10 non-brand ; même structure simplifiée (sans `globalVolume`).\n\n### 5.3 Sous-noeud `questionKeywordsFR`\n\nQuestions de type PAA/FAQ (volume ≤ 1000).\n\n---\n\n## 6. `competitors`\n\nArray : un objet par concurrent direct.\n\n| Champ             | Type    | Explication                  |\n| ----------------- | ------- | ---------------------------- |\n| `domain`          | string  | Domaine concurrent           |\n| `trafficEst`      | integer | Trafic organique estimé      |\n| `domainAuthority` | integer | Score d’autorité             |\n| `overlapKeywords` | integer | Nombre de mots-clés partagés |\n| `positioning`     | string  | Angle marketing principal    |\n\n---\n\n## 7. `actionPlan90Days`\n\nFeuille de route **priorisée** : chaque entrée = tâche mesurable.\n\n| Champ            | Type   | Détails                               |\n| ---------------- | ------ | ------------------------------------- |\n| `priority`       | string | `high` / `medium` / `low`             |\n| `task`           | string | Intitulé concret                      |\n| `expectedImpact` | string | Mécanisme SEO/UX visé                 |\n| `kpi`            | string | Indicateur chiffré (élément de suivi) |\n\n---\n\n## 8. `recommendations`\n\nGranularité **par verticale** : `onPage`, `content`, `technical`, `international`, `offPage`, `coreWebVitals`, `keywordStrategy`.\n\n* Chaque clé contient un **array de strings** ou d’objets si besoin de métadonnées supplémentaires (ex. cluster).\n\nExemple `keywordStrategy` (objet) :\n\n```json\n{\n  \"cluster\": \"LinkedIn automation\",\n  \"newKeywords\": [\"bot linkedin sécurisé\"],\n  \"contentType\": \"guide\",\n  \"internalLinking\": \"ancre 'workflow multicanal'\"\n}\n```\n\n---\n\n## 9. `notes`\n\nChamp libre : todo internes, mises en garde, date de la prochaine mise à jour…\n\n---\n\n### Bonnes pratiques d’implémentation\n\n| Point             | Recommandation                                                                                                                                                                                                                     |\n| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| **Normalisation** | Dates ISO-8601 (`YYYY-MM-DD`), décimales `.` (pas de `,`).                                                                                                                                                                         |\n| **Actualisation** | Mettre à jour chaque nœud via des jobs dédiés : <br>• `meta` & `overview` → crawler mensuel <br>• `technical` → lab + CrUX hebdo <br>• `keywordStats` → API Semrush/Ahrefs quotidien <br>• `actionPlan90Days` → révision manuelle. |\n| **Extensibilité** | Vous pouvez ajouter des nœuds (`socialMetrics`, `conversionData`, etc.) sans casser le modèle existant.                                                                                                                            |\n| **Validation**    | Fournir un JSON Schema (draft-07) pour automatiser le contrôle (illustré ci-dessous).                                                                                                                                              |\n\n---\n\n### Extrait de JSON Schema simplifié (draft-07)\n\n```json\n{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"title\": \"SEODashboard\",\n  \"type\": \"object\",\n  \"required\": [\"meta\", \"overview\", \"technical\", \"domainMetrics\"],\n  \"properties\": {\n    \"meta\": {\n      \"type\": \"object\",\n      \"required\": [\"pageAnalyzed\", \"crawlDate\", \"locale\"],\n      \"properties\": {\n        \"pageAnalyzed\": { \"type\": \"string\", \"format\": \"uri\" },\n        \"crawlDate\":   { \"type\": \"string\", \"format\": \"date\" },\n        \"locale\":      { \"type\": \"string\" }\n      }\n    },\n    \"overview\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"httpStatus\": { \"type\": \"integer\" },\n        \"title\":       { \"type\": \"string\" },\n        \"metaDescription\": { \"type\": [\"string\", \"null\"] },\n        \"wordCount\":   { \"type\": \"integer\" },\n        \"mainH1\":      { \"type\": \"string\" }\n      }\n    },\n    \"...\": {}\n  }\n}\n```\n\n> **Astuce** : validez votre JSON à chaque ingestion (`ajv`, `jsonschema`, etc.) afin d’éviter les ruptures de pipeline.\n\n---\n\n## Résumé\n\n* **Modulaire** : chaque section répond à un besoin métier (technique, contenu, netlinking).\n* **Actionnable** : `actionPlan90Days` et `recommendations` lient insights → tâches → KPI.\n* **Compatible Dashboard** : tous les champs sont typés, normalisés, prêts à être pivottés ou filtrés.\n\nEn suivant ce guide, vous disposerez d’un référentiel clair pour stocker, maintenir et exploiter vos données SEO dans un environnement analytique moderne.\n\n\n------\nUtilise l'outil http pour récupérer les analyse avec les données réel pour alimenter la structure du JSON.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -176,
+        400
+      ],
+      "id": "6f572ead-1711-41bb-9556-927d96ea8b11",
+      "name": "AI Agent",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        624
+      ],
+      "id": "2b7531fa-0e17-4091-b3ce-3a3a16e4bc14",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0ZffdUjnoDddFhbh",
+          "name": "OpenAi account 12"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "path": "4c07451f-11b9-4d71-8060-ac071029417d",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        272
+      ],
+      "id": "6af207a2-2f85-4ba0-96ac-175643997429",
+      "name": "Webhook",
+      "webhookId": "4c07451f-11b9-4d71-8060-ac071029417d"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        400
+      ],
+      "id": "4b8d24df-c3d2-429c-ad9d-aee9ad053b84",
+      "name": "Respond to Webhook",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://www.plug2ai.com&key=AIzaSyDj8szkif6LNp8CvQg8AZ28Qgepd3zsLaQ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -416,
+        768
+      ],
+      "id": "7f071284-2170-4b6f-9893-a478570761ed",
+      "name": "HTTP Request",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "Utilise cet outil pour faire avoir plus de data sur le site.",
+        "url": "=https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url={{ $json.query.url }}&key=AIzaSyDj8szkif6LNp8CvQg8AZ28Qgepd3zsLaQ"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        624
+      ],
+      "id": "4c11e6dd-e5b3-4199-afa2-0d8d6fd7374c",
+      "name": "HTTP Request1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "utilise cette API pour faire l'analyse SEO pour avoir des données rééls.",
+        "method": "POST",
+        "url": "https://f0bfad6d-01f5-418d-8771-a7f2f98a98c0-00-2o3awvn6syp0z.kirk.repl.co/api/analyze",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "analysisType",
+              "value": "deep"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        624
+      ],
+      "id": "3e88c440-2a54-4bf2-aeb8-0190be685524",
+      "name": "HTTP Request2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "utilise cette API pour faire l'analyse SEO pour avoir des données rééls.",
+        "method": "POST",
+        "url": "https://f0bfad6d-01f5-418d-8771-a7f2f98a98c0-00-2o3awvn6syp0z.kirk.repl.co/api/analyze",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "analysisType",
+              "value": "deep"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -416,
+        -400
+      ],
+      "id": "b9e81208-5b3e-444d-9243-512fb8f02038",
+      "name": "HTTP Request3",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        112
+      ],
+      "id": "eb50a924-220c-4dde-97f1-cc706b629d8f",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://seo-analyzer-plug2ai.replit.app/api/analyze",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.query.url }}"
+            },
+            {
+              "name": "analysisType",
+              "value": "deep"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -96,
+        112
+      ],
+      "id": "f36b5d89-24b9-4800-bb17-c534c12930c8",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "app9L4iAzg6Nms9Qq",
+          "mode": "list",
+          "cachedResultName": "SEO DASH",
+          "cachedResultUrl": "https://airtable.com/app9L4iAzg6Nms9Qq"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        -160
+      ],
+      "id": "85022d02-aa8f-427f-ada4-c28bab7dfa08",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Eg23eel0ZoDfveL0",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "app9L4iAzg6Nms9Qq",
+          "mode": "list",
+          "cachedResultName": "SEO DASH",
+          "cachedResultUrl": "https://airtable.com/app9L4iAzg6Nms9Qq"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblI1i388kBrW7jtq",
+          "mode": "list",
+          "cachedResultName": "analyse SEO",
+          "cachedResultUrl": "https://airtable.com/app9L4iAzg6Nms9Qq/tblI1i388kBrW7jtq"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "URL": "={{ $('Webhook').item.json.query.url }}",
+            "Analyse_SEO": "={{ $json.toJsonString() }}",
+            "Nom_site_web": "={{ $json.title }}"
+          },
+          "matchingColumns": [
+            "URL"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "ID site",
+              "displayName": "ID site",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nom_site_web",
+              "displayName": "Nom_site_web",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Analyse_SEO",
+              "displayName": "Analyse_SEO",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        272
+      ],
+      "id": "41c7175a-8ce8-4397-9143-c15ca5c8ab7c",
+      "name": "Create or update a record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Eg23eel0ZoDfveL0",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "doseit.app.n8n.cloud",
+            "user-agent": "node",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "*",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "34.75.81.30",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "95749fa6505d8bba-ATL",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "sec-fetch-mode": "cors",
+            "x-forwarded-for": "34.75.81.30, 108.162.238.166",
+            "x-forwarded-host": "doseit.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-14-5654dfbc89-xbgh4",
+            "x-is-trusted": "yes",
+            "x-real-ip": "34.75.81.30"
+          },
+          "params": {},
+          "query": {
+            "url": "https://www.oh-les-kids.fr",
+            "timestamp": "2025-06-29T10:08:36.759Z"
+          },
+          "body": {},
+          "webhookUrl": "https://doseit.app.n8n.cloud/webhook/4c07451f-11b9-4d71-8060-ac071029417d",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create or update a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "225881cf-f417-42d1-9e65-fe5d4de3c186",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f5d7031303631d391eb8dfaa8f455847d9088305f68d597540a5d0496c9293d3"
+  },
+  "id": "EKw1rcATZWCfXgZa",
+  "tags": []
+}

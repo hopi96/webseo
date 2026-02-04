@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
+import {
   Calendar,
   Zap,
   Clock,
@@ -31,7 +31,7 @@ import {
   TrendingUp,
   HelpCircle
 } from "lucide-react";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogContent,
@@ -51,107 +51,87 @@ interface EditorialCalendarGeneratorDialogProps {
   seoAnalysis?: any;
 }
 
-export function EditorialCalendarGeneratorDialog({ 
-  open, 
-  onOpenChange, 
-  websiteId, 
-  websiteName, 
-  websiteUrl, 
-  seoAnalysis 
+export function EditorialCalendarGeneratorDialog({
+  open,
+  onOpenChange,
+  websiteId,
+  websiteName,
+  websiteUrl,
+  seoAnalysis
 }: EditorialCalendarGeneratorDialogProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [generationResult, setGenerationResult] = useState<any>(null);
-  
+
   // États pour la sélection de période
   const [isMonthlyPeriod, setIsMonthlyPeriod] = useState(true);
-  
+
   // Dates par défaut
   const today = new Date();
   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
-  
+
   const [startDate, setStartDate] = useState(today.toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(nextMonth.toISOString().split('T')[0]);
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
-  // Fonction pour simuler la progression pendant exactement 1 heure
-  const simulateProgressFor1Hour = async (startTime: Date): Promise<any> => {
-    const startPollingTime = Date.now();
-    const progressDuration = 60 * 60 * 1000; // Exactement 1 heure
-    
-    return new Promise((resolve) => {
-      // Progression continue pendant exactement 1 heure
-      const progressInterval = setInterval(() => {
-        const elapsed = Date.now() - startPollingTime;
-        const progressPercent = Math.min((elapsed / progressDuration) * 100, 100);
-        setProgress(progressPercent);
-        
-        if (elapsed >= progressDuration) {
-          // Exactement 1 heure écoulée
-          clearInterval(progressInterval);
-          setCurrentStep('Génération terminée');
-          setProgress(100);
-          console.log('⏰ Génération terminée après exactement 1 heure');
-          resolve({ completed: true, duration: '1 heure' });
-        } else {
-          setCurrentStep('Génération de contenu par IA en cours...');
-        }
-      }, 1000); // Mise à jour chaque seconde
-    });
-  };
+
 
   // Mutation pour générer le calendrier éditorial
   const generateCalendarMutation = useMutation({
     mutationFn: async () => {
-      const generationStartTime = new Date();
-      
       // Commencer la génération
-      setCurrentStep('Lancement de la génération...');
-      setProgress(20);
-      
-      // Lancer le webhook en arrière-plan sans attendre sa réponse
+      setCurrentStep('Analyse SEO et génération du calendrier...');
+      setProgress(10);
+
+      const Period = isMonthlyPeriod ? {
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0]
+      } : {
+        startDate,
+        endDate
+      };
+
       try {
-        // Déclencher le webhook sans attendre le résultat
-        apiRequest('POST', '/api/generate-editorial-calendar', {
-          websiteId,
+        setProgress(30);
+        setCurrentStep('Génération des idées avec GPT-4o...');
+
+        // Appel au nouveau workflow natif
+        const response = await apiRequest('POST', '/api/workflows/generate-calendar-flow', {
+          siteId: websiteId,
           websiteName,
           websiteUrl,
           seoAnalysis: seoAnalysis || {},
-          period: isMonthlyPeriod ? 'monthly' : {
-            startDate,
-            endDate
-          }
-        }).catch(error => {
-          console.log('⚠️ Webhook lancé en arrière-plan, erreur ignorée:', error.message);
+          period: Period,
+          platforms: ['instagram', 'facebook', 'newsletter', 'linkedin'] // Plateformes par défaut
         });
-        
-        console.log('🚀 Webhook lancé en arrière-plan, début de la génération 1h');
+
+        setProgress(80);
+        setCurrentStep('Enregistrement des contenus...');
+
+        const data = await response.json();
+
+        setProgress(100);
+        return data;
+
       } catch (error) {
-        console.log('⚠️ Erreur webhook ignorée, continuation de la génération:', (error as Error).message);
+        console.error('Erreur génération:', error);
+        throw error;
       }
-      
-      // Continuer immédiatement avec la simulation 1h sans attendre le webhook
-      setCurrentStep('Traitement par l\'IA en cours...');
-      setProgress(40);
-      
-      // Utiliser la simulation de progression pendant exactement 1 heure
-      const result = await simulateProgressFor1Hour(generationStartTime);
-      
-      return { success: true, pollResult: result };
     },
     onSuccess: (data) => {
       setGenerationResult(data);
       setIsGenerating(false);
-      
+      setProgress(100);
+
       toast({
-        title: "Génération terminée",
-        description: "Vérifiez votre table Airtable pour voir les contenus générés.",
+        title: "Génération lancée",
+        description: data.message || `${data.calendarCount || 0} idées de contenus ont été générées. La rédaction continue en arrière-plan.`,
       });
-      
+
       // Invalider le cache pour forcer le rechargement des données
       queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
     },
@@ -159,25 +139,10 @@ export function EditorialCalendarGeneratorDialog({
       setIsGenerating(false);
       setProgress(0);
       setCurrentStep('');
-      
-      // Gestion spécifique des erreurs de webhook n8n et polling
-      let errorMessage = error.message || "Impossible de générer le calendrier éditorial";
-      let errorTitle = "Erreur";
-      
-      if (error.message?.includes('Timeout: La génération a pris plus d\'1 heure')) {
-        errorTitle = "Génération terminée (timeout 1h)";
-        errorMessage = "La génération a duré 1 heure complète. Le processus est maintenant terminé. Vérifiez votre table Airtable - les contenus ont peut-être été générés avec succès même si nous n'avons pas pu le détecter automatiquement.";
-      } else if (error.message?.includes('polling')) {
-        errorTitle = "Génération en cours";
-        errorMessage = "La génération continue en arrière-plan. Vérifiez votre table Airtable dans quelques minutes - les contenus y apparaîtront automatiquement.";
-      } else {
-        errorTitle = "Génération lancée";
-        errorMessage = "La génération a été déclenchée avec succès. Le processus est en cours dans n8n. Vérifiez votre table Airtable dans les prochaines minutes.";
-      }
-      
+
       toast({
-        title: errorTitle,
-        description: errorMessage,
+        title: "Erreur de génération",
+        description: error.message || "Impossible de générer le calendrier éditorial",
         variant: "destructive",
       });
     },
@@ -188,19 +153,6 @@ export function EditorialCalendarGeneratorDialog({
     setProgress(0);
     setCurrentStep('Initialisation...');
     setGenerationResult(null);
-
-    // Simuler les étapes de génération avant l'appel API
-    const steps = [
-      { step: 'Analyse du site web...', progress: 20 },
-      { step: 'Extraction des données SEO...', progress: 40 },
-      { step: 'Préparation des données...', progress: 50 }
-    ];
-
-    for (let i = 0; i < steps.length; i++) {
-      setCurrentStep(steps[i].step);
-      setProgress(steps[i].progress);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
 
     // Lancer la génération avec le webhook n8n
     generateCalendarMutation.mutate();
@@ -223,7 +175,7 @@ export function EditorialCalendarGeneratorDialog({
               <Calendar className="h-5 w-5 text-blue-600" />
               Génération du calendrier éditorial
             </div>
-            
+
             {/* Bouton d'aide pour n8n */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -239,7 +191,7 @@ export function EditorialCalendarGeneratorDialog({
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-left space-y-3">
                     <p>Le calendrier éditorial est généré automatiquement pendant 1 heure. Pour de meilleurs résultats, activez votre workflow n8n :</p>
-                    
+
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                       <h4 className="font-semibold text-sm mb-2">🔧 Mode Production (recommandé)</h4>
                       <ol className="text-sm space-y-1 list-decimal list-inside">
@@ -248,7 +200,7 @@ export function EditorialCalendarGeneratorDialog({
                         <li>Le workflow restera actif en permanence</li>
                       </ol>
                     </div>
-                    
+
                     <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
                       <h4 className="font-semibold text-sm mb-2">🧪 Mode Test</h4>
                       <ol className="text-sm space-y-1 list-decimal list-inside">
@@ -257,9 +209,9 @@ export function EditorialCalendarGeneratorDialog({
                         <li>Le workflow sera actif temporairement</li>
                       </ol>
                     </div>
-                    
+
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      💡 La génération continue même si le workflow n'est pas activé. Les résultats apparaîtront dans votre table Airtable.
+                      💡 La génération continue même si le workflow n'est pas activé. Les résultats apparaîtront dans votre calendrier.
                     </p>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -291,9 +243,9 @@ export function EditorialCalendarGeneratorDialog({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">URL</span>
-                  <a 
-                    href={websiteUrl} 
-                    target="_blank" 
+                  <a
+                    href={websiteUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
                   >
@@ -363,7 +315,7 @@ export function EditorialCalendarGeneratorDialog({
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
+                  <Checkbox
                     id="monthly-period"
                     checked={isMonthlyPeriod}
                     onCheckedChange={(checked) => setIsMonthlyPeriod(checked === true)}
@@ -372,13 +324,13 @@ export function EditorialCalendarGeneratorDialog({
                     Génération mensuelle (recommandé)
                   </Label>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="start-date" className="text-sm font-medium">
                       Date de début
                     </Label>
-                    <Input 
+                    <Input
                       id="start-date"
                       type="date"
                       value={startDate}
@@ -387,12 +339,12 @@ export function EditorialCalendarGeneratorDialog({
                       disabled={isMonthlyPeriod}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="end-date" className="text-sm font-medium">
                       Date de fin
                     </Label>
-                    <Input 
+                    <Input
                       id="end-date"
                       type="date"
                       value={endDate}
@@ -403,11 +355,11 @@ export function EditorialCalendarGeneratorDialog({
                     />
                   </div>
                 </div>
-                
+
                 <div className="text-xs text-gray-500 mt-2">
-                  {isMonthlyPeriod 
+                  {isMonthlyPeriod
                     ? "Le calendrier sera généré pour 1 mois complet à partir d'aujourd'hui"
-                    : startDate && endDate 
+                    : startDate && endDate
                       ? `Le calendrier sera généré du ${new Date(startDate).toLocaleDateString('fr-FR')} au ${new Date(endDate).toLocaleDateString('fr-FR')}`
                       : "Veuillez sélectionner une période personnalisée"
                   }
@@ -475,7 +427,7 @@ export function EditorialCalendarGeneratorDialog({
             >
               {generationResult ? 'Fermer' : 'Annuler'}
             </Button>
-            
+
             {!generationResult && (
               <Button
                 onClick={handleGenerate}
@@ -495,7 +447,7 @@ export function EditorialCalendarGeneratorDialog({
                 )}
               </Button>
             )}
-            
+
             {generationResult && (
               <Button
                 variant="default"

@@ -1,28 +1,28 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
 } from "@/components/ui/dialog";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
@@ -35,13 +35,13 @@ import { EditorialContent } from "@shared/schema";
 import { Sparkles, Globe, Upload, X, RotateCcw } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
 import { ImageModal } from "@/components/ui/image-modal";
-import { 
-  prepareImageDataForSubmission, 
-  initializeImageFormState, 
-  resetImageState, 
-  getDisplayImageUrl, 
+import {
+  prepareImageDataForSubmission,
+  initializeImageFormState,
+  resetImageState,
+  getDisplayImageUrl,
   getImageSourceLabel,
-  type FormImageState 
+  type FormImageState
 } from "@/lib/image-utils";
 
 interface EditArticleDialogProps {
@@ -71,33 +71,33 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
   const [customPrompt, setCustomPrompt] = useState<string>("");
   const [imageLoadError, setImageLoadError] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
-  
+
   // État des images utilisant la nouvelle logique
-  const [imageState, setImageState] = useState<FormImageState>(() => 
+  const [imageState, setImageState] = useState<FormImageState>(() =>
     initializeImageFormState({
       hasImage: article.hasImage ?? false,
       imageUrl: article.imageUrl ?? null,
       imageSource: article.imageSource ?? null
     })
   );
-  
+
   // Récupération des sites web depuis la table analyse SEO d'Airtable
   const { data: websites = [] } = useQuery({
-    queryKey: ['/api/sites-airtable'],
+    queryKey: ['/api/sites'],
     select: (data: any[]) => data || []
   });
-  
+
   // Normaliser les valeurs pour s'assurer qu'elles correspondent aux options du Select
   const normalizeStatut = (statut: string): "en attente" | "à réviser" | "validé" | "publié" => {
     const validStatuts = ["en attente", "à réviser", "validé", "publié"];
     return validStatuts.includes(statut) ? statut as any : "en attente";
   };
-  
+
   const normalizeTypeContent = (type: string): "newsletter" | "tiktok" | "instagram" | "xtwitter" | "youtube" | "facebook" | "blog" | "google my business" | "pinterest" => {
     const validTypes = ["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog", "google my business", "pinterest"];
     return validTypes.includes(type) ? type as any : "newsletter";
   };
-  
+
   const form = useForm<EditArticleFormData>({
     resolver: zodResolver(editArticleSchema),
     defaultValues: {
@@ -123,9 +123,9 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         dateDePublication: new Date(article.dateDePublication).toISOString().split('T')[0],
         idSite: article.idSite || 1
       };
-      
+
       form.reset(newValues);
-      
+
       // Réinitialiser l'état des images avec les nouvelles valeurs de l'article
       setImageState(initializeImageFormState({
         hasImage: article.hasImage ?? false,
@@ -149,10 +149,10 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
 
     setGeneratingImage(true);
     try {
-      const finalPrompt = customPrompt?.trim() 
-        ? customPrompt 
+      const finalPrompt = customPrompt?.trim()
+        ? customPrompt
         : `Créer une image optimisée pour ${typeContent} basée sur ce contenu : "${contentText}"`;
-        
+
       const response = await apiRequest("POST", "/api/generate-image", {
         contentText,
         typeContent,
@@ -160,7 +160,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       });
 
       const result = await response.json();
-      
+
       if (result.imageUrl) {
         setImageState(prev => ({
           ...prev,
@@ -172,7 +172,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         setImageLoadError(false);
         form.setValue("imageUrl", result.imageUrl);
         form.setValue("hasImage", true);
-        
+
         toast({
           title: "Image générée",
           description: "L'image a été générée avec succès par l'IA.",
@@ -269,7 +269,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     mutationFn: async (data: EditArticleFormData) => {
       // Préparer les données d'image avec la nouvelle logique
       const imageData = prepareImageDataForSubmission(imageState);
-      
+
       const response = await apiRequest(
         'PUT',
         `/api/editorial-content/${encodeURIComponent(article.id)}`,
@@ -287,7 +287,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         description: "L'article a été modifié avec succès dans Airtable",
         variant: "default"
       });
-      
+
       // Réinitialiser le formulaire après modification réussie
       form.reset({
         contentText: "",
@@ -298,10 +298,10 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         dateDePublication: new Date().toISOString().split('T')[0],
         idSite: websites.length > 0 ? websites[0].id : 1
       });
-      
+
       // Réinitialiser les images
       resetImages();
-      
+
       queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
       onOpenChange(false);
     },
@@ -351,7 +351,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
         <DialogHeader>
           <DialogTitle>Éditer l'article</DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -510,7 +510,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
             {form.watch("hasImage") && (
               <div className="border rounded-lg p-4 bg-gray-50">
                 <h4 className="font-medium mb-3">Gestion des images</h4>
-                
+
                 {/* Aperçu des images existantes */}
                 {getDisplayImageUrl(imageState) && (
                   <div className="mb-4">
@@ -533,8 +533,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         {(() => {
                           const imageUrl = getDisplayImageUrl(imageState)!;
                           const { label, color } = getImageSourceLabel(imageUrl);
-                          const colorClass = color === 'purple' ? 'bg-purple-500' : 
-                                            color === 'blue' ? 'bg-blue-500' : 'bg-green-500';
+                          const colorClass = color === 'purple' ? 'bg-purple-500' :
+                            color === 'blue' ? 'bg-blue-500' : 'bg-green-500';
                           return (
                             <span className={`absolute top-2 left-2 ${colorClass} text-white px-2 py-1 rounded text-xs`}>
                               {label}
@@ -608,7 +608,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 {/* Options d'image - Choix exclusif */}
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600">Choisissez l'une des deux options :</p>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     {/* Génération par IA */}
                     <div className="space-y-2">
@@ -694,7 +694,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
           </form>
         </Form>
       </DialogContent>
-      
+
       <AIGenerationDialog
         open={showAIDialog}
         onOpenChange={setShowAIDialog}

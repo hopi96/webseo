@@ -1,10 +1,16 @@
 import OpenAI from "openai";
-import { airtableService } from "./airtable-service";
+import { supabaseService } from "./supabase-service";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+let openai: OpenAI | null = null;
+
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+} else {
+  console.warn('⚠️ OPENAI_API_KEY non configurée. Les fonctionnalités de génération de contenu seront désactivées.');
+}
 
 export interface ArticleGenerationRequest {
   keywords: string[];
@@ -22,17 +28,20 @@ export interface GeneratedArticle {
 }
 
 export class OpenAIService {
-  
+
   /**
-   * Récupère le prompt système actif depuis Airtable ou utilise un fallback
+   * Récupère le prompt système actif depuis Supabase ou utilise un fallback
    */
   private async getSystemPrompt(): Promise<{ systemMessage: string; outputStructure: string }> {
     try {
-      console.log('🔍 Récupération du prompt système actif depuis Airtable...');
-      const activePrompt = await airtableService.getActiveSystemPrompt();
-      
+      console.log('🔍 Récupération du prompt système actif depuis Supabase...');
+      const prompts = await supabaseService.getAllSystemPrompts();
+
+      // Chercher un prompt marqué comme "General" ou prendre le premier
+      const activePrompt = prompts.find(p => p.nom?.toLowerCase().includes('general') || p.actif) || prompts[0];
+
       if (activePrompt && activePrompt.promptSystem) {
-        console.log('✅ Prompt système actif récupéré:', activePrompt.nom || 'Sans nom');
+        console.log('✅ Prompt système actif récupéré from Supabase');
         return {
           systemMessage: activePrompt.promptSystem,
           outputStructure: activePrompt.structureSortie || ''
@@ -57,21 +66,24 @@ export class OpenAIService {
    * Génère ou régénère un article avec GPT-4o basé sur les mots-clés et paramètres
    */
   async generateArticle(request: ArticleGenerationRequest): Promise<GeneratedArticle> {
+    if (!openai) {
+      throw new Error('OpenAI non configuré. Veuillez définir la variable OPENAI_API_KEY.');
+    }
     try {
       // Récupérer le prompt système depuis Airtable
       const { systemMessage, outputStructure } = await this.getSystemPrompt();
-      
+
       const isRegeneration = !!request.existingContent;
-      
+
       let prompt = "";
-      
+
       // Intégrer la structure de sortie si disponible
       const outputFormat = outputStructure || `{
   "title": "Titre ${isRegeneration ? 'optimisé' : 'accrocheur'} du contenu",
   "content": "Contenu ${isRegeneration ? 'régénéré et optimisé' : 'complet généré'}",
   "suggestions": ["3 suggestions d'${isRegeneration ? 'amélioration spécifiques' : 'optimisation SEO'}"]
 }`;
-      
+
       if (isRegeneration) {
         prompt = `Régénère et améliore ce contenu existant en l'optimisant pour les mots-clés fournis.
 
@@ -129,7 +141,7 @@ ${outputFormat}`;
       });
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
-      
+
       return {
         title: result.title || 'Titre généré',
         content: result.content || 'Contenu généré',
@@ -146,13 +158,17 @@ ${outputFormat}`;
    * Génère des suggestions de mots-clés basées sur un sujet
    */
   async suggestKeywords(topic: string, contentType: string): Promise<string[]> {
+    if (!openai) {
+      console.warn('OpenAI non configuré, suggestion de mots-clés désactivée.');
+      return [];
+    }
     try {
       // Récupérer le prompt système depuis Airtable (avec un fallback spécialisé pour les mots-clés)
       const { systemMessage } = await this.getSystemPrompt();
-      
+
       // Si le prompt système est générique, utiliser un prompt spécialisé pour SEO
-      const keywordSystemPrompt = systemMessage.includes('mots-clés') || systemMessage.includes('SEO') 
-        ? systemMessage 
+      const keywordSystemPrompt = systemMessage.includes('mots-clés') || systemMessage.includes('SEO')
+        ? systemMessage
         : "Tu es un expert SEO spécialisé dans la recherche de mots-clés. Réponds toujours en JSON valide.";
 
       const prompt = `Génère une liste de mots-clés pertinents pour un contenu de type "${contentType}" sur le sujet "${topic}".
@@ -198,10 +214,13 @@ Réponds en JSON avec ce format exact :
    * Génère une image avec DALL-E 3 basée sur le contenu et le type
    */
   async generateImage(contentText: string, typeContent: string): Promise<{ imageUrl: string }> {
+    if (!openai) {
+      throw new Error('OpenAI non configuré. Veuillez définir la variable OPENAI_API_KEY.');
+    }
     try {
       // Créer un prompt optimisé pour DALL-E 3 basé sur le contenu et le type
       let imagePrompt = "";
-      
+
       switch (typeContent) {
         case "xtwitter":
           imagePrompt = `Créer une image moderne et engageante pour Twitter avec un style épuré et professionnel. L'image doit illustrer visuellement le concept suivant : "${contentText}". Style : minimal, couleurs vives, typographie moderne, format carré optimisé pour les réseaux sociaux.`;
@@ -246,7 +265,7 @@ Réponds en JSON avec ce format exact :
       });
 
       const imageUrl = response.data[0].url;
-      
+
       if (!imageUrl) {
         throw new Error("Aucune URL d'image retournée par DALL-E 3");
       }
@@ -263,6 +282,10 @@ Réponds en JSON avec ce format exact :
    * Teste la connexion à l'API OpenAI
    */
   async testConnection(): Promise<boolean> {
+    if (!openai) {
+      console.warn('OpenAI non configuré.');
+      return false;
+    }
     try {
       await openai.chat.completions.create({
         model: "gpt-4o",

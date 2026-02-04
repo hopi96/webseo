@@ -14,11 +14,11 @@ import { UnifiedHeader } from "@/components/layout/unified-header";
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
 import { DeleteArticleDialog } from "@/components/editorial/delete-article-dialog";
-import { 
-  Calendar as CalendarIcon, 
-  Plus, 
-  Edit3, 
-  Clock, 
+import {
+  Calendar as CalendarIcon,
+  Plus,
+  Edit3,
+  Clock,
   Tag,
   ChevronLeft,
   ChevronRight,
@@ -61,7 +61,7 @@ export default function Calendar() {
 
   // États pour les statistiques cliquables
   const [statsDialogOpen, setStatsDialogOpen] = useState(false);
-  const [statsFilter, setStatsFilter] = useState<{kind: 'status' | 'type', value: string} | null>(null);
+  const [statsFilter, setStatsFilter] = useState<{ kind: 'status' | 'type', value: string } | null>(null);
   const [visibleCount, setVisibleCount] = useState(50);
   const { toast } = useToast();
 
@@ -100,11 +100,11 @@ export default function Calendar() {
     }
   });
 
-  // Récupérer les sites depuis Airtable
+  // Récupérer les sites
   const { data: sites = [] } = useQuery({
-    queryKey: ['/api/sites-airtable'],
-    queryFn: async (): Promise<Array<{id: number, name: string, url: string}>> => {
-      const response = await fetch('/api/sites-airtable');
+    queryKey: ['/api/sites'],
+    queryFn: async (): Promise<Array<{ id: number, name: string, url: string }>> => {
+      const response = await fetch('/api/sites');
       if (!response.ok) {
         throw new Error('Failed to fetch sites');
       }
@@ -139,20 +139,20 @@ export default function Calendar() {
 
   // Fonction helper pour vérifier si un événement appartient au mois courant
   const isSameMonth = (eventDate: Date, referenceDate: Date) => {
-    return eventDate.getFullYear() === referenceDate.getFullYear() && 
-           eventDate.getMonth() === referenceDate.getMonth();
+    return eventDate.getFullYear() === referenceDate.getFullYear() &&
+      eventDate.getMonth() === referenceDate.getMonth();
   };
 
   // Événements du mois courant uniquement (optimisé avec useMemo)
-  const monthlyEvents = useMemo(() => 
-    events.filter(event => isSameMonth(event.date, currentDate)), 
+  const monthlyEvents = useMemo(() =>
+    events.filter(event => isSameMonth(event.date, currentDate)),
     [events, currentDate]
   );
 
   // Liste filtrée pour le dialogue de statistiques (optimisé avec useMemo)
   const filteredList = useMemo(() => {
     if (!statsFilter) return [];
-    
+
     return monthlyEvents.filter(event => {
       if (statsFilter.kind === 'status') {
         return event.status === statsFilter.value;
@@ -173,23 +173,23 @@ export default function Calendar() {
     const startingDayOfWeek = firstDay.getDay();
 
     const days: (Date | null)[] = [];
-    
+
     // Ajouter les jours vides du début
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Ajouter les jours du mois
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
     }
-    
+
     return days;
   };
 
   // Fonction pour obtenir les événements d'une date
   const getEventsForDate = (date: Date) => {
-    return events.filter(event => 
+    return events.filter(event =>
       event.date.toDateString() === date.toDateString()
     );
   };
@@ -275,10 +275,10 @@ export default function Calendar() {
         title: "Mise à jour réussie",
         description: `${result.updated} article(s) mis à jour avec le statut "${result.message.split('"')[1]}"`,
       });
-      
+
       // Rafraîchir les données
       queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
-      
+
       // Réinitialiser la sélection
       exitSelectionMode();
     },
@@ -363,7 +363,7 @@ export default function Calendar() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <UnifiedHeader />
-      
+
       <main className="container mx-auto px-4 pt-20 pb-20 max-w-7xl">
         {/* En-tête */}
         <div className="mb-8">
@@ -376,7 +376,7 @@ export default function Calendar() {
                 Planifiez et organisez votre contenu SEO
               </p>
             </div>
-            <Button 
+            <Button
               onClick={() => handleAddArticle()}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
@@ -384,88 +384,88 @@ export default function Calendar() {
               Nouveau contenu
             </Button>
           </div>
-          
+
           {/* Filtres */}
           <div className="space-y-4 mb-4">
             <div className="flex flex-wrap items-center gap-4 justify-between">
               <div className="flex flex-wrap items-center gap-4">
-              {/* Filtre par site */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Site :
-                </label>
-                <Select
-                  value={selectedSiteFilter?.toString() || "all"}
-                  onValueChange={(value) => setSelectedSiteFilter(value === "all" ? null : parseInt(value))}
-                >
-                  <SelectTrigger className="w-56">
-                    <SelectValue placeholder="Tous les sites" />
-                  </SelectTrigger>
-                  <SelectContent className="smart-scroll-vertical max-h-60">
-                    <SelectItem value="all">Tous les sites</SelectItem>
-                    {sites.sort((a, b) => b.id - a.id).map((site) => (
-                      <SelectItem key={site.id} value={site.id.toString()}>
-                        {site.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                {/* Filtre par site */}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Site :
+                  </label>
+                  <Select
+                    value={selectedSiteFilter?.toString() || "all"}
+                    onValueChange={(value) => setSelectedSiteFilter(value === "all" ? null : parseInt(value))}
+                  >
+                    <SelectTrigger className="w-56">
+                      <SelectValue placeholder="Tous les sites" />
+                    </SelectTrigger>
+                    <SelectContent className="smart-scroll-vertical max-h-60">
+                      <SelectItem value="all">Tous les sites</SelectItem>
+                      {sites.sort((a, b) => b.id - a.id).map((site) => (
+                        <SelectItem key={site.id} value={site.id.toString()}>
+                          {site.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Filtre par plateforme */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Plateforme :
-                </label>
-                <Select
-                  value={selectedPlatformFilter || "all"}
-                  onValueChange={(value) => setSelectedPlatformFilter(value === "all" ? null : value)}
-                >
-                  <SelectTrigger className="w-56">
-                    <SelectValue placeholder="Toutes les plateformes" />
-                  </SelectTrigger>
-                  <SelectContent className="smart-scroll-vertical max-h-60">
-                    <SelectItem value="all">Toutes les plateformes</SelectItem>
-                    <SelectItem value="newsletter">Newsletter</SelectItem>
-                    <SelectItem value="tiktok">TikTok</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="xtwitter">X (Twitter)</SelectItem>
-                    <SelectItem value="youtube">YouTube</SelectItem>
-                    <SelectItem value="facebook">Facebook</SelectItem>
-                    <SelectItem value="blog">Article de blog</SelectItem>
-                    <SelectItem value="google my business">Google My Business</SelectItem>
-                    <SelectItem value="pinterest">Pinterest</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {/* Bouton Mode Sélection */}
-              <div className="flex items-center gap-2">
-                {!isSelectionMode ? (
-                  <Button
-                    variant="outline"
-                    onClick={enterSelectionMode}
-                    className="text-sm"
-                    data-testid="enable-selection-mode"
+                {/* Filtre par plateforme */}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Plateforme :
+                  </label>
+                  <Select
+                    value={selectedPlatformFilter || "all"}
+                    onValueChange={(value) => setSelectedPlatformFilter(value === "all" ? null : value)}
                   >
-                    <CheckSquare className="h-4 w-4 mr-2" />
-                    Mode sélection
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    onClick={exitSelectionMode}
-                    className="text-sm"
-                    data-testid="disable-selection-mode"
-                  >
-                    <Square className="h-4 w-4 mr-2" />
-                    Annuler sélection
-                  </Button>
-                )}
-              </div>
+                    <SelectTrigger className="w-56">
+                      <SelectValue placeholder="Toutes les plateformes" />
+                    </SelectTrigger>
+                    <SelectContent className="smart-scroll-vertical max-h-60">
+                      <SelectItem value="all">Toutes les plateformes</SelectItem>
+                      <SelectItem value="newsletter">Newsletter</SelectItem>
+                      <SelectItem value="tiktok">TikTok</SelectItem>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="xtwitter">X (Twitter)</SelectItem>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                      <SelectItem value="facebook">Facebook</SelectItem>
+                      <SelectItem value="blog">Article de blog</SelectItem>
+                      <SelectItem value="google my business">Google My Business</SelectItem>
+                      <SelectItem value="pinterest">Pinterest</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Bouton Mode Sélection */}
+                <div className="flex items-center gap-2">
+                  {!isSelectionMode ? (
+                    <Button
+                      variant="outline"
+                      onClick={enterSelectionMode}
+                      className="text-sm"
+                      data-testid="enable-selection-mode"
+                    >
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      Mode sélection
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={exitSelectionMode}
+                      className="text-sm"
+                      data-testid="disable-selection-mode"
+                    >
+                      <Square className="h-4 w-4 mr-2" />
+                      Annuler sélection
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
-            
+
             {/* Barre d'actions pour la sélection en lot */}
             {isSelectionMode && selectedArticles.size > 0 && (
               <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
@@ -475,7 +475,7 @@ export default function Calendar() {
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         {selectedArticles.size} article(s) sélectionné(s)
                       </span>
-                      
+
                       <Select value={bulkStatus} onValueChange={setBulkStatus}>
                         <SelectTrigger className="w-48" data-testid="bulk-status-select">
                           <SelectValue placeholder="Nouveau statut" />
@@ -486,7 +486,7 @@ export default function Calendar() {
                           <SelectItem value="validé">Validé</SelectItem>
                         </SelectContent>
                       </Select>
-                      
+
                       <Button
                         onClick={handleBulkUpdate}
                         disabled={!bulkStatus || bulkUpdateMutation.isPending}
@@ -505,7 +505,7 @@ export default function Calendar() {
                           </>
                         )}
                       </Button>
-                      
+
                       <Button
                         variant="outline"
                         onClick={clearSelection}
@@ -519,21 +519,21 @@ export default function Calendar() {
                 </Card>
               </div>
             )}
-            
+
             {/* Compteur de résultats */}
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
               <div>
                 📊 {events.length} contenu(s) affiché(s)
                 {selectedSiteFilter && ` • Site: ${getSiteName(selectedSiteFilter)}`}
-                {selectedPlatformFilter && ` • Plateforme: ${selectedPlatformFilter === 'xtwitter' ? 'X (Twitter)' : 
+                {selectedPlatformFilter && ` • Plateforme: ${selectedPlatformFilter === 'xtwitter' ? 'X (Twitter)' :
                   selectedPlatformFilter === 'google my business' ? 'Google My Business' :
-                  selectedPlatformFilter === 'article' ? 'Article de blog' :
-                  selectedPlatformFilter.charAt(0).toUpperCase() + selectedPlatformFilter.slice(1)}`}
+                    selectedPlatformFilter === 'article' ? 'Article de blog' :
+                      selectedPlatformFilter.charAt(0).toUpperCase() + selectedPlatformFilter.slice(1)}`}
               </div>
-              
+
               {(selectedSiteFilter || selectedPlatformFilter) && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => {
                     setSelectedSiteFilter(null);
@@ -586,7 +586,7 @@ export default function Calendar() {
                       {day}
                     </div>
                   ))}
-                  
+
                   {/* Jours du mois */}
                   {days.map((day, index) => (
                     <div
@@ -594,8 +594,8 @@ export default function Calendar() {
                       className={`
                         min-h-[80px] p-1 border border-gray-100 dark:border-gray-700 rounded-lg group
                         ${day ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''}
-                        ${selectedDate && day && selectedDate.toDateString() === day.toDateString() 
-                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' 
+                        ${selectedDate && day && selectedDate.toDateString() === day.toDateString()
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
                           : ''
                         }
                       `}
@@ -661,13 +661,12 @@ export default function Calendar() {
                 <CardContent className="p-4">
                   <div className="space-y-3 smart-scroll-vertical max-h-80">
                     {getEventsForDate(selectedDate).map(event => (
-                      <div 
-                        key={event.id} 
-                        className={`p-3 border rounded-lg transition-colors ${
-                          isSelectionMode && selectedArticles.has(event.id)
+                      <div
+                        key={event.id}
+                        className={`p-3 border rounded-lg transition-colors ${isSelectionMode && selectedArticles.has(event.id)
                             ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20'
                             : 'border-gray-100 dark:border-gray-700'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-start gap-3 flex-1">
@@ -687,17 +686,17 @@ export default function Calendar() {
                             </h4>
                           </div>
                           <div className="flex gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/20"
                               onClick={() => handleEditArticle(event)}
                             >
                               <Edit3 className="h-3 w-3" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20"
                               data-testid={`delete-article-${event.id}`}
                               title="Supprimer cet article"
@@ -729,14 +728,14 @@ export default function Calendar() {
                         </div>
                       </div>
                     ))}
-                    
+
                     {getEventsForDate(selectedDate).length === 0 && (
                       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                         <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>Aucun contenu prévu pour cette date</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="mt-3"
                           onClick={() => handleAddArticle(selectedDate)}
                         >
@@ -765,12 +764,12 @@ export default function Calendar() {
                     </div>
                   ) : (
                     <>
-                      <div 
+                      <div
                         className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         onClick={() => {
                           const count = monthlyEvents.filter(e => e.status === 'en attente').length;
                           if (count > 0) {
-                            setStatsFilter({kind: 'status', value: 'en attente'});
+                            setStatsFilter({ kind: 'status', value: 'en attente' });
                             setStatsDialogOpen(true);
                           }
                         }}
@@ -783,12 +782,12 @@ export default function Calendar() {
                           {monthlyEvents.filter(e => e.status === 'en attente').length}
                         </Badge>
                       </div>
-                      <div 
+                      <div
                         className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         onClick={() => {
                           const count = monthlyEvents.filter(e => e.status === 'à réviser').length;
                           if (count > 0) {
-                            setStatsFilter({kind: 'status', value: 'à réviser'});
+                            setStatsFilter({ kind: 'status', value: 'à réviser' });
                             setStatsDialogOpen(true);
                           }
                         }}
@@ -801,12 +800,12 @@ export default function Calendar() {
                           {monthlyEvents.filter(e => e.status === 'à réviser').length}
                         </Badge>
                       </div>
-                      <div 
+                      <div
                         className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         onClick={() => {
                           const count = monthlyEvents.filter(e => e.status === 'validé').length;
                           if (count > 0) {
-                            setStatsFilter({kind: 'status', value: 'validé'});
+                            setStatsFilter({ kind: 'status', value: 'validé' });
                             setStatsDialogOpen(true);
                           }
                         }}
@@ -819,12 +818,12 @@ export default function Calendar() {
                           {monthlyEvents.filter(e => e.status === 'validé').length}
                         </Badge>
                       </div>
-                      <div 
+                      <div
                         className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         onClick={() => {
                           const count = monthlyEvents.filter(e => e.status === 'publié').length;
                           if (count > 0) {
-                            setStatsFilter({kind: 'status', value: 'publié'});
+                            setStatsFilter({ kind: 'status', value: 'publié' });
                             setStatsDialogOpen(true);
                           }
                         }}
@@ -837,12 +836,12 @@ export default function Calendar() {
                           {monthlyEvents.filter(e => e.status === 'publié').length}
                         </Badge>
                       </div>
-                      <div 
+                      <div
                         className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         onClick={() => {
                           const count = monthlyEvents.filter(e => e.hasImage).length;
                           if (count > 0) {
-                            setStatsFilter({kind: 'type', value: 'hasImage'});
+                            setStatsFilter({ kind: 'type', value: 'hasImage' });
                             setStatsDialogOpen(true);
                           }
                         }}
@@ -872,9 +871,9 @@ export default function Calendar() {
               {statsFilter?.kind === 'status' && (
                 <>Contenu : {
                   statsFilter.value === 'en attente' ? 'En attente' :
-                  statsFilter.value === 'à réviser' ? 'À réviser' :
-                  statsFilter.value === 'validé' ? 'Validé' :
-                  statsFilter.value === 'publié' ? 'Publié' : statsFilter.value
+                    statsFilter.value === 'à réviser' ? 'À réviser' :
+                      statsFilter.value === 'validé' ? 'Validé' :
+                        statsFilter.value === 'publié' ? 'Publié' : statsFilter.value
                 }</>
               )}
               {statsFilter?.kind === 'type' && statsFilter.value === 'hasImage' && (
@@ -885,7 +884,7 @@ export default function Calendar() {
               </span>
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {/* Barre d'actions si mode sélection */}
             {isSelectionMode && (
@@ -907,9 +906,9 @@ export default function Calendar() {
                     >
                       Tout sélectionner
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="text-xs sm:text-sm h-8 px-2 sm:px-3 touch-manipulation"
                       onClick={clearSelection}
                       data-testid="clear-selection"
@@ -918,7 +917,7 @@ export default function Calendar() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Select value={bulkStatus} onValueChange={setBulkStatus}>
                     <SelectTrigger className="w-full sm:w-40 h-9" data-testid="bulk-status-select">
@@ -932,7 +931,7 @@ export default function Calendar() {
                     </SelectContent>
                   </Select>
                   <div className="flex gap-2 flex-1 sm:flex-none">
-                    <Button 
+                    <Button
                       className="flex-1 sm:flex-none h-9 touch-manipulation"
                       onClick={handleBulkUpdate}
                       disabled={selectedArticles.size === 0 || !bulkStatus || bulkUpdateMutation.isPending}
@@ -940,8 +939,8 @@ export default function Calendar() {
                     >
                       {bulkUpdateMutation.isPending ? "Mise à jour..." : "Appliquer"}
                     </Button>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="flex-1 sm:flex-none h-9 touch-manipulation"
                       onClick={exitSelectionMode}
                       data-testid="cancel-bulk-update-stats"
@@ -956,9 +955,9 @@ export default function Calendar() {
             {/* Actions rapides */}
             {!isSelectionMode && (
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="h-9 px-3"
                   onClick={enterSelectionMode}
                 >
@@ -967,13 +966,13 @@ export default function Calendar() {
                 </Button>
               </div>
             )}
-            
+
             {/* Liste des contenus */}
             <div className="space-y-2 max-h-[55vh] overflow-y-auto smart-scroll-vertical">
               {filteredList.slice(0, visibleCount).map((event) => {
                 const content = editorialContent.find(c => c.id === event.id);
                 if (!content) return null;
-                
+
                 return (
                   <div key={event.id} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" data-testid={`row-content-${event.id}`}>
                     {isSelectionMode && (
@@ -981,13 +980,13 @@ export default function Calendar() {
                         className="cursor-pointer pt-1 touch-manipulation"
                         onClick={() => toggleArticleSelection(event.id)}
                       >
-                        {selectedArticles.has(event.id) ? 
-                          <CheckSquare className="h-5 w-5 sm:h-4 sm:w-4 text-blue-600" /> : 
+                        {selectedArticles.has(event.id) ?
+                          <CheckSquare className="h-5 w-5 sm:h-4 sm:w-4 text-blue-600" /> :
                           <Square className="h-5 w-5 sm:h-4 sm:w-4 text-gray-400" />
                         }
                       </div>
                     )}
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                         <div className="flex-1 min-w-0 space-y-2">
@@ -1013,7 +1012,7 @@ export default function Calendar() {
                             {event.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
                         </div>
-                        
+
                         <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-start">
                           <Button
                             variant="ghost"
@@ -1037,7 +1036,7 @@ export default function Calendar() {
                   </div>
                 );
               })}
-              
+
               {/* Bouton "Charger plus" */}
               {filteredList.length > visibleCount && (
                 <div className="text-center pt-4">
@@ -1050,7 +1049,7 @@ export default function Calendar() {
                   </Button>
                 </div>
               )}
-              
+
               {filteredList.length === 0 && (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />

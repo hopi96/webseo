@@ -36,7 +36,7 @@ export default function Settings() {
   const [editingPrompt, setEditingPrompt] = useState<SystemPrompt | null>(null);
 
   const { data: websites = [] } = useQuery<any[]>({
-    queryKey: ["/api/sites-airtable"],
+    queryKey: ["/api/sites"],
   });
 
   const { data: systemPrompts = [] } = useQuery<SystemPrompt[]>({
@@ -45,10 +45,10 @@ export default function Settings() {
 
   const deleteWebsiteMutation = useMutation({
     mutationFn: async (websiteId: number) => {
-      await apiRequest("DELETE", `/api/sites-airtable/${websiteId}`);
+      await apiRequest("DELETE", `/api/sites/${websiteId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sites-airtable"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
       toast({
         title: "Succès",
         description: "Site web supprimé avec succès",
@@ -70,13 +70,13 @@ export default function Settings() {
         setIsAnalyzing(true);
         setAnalyzingWebsite(website.name);
       }
-      const response = await apiRequest("POST", `/api/sites-airtable/${websiteId}/analyze`);
+      const response = await apiRequest("POST", `/api/sites/${websiteId}/analyze`);
       return response.json();
     },
     onSuccess: () => {
       setIsAnalyzing(false);
       setAnalyzingWebsite("");
-      queryClient.invalidateQueries({ queryKey: ["/api/sites-airtable"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
       toast({
         title: "Succès",
         description: "Analyse du site web terminée avec succès",
@@ -214,7 +214,7 @@ export default function Settings() {
                   onCheckedChange={setNotifications}
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="auto-analysis" className="text-sm font-medium">
@@ -259,16 +259,15 @@ export default function Settings() {
                   </div>
                 </div>
               )}
-              
+
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {systemPrompts?.map((prompt) => (
-                  <div 
-                    key={prompt.id} 
-                    className={`flex items-center justify-between p-3 rounded-lg border ${
-                      prompt.actif 
-                        ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800' 
-                        : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                    }`}
+                  <div
+                    key={prompt.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border ${prompt.actif
+                      ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
+                      : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                      }`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center">
@@ -300,7 +299,7 @@ export default function Settings() {
                           <Check className="w-4 h-4" />
                         </Button>
                       )}
-                      
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -309,11 +308,11 @@ export default function Settings() {
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      
+
                     </div>
                   </div>
                 ))}
-                
+
                 {(!systemPrompts || systemPrompts.length === 0) && (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     Aucun prompt système configuré. Les prompts par défaut seront utilisés.
@@ -361,7 +360,7 @@ export default function Settings() {
                       >
                         <RefreshCw className={`w-4 h-4 ${analyzeWebsiteMutation.isPending ? 'animate-spin' : ''}`} />
                       </Button>
-                      
+
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -376,7 +375,7 @@ export default function Settings() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Supprimer le site web</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir supprimer "{website.name}" ? 
+                              Êtes-vous sûr de vouloir supprimer "{website.name}" ?
                               Cette action ne peut pas être annulée et supprimera toutes les données SEO associées.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
@@ -394,7 +393,7 @@ export default function Settings() {
                     </div>
                   </div>
                 ))}
-                
+
                 {(!websites || websites.length === 0) && (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     Aucun site web ajouté pour le moment. Ajoutez votre premier site depuis le tableau de bord.

@@ -16,7 +16,7 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteA
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   const { data: websites, isLoading } = useQuery<any[]>({
-    queryKey: ["/api/sites-airtable"],
+    queryKey: ["/api/sites"],
   });
 
   if (isLoading) {

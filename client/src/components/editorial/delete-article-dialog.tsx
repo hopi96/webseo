@@ -16,7 +16,7 @@ export function DeleteArticleDialog({ open, onOpenChange, article }: DeleteArtic
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("DELETE", `/api/editorial-content/${encodeURIComponent(article.airtableId)}`);
+      const response = await apiRequest("DELETE", `/api/editorial-content/${article.id}`);
       return response;
     },
     onSuccess: () => {
@@ -24,7 +24,7 @@ export function DeleteArticleDialog({ open, onOpenChange, article }: DeleteArtic
         title: "Article supprimé",
         description: "L'article a été supprimé avec succès.",
       });
-      
+
       // Invalider le cache pour actualiser la liste
       queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
       onOpenChange(false);
@@ -58,7 +58,7 @@ export function DeleteArticleDialog({ open, onOpenChange, article }: DeleteArtic
             <AlertDialogDescription>
               Êtes-vous sûr de vouloir supprimer cet article ?
             </AlertDialogDescription>
-            
+
             <div className="bg-gray-50 p-3 rounded border max-h-48 overflow-y-auto">
               <div className="space-y-2 text-sm">
                 <div>
@@ -75,7 +75,7 @@ export function DeleteArticleDialog({ open, onOpenChange, article }: DeleteArtic
                 </div>
               </div>
             </div>
-            
+
             <AlertDialogDescription className="text-red-600 font-medium">
               Cette action est irréversible.
             </AlertDialogDescription>

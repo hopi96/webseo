@@ -66,7 +66,7 @@ const platformGroups = {
   content: {
     title: "Création de contenu",
     description: "Plateformes de contenu et blog",
-    priority: "medium", 
+    priority: "medium",
     platforms: ['tiktok', 'pinterest', 'prestashop_blog']
   },
   marketing: {
@@ -242,15 +242,15 @@ const platformConfigs = [
 export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsDialogProps) {
   const [open, setOpen] = useState(false);
   const [socialParams, setSocialParams] = useState<SocialParams>({});
-  const [showTokens, setShowTokens] = useState<{[key: string]: boolean}>({});
+  const [showTokens, setShowTokens] = useState<{ [key: string]: boolean }>({});
   const [selectedGroup, setSelectedGroup] = useState<string>('social');
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Récupérer les paramètres existants
   const { data: existingParams, isLoading } = useQuery({
-    queryKey: [`/api/sites-airtable/${siteId}/social-params`],
+    queryKey: [`/api/sites/${siteId}/social-params`],
     enabled: open && !!siteId,
   });
 
@@ -264,18 +264,18 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
   // Mutation pour sauvegarder les paramètres
   const saveMutation = useMutation({
     mutationFn: async (params: SocialParams) => {
-      const response = await fetch(`/api/sites-airtable/${siteId}/social-params`, {
+      const response = await fetch(`/api/sites/${siteId}/social-params`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(params),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to save social parameters');
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -283,7 +283,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
         title: "Paramètres sauvegardés",
         description: "Les tokens des réseaux sociaux ont été mis à jour avec succès.",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/sites-airtable/${siteId}/social-params`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/sites/${siteId}/social-params`] });
       setOpen(false);
     },
     onError: (error: any) => {
@@ -334,7 +334,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
   };
 
   const getDifficultyColor = (difficulty: string) => {
-    switch(difficulty) {
+    switch (difficulty) {
       case 'Facile': return 'text-green-600 bg-green-100';
       case 'Moyen': return 'text-yellow-600 bg-yellow-100';
       case 'Difficile': return 'text-red-600 bg-red-100';
@@ -376,7 +376,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                     Configuration des accès aux réseaux sociaux
                   </h3>
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    Ces paramètres permettent à votre système de publier automatiquement du contenu sur vos réseaux sociaux. 
+                    Ces paramètres permettent à votre système de publier automatiquement du contenu sur vos réseaux sociaux.
                     Commencez par les plateformes essentielles, puis ajoutez progressivement les autres selon vos besoins.
                   </p>
                 </div>
@@ -397,7 +397,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                     const configuredCount = getGroupConfiguredCount(groupKey);
                     const totalCount = group.platforms.length;
                     const percentage = totalCount > 0 ? (configuredCount / totalCount) * 100 : 0;
-                    
+
                     return (
                       <div key={groupKey} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -405,11 +405,10 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">{group.title}</div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              group.priority === 'high' ? 'bg-green-500' : 
-                              group.priority === 'medium' ? 'bg-blue-500' : 'bg-gray-400'
-                            }`}
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${group.priority === 'high' ? 'bg-green-500' :
+                                group.priority === 'medium' ? 'bg-blue-500' : 'bg-gray-400'
+                              }`}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -430,7 +429,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
               {Object.entries(platformGroups).map(([groupKey, group]) => {
                 const isSelected = selectedGroup === groupKey;
                 const configuredCount = getGroupConfiguredCount(groupKey);
-                
+
                 return (
                   <Button
                     key={groupKey}
@@ -441,9 +440,8 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                   >
                     {group.priority === 'high' && <Star className="h-4 w-4" />}
                     {group.title}
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      configuredCount > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                    }`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${configuredCount > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                      }`}>
                       {configuredCount}/{group.platforms.length}
                     </span>
                   </Button>
@@ -461,7 +459,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                   {platformGroups[selectedGroup as keyof typeof platformGroups]?.description}
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {platformConfigs
                   .filter(platform => platformGroups[selectedGroup as keyof typeof platformGroups]?.platforms.includes(platform.key))
@@ -469,11 +467,10 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                     const Icon = platform.icon;
                     const platformData = socialParams[platform.key as keyof SocialParams];
                     const isConfigured = platformData && Object.values(platformData).some(value => value && value.toString().trim() !== '');
-                    
+
                     return (
-                      <Card key={platform.key} className={`border-2 transition-all duration-200 hover:shadow-md ${
-                        isConfigured ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 hover:border-gray-300'
-                      }`}>
+                      <Card key={platform.key} className={`border-2 transition-all duration-200 hover:shadow-md ${isConfigured ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 hover:border-gray-300'
+                        }`}>
                         <CardHeader className="pb-3">
                           <CardTitle className="flex items-center justify-between text-base">
                             <div className="flex items-center">
@@ -482,9 +479,8 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                             </div>
                             <div className="flex items-center gap-2">
                               {platform.difficulty && (
-                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                  getDifficultyColor(platform.difficulty)
-                                }`}>
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${getDifficultyColor(platform.difficulty)
+                                  }`}>
                                   {platform.difficulty}
                                 </span>
                               )}
@@ -505,7 +501,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                               const fieldKey = `${platform.key}_${field.name}`;
                               const isVisible = showTokens[fieldKey];
                               const currentValue = platformData?.[field.name as keyof typeof platformData] || '';
-                              
+
                               return (
                                 <div key={field.name} className="space-y-2">
                                   <Label htmlFor={fieldKey} className="text-sm font-medium">
@@ -523,9 +519,8 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                                       placeholder={field.placeholder}
                                       value={currentValue}
                                       onChange={(e) => handleFieldChange(platform.key, field.name, e.target.value)}
-                                      className={`${field.name.includes('token') || field.name.includes('key') ? "pr-10" : ""} ${
-                                        currentValue ? 'border-green-300 bg-green-50 dark:bg-green-900/20' : ''
-                                      }`}
+                                      className={`${field.name.includes('token') || field.name.includes('key') ? "pr-10" : ""} ${currentValue ? 'border-green-300 bg-green-50 dark:bg-green-900/20' : ''
+                                        }`}
                                     />
                                     {(field.name.includes('token') || field.name.includes('key')) && (
                                       <Button
@@ -546,7 +541,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                                 </div>
                               );
                             })}
-                            
+
                             {/* Section d'aide avec liens de documentation */}
                             {platform.helpLinks && platform.helpLinks.length > 0 && (
                               <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
