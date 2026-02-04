@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Route pour analyser un site
+  // Route pour analyser un site (CORRIGÉ: sauvegarde maintenant dans Supabase)
   app.post("/api/sites/:id/analyze", async (req, res) => {
     try {
       const siteId = parseInt(req.params.id);
@@ -129,14 +129,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Site not found" });
       }
 
-      console.log(`🔄 Déclenchement de l'analyse SEO pour ${site.url} via webhook n8n...`);
+      console.log(`🔄 Déclenchement de l'analyse SEO pour ${site.url}...`);
 
-      // Appel du webhook n8n pour déclencher une nouvelle analyse
-      const webhookAnalysisData = await requestSeoAnalysisFromWebhook(site.url);
+      // Utiliser le service SEO qui sauvegarde automatiquement dans Supabase
+      const { seoAnalysisService } = await import('./seo-analysis-service');
+      const result = await seoAnalysisService.generateAndSaveSeoReport(site.url, site.name);
 
-      console.log('✅ Nouvelle analyse SEO reçue du webhook:', webhookAnalysisData);
+      console.log(`✅ Analyse SEO terminée et sauvegardée pour site ID: ${result.siteId}`);
 
-      res.json(webhookAnalysisData);
+      res.json({
+        success: true,
+        siteId: result.siteId,
+        analysis: result.analysis
+      });
     } catch (error) {
       console.error("❌ Erreur lors de l'analyse du site:", error);
       res.status(500).json({ message: error.message || "Erreur lors de l'analyse du site" });
@@ -145,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Nouvelle route pour déclencher l'analyse SEO d'un site via webhook n8n
+  // Route pour rafraîchir l'analyse SEO d'un site (CORRIGÉ: sauvegarde maintenant dans Supabase)
   app.post("/api/sites/:id/refresh-analysis", async (req, res) => {
     try {
       const siteId = parseInt(req.params.id);
@@ -156,18 +161,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Site not found" });
       }
 
-      console.log(`🔄 Déclenchement de l'analyse SEO pour ${site.url} via webhook n8n...`);
+      console.log(`🔄 Rafraîchissement de l'analyse SEO pour ${site.url}...`);
 
-      // Appel du webhook n8n pour déclencher une nouvelle analyse
-      const webhookAnalysisData = await requestSeoAnalysisFromWebhook(site.url);
+      // Utiliser le service SEO qui sauvegarde automatiquement dans Supabase
+      const { seoAnalysisService } = await import('./seo-analysis-service');
+      const result = await seoAnalysisService.generateAndSaveSeoReport(site.url, site.name);
 
-      console.log('✅ Nouvelle analyse SEO reçue du webhook:', webhookAnalysisData);
+      console.log(`✅ Analyse SEO rafraîchie et sauvegardée pour site ID: ${result.siteId}`);
 
-      // Retourner les données de l'analyse mise à jour
-      res.json(webhookAnalysisData);
+      res.json({
+        success: true,
+        siteId: result.siteId,
+        analysis: result.analysis
+      });
     } catch (error) {
-      console.error("❌ Erreur lors du rafraîchissement de l'analyse via webhook:", error);
-      res.status(500).json({ message: "Failed to refresh analysis via webhook", error: error.message });
+      console.error("❌ Erreur lors du rafraîchissement de l'analyse:", error);
+      res.status(500).json({ message: "Failed to refresh analysis", error: error.message });
     }
   });
 
@@ -187,30 +196,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/websites", async (req, res) => {
     try {
       const validatedData = insertWebsiteSchema.parse(req.body);
-      const website = await storage.createWebsite(validatedData);
 
-      // Request real-time SEO analysis from webhook
-      try {
-        console.log(`Requesting SEO analysis for new website: ${website.url}`);
-        const seoAnalysisData = await requestSeoAnalysisFromWebhook(website.url);
+      console.log(`🆕 Ajout d'un nouveau site web: ${validatedData.url}`);
 
-        // Create SEO analysis with webhook data
-        await storage.createSeoAnalysis({
-          ...seoAnalysisData,
-          websiteId: website.id
-        });
+      // Utiliser le service SEO qui crée le site ET l'analyse dans Supabase
+      const { seoAnalysisService } = await import('./seo-analysis-service');
+      const result = await seoAnalysisService.generateAndSaveSeoReport(validatedData.url, validatedData.name);
 
-        console.log(`SEO analysis created for website ${website.id}`);
-      } catch (webhookError) {
-        console.error(`Webhook analysis failed for ${website.url}:`, webhookError);
-        // Website is still created even if SEO analysis fails
-      }
+      console.log(`✅ Site créé avec ID: ${result.siteId}, analyse SEO sauvegardée dans Supabase`);
 
-      res.status(201).json(website);
+      // Retourner le site créé avec l'analyse
+      res.status(201).json({
+        id: result.siteId,
+        name: validatedData.name,
+        url: validatedData.url,
+        seoAnalysis: result.analysis
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid website data", errors: error.errors });
       }
+      console.error("❌ Erreur lors de la création du site:", error);
       res.status(500).json({ message: "Failed to create website" });
     }
   });
