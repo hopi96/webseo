@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "./hooks/use-theme";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SiteProvider } from "@/lib/site-context";
 import Dashboard from "@/pages/dashboard";
 import Keywords from "@/pages/keywords";
 import Calendar from "@/pages/calendar";
@@ -29,8 +30,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="seo-dashboard-theme">
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <SiteProvider>
+            <Toaster />
+            <Router />
+          </SiteProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
@@ -38,3 +41,4 @@ function App() {
 }
 
 export default App;
+

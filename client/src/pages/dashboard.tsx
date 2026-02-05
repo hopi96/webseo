@@ -9,13 +9,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { UnifiedHeader } from "@/components/layout/unified-header";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
-import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
-import { WebsiteSelector } from "@/components/website/website-selector";
 import { SocialMediaProgramDialog } from "@/components/social-media/social-media-program-dialog";
 import { EditorialCalendarGeneratorDialog } from "@/components/editorial/editorial-calendar-generator-dialog";
 import { SEOAIAgent } from "@/components/dashboard/seo-ai-agent";
 import { SocialParamsDialog } from "@/components/social/social-params-dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useSite } from "@/lib/site-context";
 import { useToast } from "@/hooks/use-toast";
 import {
   Globe,
@@ -62,68 +61,16 @@ type SeoAnalysisType = {
 };
 
 export default function DashboardWebhook() {
-  const [isAddWebsiteOpen, setIsAddWebsiteOpen] = useState(false);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const [isSocialProgramOpen, setIsSocialProgramOpen] = useState(false);
   const [isCalendarGeneratorOpen, setIsCalendarGeneratorOpen] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
-  const [selectedWebsiteId, setSelectedWebsiteId] = useState<number>(() => {
-    // Récupérer le site sélectionné depuis localStorage
-    const savedWebsiteId = localStorage.getItem('selectedWebsiteId');
-    return savedWebsiteId ? parseInt(savedWebsiteId) : 1;
-  });
-
-  // Stocker la liste précédente des sites pour détecter les nouveaux
-  const [previousWebsites, setPreviousWebsites] = useState<any[]>([]);
   const { toast } = useToast();
 
-  // Récupération des sites web avec rafraîchissement intelligent
-  const { data: websites = [], isLoading: isLoadingWebsites } = useQuery<any[]>({
-    queryKey: ['/api/sites'],
-    refetchInterval: 30000, // Rafraîchir toutes les 30 secondes (plus raisonnable)
-    refetchOnWindowFocus: true, // Rafraîchir quand la fenêtre regagne le focus
-    refetchOnReconnect: true, // Rafraîchir à la reconnexion
-    staleTime: 15000, // Considérer les données comme fraîches pendant 15 secondes
-  });
+  // Utiliser le contexte global pour le site sélectionné
+  const { selectedSiteId: selectedWebsiteId, currentSite: website, sites: websites, isLoading: isLoadingWebsites } = useSite();
 
-  // Fonction pour sélectionner un site et persister l'état
-  const selectWebsite = (websiteId: number) => {
-    setSelectedWebsiteId(websiteId);
-    localStorage.setItem('selectedWebsiteId', websiteId.toString());
-  };
-
-  // Détecter les nouveaux sites ajoutés et les sélectionner automatiquement
-  useEffect(() => {
-    if (websites.length > 0 && !isLoadingWebsites) {
-      // Trier par ID décroissant pour avoir le plus récent en premier
-      const sortedWebsites = [...websites].sort((a, b) => b.id - a.id);
-      const newestWebsite = sortedWebsites[0];
-
-      // Si c'est le premier chargement ou s'il n'y a pas de site sélectionné
-      if (!selectedWebsiteId || !websites.find(w => w.id === selectedWebsiteId)) {
-        selectWebsite(newestWebsite.id);
-      }
-
-      // Détecter les nouveaux sites
-      if (previousWebsites.length > 0 && websites.length > previousWebsites.length) {
-        // Trouver le nouveau site (celui avec le plus grand ID)
-        const newSite = websites.find(w => !previousWebsites.some(p => p.id === w.id));
-        if (newSite) {
-          selectWebsite(newSite.id);
-          toast({
-            title: "Nouveau site ajouté",
-            description: `${newSite.name} a été ajouté et sélectionné automatiquement`,
-          });
-        }
-      }
-
-      // Mettre à jour la liste précédente
-      setPreviousWebsites(websites);
-    }
-  }, [websites.length, isLoadingWebsites]);
-
-  // Récupération de l'analyse SEO depuis les données
-  const website = websites.find(w => w.id === selectedWebsiteId);
+  // Récupération de l'analyse SEO depuis les données du site courant
   const seoAnalysis = website?.seoAnalysis;
   const isLoading = isLoadingWebsites;
   const seoError = !seoAnalysis && !isLoadingWebsites && websites.length > 0;
@@ -205,63 +152,53 @@ export default function DashboardWebhook() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <UnifiedHeader />
       <div className="p-6 space-y-6 animate-in fade-in duration-700 smart-scroll-vertical">
-        {/* En-tête avec sélecteur de site et boutons d'action */}
+        {/* En-tête avec infos du site et boutons d'action */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 transition-all duration-300 hover:shadow-md animate-in slide-in-from-top-4 duration-500">
           <div className="flex flex-col gap-4">
-            {/* Première ligne : Titre et sélecteur */}
+            {/* Première ligne : Titre et boutons d'action */}
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Analyse SEO du site web
+                Analyse SEO
               </h1>
 
-              <div className="flex items-center gap-4">
-                {/* Sélecteur de site web */}
-                <div className="min-w-64">
-                  <WebsiteSelector
-                    selectedWebsiteId={selectedWebsiteId}
-                    onWebsiteChange={selectWebsite}
-                  />
-                </div>
+              {/* Boutons d'action */}
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  onClick={() => setIsSocialProgramOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  disabled={!selectedWebsiteId}
+                >
+                  <Share2 className="h-4 w-4" />
+                  Réseaux sociaux
+                </Button>
 
-                {/* Boutons d'action */}
-                <div className="flex gap-2 flex-wrap">
-                  <Button
-                    onClick={() => setIsSocialProgramOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
-                    disabled={!selectedWebsiteId}
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Réseaux sociaux
-                  </Button>
+                <Button
+                  onClick={() => setIsCalendarGeneratorOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  disabled={!selectedWebsiteId}
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendrier éditorial
+                </Button>
 
-                  <Button
-                    onClick={() => setIsCalendarGeneratorOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
-                    disabled={!selectedWebsiteId}
-                  >
-                    <Calendar className="h-4 w-4" />
-                    Calendrier éditorial
-                  </Button>
-
-                  <Button
-                    onClick={() => setIsAnalysisOpen(true)}
-                    variant="default"
-                    size="sm"
-                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
-                    disabled={refreshAnalysisMutation.isPending}
-                  >
-                    {refreshAnalysisMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
-                    )}
-                    Actualiser l'analyse
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => setIsAnalysisOpen(true)}
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  disabled={refreshAnalysisMutation.isPending}
+                >
+                  {refreshAnalysisMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
+                  )}
+                  Actualiser l'analyse
+                </Button>
               </div>
             </div>
 
@@ -275,17 +212,18 @@ export default function DashboardWebhook() {
                   </div>
 
                   {/* Bouton Tokens réseaux sociaux intégré discrètement */}
-                  <SocialParamsDialog siteId={selectedWebsiteId} siteName={website.name}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                      disabled={!selectedWebsiteId}
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span className="text-xs">Tokens API</span>
-                    </Button>
-                  </SocialParamsDialog>
+                  {selectedWebsiteId && (
+                    <SocialParamsDialog siteId={selectedWebsiteId} siteName={website.name}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                      >
+                        <Settings className="h-4 w-4" />
+                        <span className="text-xs">Tokens API</span>
+                      </Button>
+                    </SocialParamsDialog>
+                  )}
                 </div>
 
                 <div className="text-right">
@@ -816,29 +754,15 @@ export default function DashboardWebhook() {
         )}
       </div>
 
-      {/* Dialogue d'ajout de site web */}
-      <AddWebsiteDialog
-        open={isAddWebsiteOpen}
-        onOpenChange={setIsAddWebsiteOpen}
-        onWebsiteAdded={(websiteId) => {
-          // Force le refetch des données Airtable
-          queryClient.invalidateQueries({ queryKey: ['/api/sites-airtable'] });
-
-          // Attendre que les données soient mises à jour
-          setTimeout(() => {
-            // Déclencher un nouveau fetch pour obtenir les données les plus récentes
-            queryClient.refetchQueries({ queryKey: ['/api/sites-airtable'] });
-          }, 2000);
-        }}
-      />
-
       {/* Dialogue de gestion des réseaux sociaux */}
-      <SocialMediaProgramDialog
-        open={isSocialProgramOpen}
-        onOpenChange={setIsSocialProgramOpen}
-        websiteId={selectedWebsiteId!}
-        currentProgram={website?.programmeRs}
-      />
+      {selectedWebsiteId && (
+        <SocialMediaProgramDialog
+          open={isSocialProgramOpen}
+          onOpenChange={setIsSocialProgramOpen}
+          websiteId={selectedWebsiteId}
+          currentProgram={website?.socialParams}
+        />
+      )}
 
       {/* Dialogue d'actualisation d'analyse */}
       <Dialog open={isAnalysisOpen} onOpenChange={setIsAnalysisOpen}>
@@ -949,14 +873,16 @@ export default function DashboardWebhook() {
       </AlertDialog>
 
       {/* Dialogue de génération du calendrier éditorial */}
-      <EditorialCalendarGeneratorDialog
-        open={isCalendarGeneratorOpen}
-        onOpenChange={setIsCalendarGeneratorOpen}
-        websiteId={selectedWebsiteId}
-        websiteName={website?.name || ''}
-        websiteUrl={website?.url || ''}
-        seoAnalysis={website?.seoAnalysis}
-      />
+      {selectedWebsiteId && (
+        <EditorialCalendarGeneratorDialog
+          open={isCalendarGeneratorOpen}
+          onOpenChange={setIsCalendarGeneratorOpen}
+          websiteId={selectedWebsiteId}
+          websiteName={website?.name || ''}
+          websiteUrl={website?.url || ''}
+          seoAnalysis={website?.seoAnalysis}
+        />
+      )}
     </div>
   );
 }
