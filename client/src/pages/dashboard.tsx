@@ -12,6 +12,7 @@ import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { SocialMediaProgramDialog } from "@/components/social-media/social-media-program-dialog";
 import { EditorialCalendarGeneratorDialog } from "@/components/editorial/editorial-calendar-generator-dialog";
 import { SEOAIAgent } from "@/components/dashboard/seo-ai-agent";
+import { GEOAnalysisCard } from "@/components/dashboard/geo-analysis-card";
 import { SocialParamsDialog } from "@/components/social/social-params-dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useSite } from "@/lib/site-context";
@@ -446,6 +447,13 @@ export default function DashboardWebhook() {
               </CardContent>
             </Card>
 
+            {/* Analyse GEO - Generative Engine Optimization */}
+            {selectedWebsiteId && (
+              <div className="animate-in slide-in-from-bottom-4 duration-700 delay-[450ms]">
+                <GEOAnalysisCard siteId={selectedWebsiteId} />
+              </div>
+            )}
+
             {/* Analyse des titres et méta-descriptions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in slide-in-from-bottom-4 duration-700 delay-500">
               {/* Balises de titre */}
@@ -760,7 +768,7 @@ export default function DashboardWebhook() {
           open={isSocialProgramOpen}
           onOpenChange={setIsSocialProgramOpen}
           websiteId={selectedWebsiteId}
-          currentProgram={website?.socialParams}
+          currentProgram={website?.socialParams || website?.programmeRs}
         />
       )}
 

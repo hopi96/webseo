@@ -10,6 +10,7 @@ import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
 import { EditPromptDialog } from "@/components/prompts/edit-prompt-dialog";
 import { useTheme } from "@/hooks/use-theme";
 import { useToast } from "@/hooks/use-toast";
+import { useSite } from "@/lib/site-context";
 import { apiRequest } from "@/lib/queryClient";
 import {
   AlertDialog,
@@ -27,6 +28,7 @@ import type { Website, SystemPrompt } from "@shared/schema";
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
+  const { currentSite } = useSite();
   const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState(true);
   const [autoAnalysis, setAutoAnalysis] = useState(true);
@@ -39,9 +41,17 @@ export default function Settings() {
     queryKey: ["/api/sites"],
   });
 
-  const { data: systemPrompts = [] } = useQuery<SystemPrompt[]>({
-    queryKey: ["/api/system-prompts"],
+  const { data: promptsData, isLoading: isLoadingPrompts } = useQuery({
+    queryKey: ["/api/sites", currentSite?.id, "prompts"],
+    queryFn: async () => {
+      if (!currentSite?.id) return { prompts: [] };
+      const res = await apiRequest("GET", `/api/sites/${currentSite.id}/prompts`);
+      return res.json();
+    },
+    enabled: !!currentSite?.id,
   });
+
+  const systemPrompts: SystemPrompt[] = promptsData?.prompts || [];
 
   const deleteWebsiteMutation = useMutation({
     mutationFn: async (websiteId: number) => {
@@ -94,15 +104,23 @@ export default function Settings() {
   });
 
   const updateSystemPromptMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<SystemPrompt> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<SystemPrompt> & { siteId?: number } }) => {
       return await apiRequest("PUT", `/api/system-prompts/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/system-prompts"] });
+      // Invalidation stricte pour forcer le rafraîchissement de la liste des prompts du site
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sites", currentSite?.id, "prompts"]
+      });
+      // Invalider aussi les prompts system globaux au cas où
+      queryClient.invalidateQueries({
+        queryKey: ["/api/system-prompts"]
+      });
+
       setEditingPrompt(null);
       toast({
         title: "Succès",
-        description: "Prompt système mis à jour avec succès",
+        description: "Prompt système et configuration mis à jour.",
       });
     },
     onError: (error: any) => {
@@ -116,10 +134,15 @@ export default function Settings() {
 
   const deleteSystemPromptMutation = useMutation({
     mutationFn: async (promptId: string) => {
+      // Pour supprimer un prompt custom, on utilise l'endpoint delete site prompt
+      // Le promptId ici est l'ID global, mais on a besoin de la plateforme
+      // On retrouvera la plateforme via le prompt object dans le handler
       await apiRequest("DELETE", `/api/system-prompts/${promptId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/system-prompts"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/sites", currentSite?.id, "prompts"]
+      });
       toast({
         title: "Succès",
         description: "Prompt système supprimé avec succès",
@@ -144,16 +167,33 @@ export default function Settings() {
 
   const handleTogglePromptActive = (prompt: SystemPrompt) => {
     updateSystemPromptMutation.mutate({
-      id: prompt.id,
-      data: { actif: !prompt.actif }
+      id: String(prompt.id),
+      data: { isActive: !prompt.isActive }
     });
   };
 
-  const handleDeletePrompt = (promptId: string) => {
-    deleteSystemPromptMutation.mutate(promptId);
+  const handleDeletePrompt = (prompt: SystemPrompt) => {
+    // Si c'est un prompt custom, on le supprime (revient au default)
+    // Si c'est un global, on ne peut pas vraiment le supprimer d'ici sans être admin, 
+    // mais pour l'instant on garde la logique existante ou on adapte.
+    // L'endpoint DELETE /api/sites/:id/prompts/:platform est préférable pour les custom.
+
+    if (prompt.platform && currentSite?.id) {
+      // Use the specific delete endpoint to reset to global
+      apiRequest("DELETE", `/api/sites/${currentSite.id}/prompts/${prompt.platform}`)
+        .then(() => {
+          queryClient.invalidateQueries({
+            queryKey: ["/api/sites", currentSite.id, "prompts"]
+          });
+          toast({ title: "Succès", description: "Prompt réinitialisé au défaut" });
+        })
+        .catch((e) => toast({ title: "Erreur", description: "Erreur suppression", variant: "destructive" }));
+    } else {
+      deleteSystemPromptMutation.mutate(String(prompt.id));
+    }
   };
 
-  const activePrompt = systemPrompts.find(p => p.actif);
+  const activePrompt = systemPrompts.find(p => p.isActive);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -247,7 +287,7 @@ export default function Settings() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium text-green-900 dark:text-green-100">
-                        Prompt actif : {activePrompt.nom || 'Sans nom'}
+                        Prompt actif : {activePrompt.name || 'Sans nom'}
                       </div>
                       <div className="text-sm text-green-700 dark:text-green-300">
                         {activePrompt.description || 'Aucune description'}
@@ -264,7 +304,7 @@ export default function Settings() {
                 {systemPrompts?.map((prompt) => (
                   <div
                     key={prompt.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border ${prompt.actif
+                    className={`flex items-center justify-between p-3 rounded-lg border ${prompt.isActive
                       ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
                       : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                       }`}
@@ -272,9 +312,9 @@ export default function Settings() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center">
                         <div className="font-medium text-gray-900 dark:text-white">
-                          {prompt.nom || 'Prompt sans nom'}
+                          {prompt.name || 'Prompt sans nom'}
                         </div>
-                        {prompt.actif && (
+                        {prompt.isActive && (
                           <span className="ml-2 px-2 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">
                             Actif
                           </span>
@@ -288,7 +328,7 @@ export default function Settings() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 ml-4">
-                      {!prompt.actif && (
+                      {!prompt.isActive && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -307,6 +347,16 @@ export default function Settings() {
                         data-testid={`button-edit-prompt-${prompt.id}`}
                       >
                         <Edit className="w-4 h-4" />
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleDeletePrompt(prompt)}
+                        data-testid={`button-delete-prompt-${prompt.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
 
                     </div>
@@ -441,7 +491,10 @@ export default function Settings() {
           open={!!editingPrompt}
           onOpenChange={(open) => !open && setEditingPrompt(null)}
           onSave={(data) => {
-            updateSystemPromptMutation.mutate({ id: editingPrompt.id, data });
+            updateSystemPromptMutation.mutate({
+              id: String(editingPrompt.id),
+              data: { ...data, siteId: currentSite?.id }
+            });
           }}
         />
       )}

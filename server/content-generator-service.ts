@@ -163,6 +163,7 @@ export class ContentGeneratorService {
     async generateContent(request: ContentGenerationRequest): Promise<GeneratedContent> {
         console.log(`📝 Génération contenu ${request.platform} pour site ${request.siteId}`);
         console.log(`   Thème: ${request.theme}`);
+        console.log(`   Date publication: ${request.publicationDate}`);
 
         // 1. Récupérer le prompt système (personnalisé ou par défaut)
         const systemPrompt = await this.getSystemPrompt(request.platform, request.siteId);
@@ -198,6 +199,8 @@ export class ContentGeneratorService {
             dateDePublication: request.publicationDate
         });
 
+        console.log(`💾 Sauvegarde en cours... Date: ${request.publicationDate}`);
+
         console.log(`✅ Contenu créé: ID ${content.id}`);
 
         return {
@@ -227,6 +230,7 @@ export class ContentGeneratorService {
         let errors = 0;
 
         for (const entry of calendarEntries) {
+            console.log(`🔄 Traitement entrée: ${entry.plateforme} - ${entry.date_de_publication}`);
             try {
                 const content = await this.generateContent({
                     siteId: entry.id_site,
@@ -240,7 +244,7 @@ export class ContentGeneratorService {
                 // Pause pour éviter les rate limits OpenAI
                 await this.delay(1000);
             } catch (error) {
-                console.error(`❌ Erreur génération pour ${entry.plateforme}:`, error);
+                console.error(`❌ Erreur génération pour ${entry.plateforme} (${entry.date_de_publication}):`, error);
                 errors++;
             }
         }
@@ -351,11 +355,13 @@ Description: ${description}`;
         }
 
         try {
-            // Chercher un prompt personnalisé dans la DB pour cette plateforme
-            const customPrompt = await supabaseService.getPromptByPlatform(platform);
+            // Chercher un prompt personnalisé (SITE-SPÉCIFIQUE ou global) pour cette plateforme
+            // La méthode getSitePrompt cherche d'abord un prompt spécifique au site,
+            // puis fallback sur le prompt global si non trouvé
+            const customPrompt = await supabaseService.getSitePrompt(siteId, platform);
 
             if (customPrompt?.promptSystem) {
-                console.log(`📋 Utilisation du prompt DB pour ${platform}`);
+                console.log(`✅ Prompt récupéré pour ${platform}: ${customPrompt.promptSystem.substring(0, 50)}...`);
                 // Combiner le prompt custom avec le contexte du site
                 return customPrompt.promptSystem + (contextString ? `\n\nCONTEXTE SITE:\n${contextString}` : '');
             }

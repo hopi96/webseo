@@ -7,6 +7,7 @@ interface Site {
     url: string;
     seoAnalysis?: any;
     socialParams?: any;
+    programmeRs?: string;
     createdAt?: string;
 }
 

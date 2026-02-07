@@ -35,6 +35,7 @@ export interface DbSystemPrompt {
     output_structure: string | null;
     platform: string | null;
     is_active: boolean;
+    site_id: number | null;
     created_at: string;
     updated_at: string;
 }
@@ -94,7 +95,8 @@ export class SupabaseService {
                 name: site.name,
                 url: site.url,
                 programmeRs: site.social_program,
-                seoAnalysis: site.seo_analysis
+                seoAnalysis: site.seo_analysis,
+                socialParams: site.social_params
             }));
         } catch (error) {
             console.error('❌ Erreur lors de la récupération des sites:', error);
@@ -556,20 +558,73 @@ export class SupabaseService {
     /**
      * Récupère tous les prompts système
      */
-    async getAllSystemPrompts(): Promise<SystemPrompt[]> {
+    /**
+     * Récupère tous les prompts système, optionnellement filtrés par site
+     */
+    async getAllSystemPrompts(siteId?: number): Promise<SystemPrompt[]> {
         try {
             const client = initializeSupabase();
 
-            const { data, error } = await client
+            // 1. Récupérer TOUS les prompts globaux (is_active=true ou false, peu importe)
+            // On filtre STRICTEMENT pour que site_id soit NULL.
+            // Cela empêche les prompts "pollués" (avec site_id) de la table system_prompts d'apparaître ici.
+            const { data: globalPrompts, error: globalError } = await client
                 .from('system_prompts')
                 .select('*')
+                .is('site_id', null) // STRICT FILTER
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (globalError) throw globalError;
 
-            console.log(`✅ ${data?.length || 0} prompts récupérés`);
+            // Map global prompts
+            const mappedGlobalPrompts = (globalPrompts || []).map((prompt: DbSystemPrompt) =>
+                this.mapDbPromptToSystemPrompt(prompt)
+            );
 
-            return (data || []).map((prompt: DbSystemPrompt) => this.mapDbPromptToSystemPrompt(prompt));
+            // Si pas de siteId, on retourne les globaux
+            if (siteId === undefined) return mappedGlobalPrompts;
+
+            // 2. Si siteId, récupérer les overrides de ce site
+            const { data: sitePrompts, error: siteError } = await client
+                .from('site_prompts')
+                .select('*')
+                .eq('site_id', siteId);
+
+            if (siteError) throw siteError;
+
+            // 3. Fusionner (Merge)
+            const mergedPrompts = new Map<string, SystemPrompt>();
+
+            // Helper function to normalize keys
+            const normalizeKey = (k: string) => k.trim().toLowerCase();
+
+            // Ajouter les globaux d'abord
+            mappedGlobalPrompts.forEach(p => {
+                const key = p.platform ? normalizeKey(p.platform) : normalizeKey(p.name || '');
+                if (key) mergedPrompts.set(key, p);
+            });
+
+            // Ajouter/Ecraser avec les site-specifics
+            (sitePrompts || []).forEach((sp: any) => {
+                const mappedSitePrompt: SystemPrompt = {
+                    id: sp.id.toString(),
+                    name: sp.name || `Prompt ${sp.platform}`,
+                    promptSystem: sp.prompt_system,
+                    outputStructure: null, // Site prompts table doesn't have output_structure column? Need to check schema.
+                    description: `Prompt personnalisé pour ${sp.platform}`,
+                    isActive: sp.is_active,
+                    siteId: sp.site_id,
+                    platform: sp.platform,
+                    createdAt: new Date(sp.created_at),
+                    updatedAt: new Date(sp.updated_at)
+                };
+
+                const key = sp.platform ? normalizeKey(sp.platform) : '';
+                if (key) mergedPrompts.set(key, mappedSitePrompt);
+            });
+
+            return Array.from(mergedPrompts.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
         } catch (error) {
             console.error('❌ Erreur lors de la récupération des prompts:', error);
             throw new Error('Impossible de récupérer les prompts');
@@ -610,18 +665,20 @@ export class SupabaseService {
     /**
      * Crée un nouveau prompt système
      */
-    async createSystemPrompt(promptData: InsertSystemPrompt): Promise<SystemPrompt> {
+    async createSystemPrompt(promptData: InsertSystemPrompt & { siteId?: number }): Promise<SystemPrompt> {
         try {
             const client = initializeSupabase();
 
             const { data, error } = await client
                 .from('system_prompts')
                 .insert({
-                    name: promptData.nom || 'Nouveau prompt',
+                    name: promptData.name || 'Nouveau prompt',
                     description: promptData.description || null,
                     prompt_system: promptData.promptSystem,
-                    output_structure: promptData.structureSortie || null,
-                    is_active: promptData.actif || false
+                    output_structure: promptData.outputStructure || null,
+                    is_active: promptData.isActive || false,
+                    site_id: promptData.siteId || null,
+                    platform: promptData.platform || null
                 })
                 .select()
                 .single();
@@ -640,17 +697,19 @@ export class SupabaseService {
     /**
      * Met à jour un prompt système
      */
-    async updateSystemPrompt(promptId: string | number, updateData: Partial<InsertSystemPrompt>): Promise<SystemPrompt> {
+    async updateSystemPrompt(promptId: string | number, updateData: Partial<InsertSystemPrompt> & { siteId?: number }): Promise<SystemPrompt> {
         try {
             const client = initializeSupabase();
 
             const fieldsToUpdate: any = {};
 
-            if (updateData.nom !== undefined) fieldsToUpdate.name = updateData.nom;
+            if (updateData.name !== undefined) fieldsToUpdate.name = updateData.name;
             if (updateData.description !== undefined) fieldsToUpdate.description = updateData.description;
             if (updateData.promptSystem !== undefined) fieldsToUpdate.prompt_system = updateData.promptSystem;
-            if (updateData.structureSortie !== undefined) fieldsToUpdate.output_structure = updateData.structureSortie;
-            if (updateData.actif !== undefined) fieldsToUpdate.is_active = updateData.actif;
+            if (updateData.outputStructure !== undefined) fieldsToUpdate.output_structure = updateData.outputStructure;
+            if (updateData.isActive !== undefined) fieldsToUpdate.is_active = updateData.isActive;
+            // On ne permet généralement pas de changer le site_id d'un prompt existant, mais pourquoi pas
+            if (updateData.siteId !== undefined) fieldsToUpdate.site_id = updateData.siteId;
 
             const { data, error } = await client
                 .from('system_prompts')
@@ -728,12 +787,14 @@ export class SupabaseService {
      */
     private mapDbPromptToSystemPrompt(prompt: DbSystemPrompt): SystemPrompt {
         return {
-            id: prompt.id.toString(),
-            nom: prompt.name,
-            description: prompt.description || undefined,
+            id: prompt.id,
+            name: prompt.name,
+            description: prompt.description || null,
             promptSystem: prompt.prompt_system,
-            structureSortie: prompt.output_structure || undefined,
-            actif: prompt.is_active,
+            outputStructure: prompt.output_structure || null,
+            isActive: prompt.is_active,
+            siteId: prompt.site_id || null,
+            platform: prompt.platform || null,
             createdAt: new Date(prompt.created_at),
             updatedAt: new Date(prompt.updated_at)
         };
@@ -759,6 +820,305 @@ export class SupabaseService {
         } catch (error) {
             console.error('❌ Échec de la connexion Supabase:', error);
             return false;
+        }
+    }
+
+    // ============= GEO Analysis Methods =============
+
+    /**
+     * Sauvegarde l'analyse GEO pour un site
+     */
+    async saveGeoAnalysis(siteId: number, geoAnalysis: any, geoScore: number): Promise<void> {
+        try {
+            const client = initializeSupabase();
+
+            const { error } = await client
+                .from('sites')
+                .update({
+                    geo_analysis: geoAnalysis,
+                    geo_score: geoScore,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', siteId);
+
+            if (error) throw error;
+
+            console.log(`✅ Analyse GEO sauvegardée pour le site ${siteId} (score: ${geoScore})`);
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde analyse GEO:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Récupère l'analyse GEO pour un site
+     */
+    async getGeoAnalysis(siteId: number): Promise<{ geoAnalysis: any; geoScore: number } | null> {
+        try {
+            const client = initializeSupabase();
+
+            const { data, error } = await client
+                .from('sites')
+                .select('geo_analysis, geo_score')
+                .eq('id', siteId)
+                .single();
+
+            if (error) throw error;
+
+            if (!data?.geo_analysis) {
+                return null;
+            }
+
+            return {
+                geoAnalysis: data.geo_analysis,
+                geoScore: data.geo_score || 0
+            };
+        } catch (error) {
+            console.error('❌ Erreur récupération analyse GEO:', error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // SITE-SPECIFIC PROMPTS
+    // ============================================
+
+    /**
+     * Récupère le prompt pour un site et une plateforme spécifique
+     * Fallback sur le prompt global si aucun prompt spécifique n'existe
+     */
+    async getSitePrompt(siteId: number, platform: string): Promise<SystemPrompt | null> {
+        try {
+            const client = initializeSupabase();
+            const platformLower = platform.toLowerCase();
+
+            // 1. D'abord chercher un prompt spécifique au site
+            const { data: sitePrompt, error: siteError } = await client
+                .from('site_prompts')
+                .select('*')
+                .eq('site_id', siteId)
+                .eq('platform', platformLower)
+                .eq('is_active', true)
+                .limit(1)
+                .single();
+
+            if (sitePrompt && !siteError) {
+                console.log(`✅ Prompt SITE-SPÉCIFIQUE trouvé pour site ${siteId}, plateforme ${platform}`);
+                return {
+                    id: sitePrompt.id,
+                    name: sitePrompt.name || `Prompt ${platform} - Site ${siteId}`,
+                    description: `Prompt personnalisé pour ${platform}`,
+                    promptSystem: sitePrompt.prompt_system,
+                    outputStructure: null,
+                    isActive: sitePrompt.is_active,
+                    siteId: siteId,
+                    platform: platform,
+                    createdAt: new Date(sitePrompt.created_at),
+                    updatedAt: new Date(sitePrompt.updated_at)
+                } as SystemPrompt; // Cast needed because schema mismatch?
+            }
+
+            // 2. Fallback sur le prompt global
+            console.log(`⚠️ Pas de prompt site-spécifique, fallback sur prompt global pour ${platform}`);
+            return await this.getPromptByPlatform(platform);
+
+        } catch (error) {
+            console.error('❌ Erreur getSitePrompt:', error);
+            // Fallback sur le prompt global en cas d'erreur
+            return await this.getPromptByPlatform(platform);
+        }
+    }
+
+    /**
+     * Liste tous les prompts personnalisés d'un site
+     */
+    async listSitePrompts(siteId: number): Promise<Array<{
+        id: number;
+        siteId: number;
+        platform: string;
+        name: string;
+        promptSystem: string;
+        isActive: boolean;
+    }>> {
+        try {
+            const client = initializeSupabase();
+
+            const { data, error } = await client
+                .from('site_prompts')
+                .select('*')
+                .eq('site_id', siteId)
+                .order('platform', { ascending: true });
+
+            if (error) throw error;
+
+            console.log(`✅ ${data?.length || 0} prompts personnalisés pour le site ${siteId}`);
+
+            return (data || []).map((p: any) => ({
+                id: p.id,
+                siteId: p.site_id,
+                platform: p.platform,
+                name: p.name || `Prompt ${p.platform}`,
+                promptSystem: p.prompt_system,
+                isActive: p.is_active
+            }));
+        } catch (error) {
+            console.error('❌ Erreur listSitePrompts:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Sauvegarde ou met à jour un prompt spécifique à un site
+     */
+    async saveSitePrompt(siteId: number, platform: string, promptSystem: string, name?: string): Promise<{
+        id: number;
+        siteId: number;
+        platform: string;
+        promptSystem: string;
+        name: string;
+    }> {
+        try {
+            const client = initializeSupabase();
+            const platformLower = platform.toLowerCase();
+
+            // Upsert - insert or update if exists
+            const { data, error } = await client
+                .from('site_prompts')
+                .upsert({
+                    site_id: siteId,
+                    platform: platformLower,
+                    name: name || `Prompt ${platform}`,
+                    prompt_system: promptSystem,
+                    is_active: true
+                }, {
+                    onConflict: 'site_id,platform'
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            console.log(`✅ Prompt sauvegardé pour site ${siteId}, plateforme ${platform}`);
+
+            return {
+                id: data.id,
+                siteId: data.site_id,
+                platform: data.platform,
+                promptSystem: data.prompt_system,
+                name: data.name
+            };
+        } catch (error) {
+            console.error('❌ Erreur saveSitePrompt:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Supprime un prompt spécifique à un site (revient au prompt global)
+     */
+    async deleteSitePrompt(siteId: number, platform: string): Promise<boolean> {
+        try {
+            const client = initializeSupabase();
+
+            const { error } = await client
+                .from('site_prompts')
+                .delete()
+                .eq('site_id', siteId)
+                .eq('platform', platform.toLowerCase());
+
+            if (error) throw error;
+
+            console.log(`✅ Prompt site ${siteId}/${platform} supprimé (fallback global)`);
+            return true;
+        } catch (error) {
+            console.error('❌ Erreur deleteSitePrompt:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Récupère tous les prompts pour un site (personnalisés + globaux complétés)
+     */
+    async getAllPromptsForSite(siteId: number): Promise<Array<{
+        id: number;
+        platform: string;
+        promptSystem: string;
+        isCustom: boolean;
+        name: string;
+        description: string;
+        isActive: boolean;
+        outputStructure: string;
+    }>> {
+        try {
+            const client = initializeSupabase();
+
+            // Récupérer les prompts personnalisés du site
+            const sitePrompts = await this.listSitePrompts(siteId);
+            const sitePromptsMap = new Map(sitePrompts.map(p => [p.platform, p]));
+
+            // Récupérer tous les prompts globaux
+            const { data: globalPrompts, error } = await client
+                .from('system_prompts')
+                .select('*')
+                .eq('is_active', true)
+                .not('platform', 'is', null);
+
+            if (error) throw error;
+
+            // Fusionner : prompts personnalisés prioritaires
+            const result: Array<{
+                id: number;
+                platform: string;
+                promptSystem: string;
+                isCustom: boolean;
+                name: string;
+                description: string;
+                isActive: boolean;
+                outputStructure: string;
+            }> = [];
+
+            const seenPlatforms = new Set<string>();
+
+            // D'abord les prompts personnalisés
+            for (const sp of sitePrompts) {
+                result.push({
+                    id: sp.id,
+                    platform: sp.platform,
+                    promptSystem: sp.promptSystem,
+                    isCustom: true,
+                    name: sp.name,
+                    description: "Prompt personnalisé", // Default description for site prompts
+                    isActive: sp.isActive,
+                    outputStructure: ""
+                });
+                if (sp.platform) {
+                    seenPlatforms.add(sp.platform.toLowerCase());
+                }
+            }
+
+            // Ensuite les prompts globaux non couverts
+            for (const gp of (globalPrompts || [])) {
+                // Créer une clé normalisée pour la vérification
+                const platformKey = gp.platform ? gp.platform.toLowerCase() : null;
+
+                if (platformKey && !seenPlatforms.has(platformKey)) {
+                    result.push({
+                        id: gp.id,
+                        platform: gp.platform,
+                        promptSystem: gp.prompt_system,
+                        isCustom: false,
+                        name: gp.name,
+                        description: gp.description || '',
+                        isActive: gp.is_active,
+                        outputStructure: gp.output_structure || ''
+                    });
+                }
+            }
+
+            return result.sort((a, b) => a.platform.localeCompare(b.platform));
+        } catch (error) {
+            console.error('❌ Erreur getAllPromptsForSite:', error);
+            return [];
         }
     }
 }

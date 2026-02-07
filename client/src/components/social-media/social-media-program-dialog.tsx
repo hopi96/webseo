@@ -68,7 +68,7 @@ interface SocialMediaProgramDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   websiteId: number;
-  currentProgram?: string;
+  currentProgram?: string | any;
 }
 
 export function SocialMediaProgramDialog({
@@ -82,36 +82,42 @@ export function SocialMediaProgramDialog({
   const queryClient = useQueryClient();
 
   // Fonction pour parser le programme existant
-  const parseExistingProgram = (programText?: string) => {
-    if (!programText) return null;
+  const parseExistingProgram = (programInput?: string | any) => {
+    if (!programInput) return null;
 
-    try {
-      const parsed = JSON.parse(programText);
-      return parsed.frequence_publication?.plateformes || null;
-    } catch {
-      return null;
+    let programObj = programInput;
+
+    // Si c'est une chaîne JSON, on la parse
+    if (typeof programInput === 'string') {
+      try {
+        programObj = JSON.parse(programInput);
+      } catch {
+        return null;
+      }
     }
+
+    return programObj?.frequence_publication?.plateformes || null;
   };
 
   const existingProgram = parseExistingProgram(currentProgram);
 
   const getDefaultValues = (program: any) => ({
-    newsletter_semaine: program?.newsletter?.par_semaine || 0,
-    newsletter_mois: program?.newsletter?.par_mois || 0,
-    tiktok_semaine: program?.tiktok?.par_semaine || 0,
-    tiktok_mois: program?.tiktok?.par_mois || 0,
-    instagram_semaine: program?.instagram?.par_semaine || 0,
-    instagram_mois: program?.instagram?.par_mois || 0,
-    xtwitter_semaine: program?.xtwitter?.par_semaine || 0,
-    xtwitter_mois: program?.xtwitter?.par_mois || 0,
-    youtube_semaine: program?.youtube?.par_semaine || 0,
-    youtube_mois: program?.youtube?.par_mois || 0,
-    facebook_semaine: program?.facebook?.par_semaine || 0,
-    facebook_mois: program?.facebook?.par_mois || 0,
-    blog_semaine: program?.blog?.par_semaine || 0,
-    blog_mois: program?.blog?.par_mois || 0,
-    pinterest_semaine: program?.pinterest?.par_semaine || 0,
-    pinterest_mois: program?.pinterest?.par_mois || 0,
+    newsletter_semaine: program?.newsletter?.posts_par_semaine || 0,
+    newsletter_mois: program?.newsletter?.posts_par_mois || 0,
+    tiktok_semaine: program?.tiktok?.posts_par_semaine || 0,
+    tiktok_mois: program?.tiktok?.posts_par_mois || 0,
+    instagram_semaine: program?.instagram?.posts_par_semaine || 0,
+    instagram_mois: program?.instagram?.posts_par_mois || 0,
+    xtwitter_semaine: program?.xtwitter?.posts_par_semaine || 0,
+    xtwitter_mois: program?.xtwitter?.posts_par_mois || 0,
+    youtube_semaine: program?.youtube?.posts_par_semaine || 0,
+    youtube_mois: program?.youtube?.posts_par_mois || 0,
+    facebook_semaine: program?.facebook?.posts_par_semaine || 0,
+    facebook_mois: program?.facebook?.posts_par_mois || 0,
+    blog_semaine: program?.blog?.posts_par_semaine || 0,
+    blog_mois: program?.blog?.posts_par_mois || 0,
+    pinterest_semaine: program?.pinterest?.posts_par_semaine || 0,
+    pinterest_mois: program?.pinterest?.posts_par_mois || 0,
   });
 
   const form = useForm<SocialMediaProgramForm>({
@@ -130,14 +136,14 @@ export function SocialMediaProgramDialog({
     // Si publications mensuelles < 4, on peut utiliser la valeur mensuelle directement
     if (mois < 4) {
       return {
-        par_semaine: 0,
-        par_mois: mois
+        posts_par_semaine: 0,
+        posts_par_mois: mois
       };
     }
     // Sinon, on utilise le calcul hebdomadaire
     return {
-      par_semaine: semaine,
-      par_mois: semaine * 4
+      posts_par_semaine: semaine,
+      posts_par_mois: semaine * 4
     };
   };
 
@@ -456,14 +462,14 @@ export function SocialMediaProgramDialog({
                           <span className="font-medium">{name}</span>
                         </div>
                         <div className="text-right">
-                          {finalFreq.par_semaine > 0 ? (
+                          {finalFreq.posts_par_semaine > 0 ? (
                             <>
-                              <div className="text-lg font-bold">{finalFreq.par_semaine}/sem</div>
-                              <div className="text-sm text-gray-500">{finalFreq.par_mois}/mois</div>
+                              <div className="text-lg font-bold">{finalFreq.posts_par_semaine}/sem</div>
+                              <div className="text-sm text-gray-500">{finalFreq.posts_par_mois}/mois</div>
                             </>
                           ) : (
                             <>
-                              <div className="text-lg font-bold text-blue-600">{finalFreq.par_mois}/mois</div>
+                              <div className="text-lg font-bold text-blue-600">{finalFreq.posts_par_mois}/mois</div>
                               <div className="text-xs text-blue-500">Mode mensuel</div>
                             </>
                           )}

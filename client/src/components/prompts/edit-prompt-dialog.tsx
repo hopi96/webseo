@@ -21,12 +21,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import type { SystemPrompt } from "@shared/schema";
 
 const editPromptSchema = z.object({
+  name: z.string().min(3, "Le nom doit contenir au moins 3 caractères"),
+  description: z.string().optional(),
   promptSystem: z.string().min(10, "Le prompt système doit contenir au moins 10 caractères"),
-  structureSortie: z.string().optional(),
+  outputStructure: z.string().optional(),
 });
 
 type EditPromptFormData = z.infer<typeof editPromptSchema>;
@@ -44,8 +45,10 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
   const form = useForm<EditPromptFormData>({
     resolver: zodResolver(editPromptSchema),
     defaultValues: {
+      name: prompt.name || "",
+      description: prompt.description || "",
       promptSystem: prompt.promptSystem || "",
-      structureSortie: prompt.structureSortie || "",
+      outputStructure: prompt.outputStructure || "",
     },
   });
 
@@ -53,8 +56,10 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
   useEffect(() => {
     if (prompt) {
       form.reset({
+        name: prompt.name || "",
+        description: prompt.description || "",
         promptSystem: prompt.promptSystem || "",
-        structureSortie: prompt.structureSortie || "",
+        outputStructure: prompt.outputStructure || "",
       });
     }
   }, [prompt, form]);
@@ -62,6 +67,20 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
   const onSubmit = async (data: EditPromptFormData) => {
     setIsSubmitting(true);
     try {
+      // Validate JSON if present
+      if (data.outputStructure && data.outputStructure.trim()) {
+        try {
+          JSON.parse(data.outputStructure);
+        } catch (e) {
+          form.setError("outputStructure", {
+            type: "manual",
+            message: "Format JSON invalide"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       await onSave(data);
       onOpenChange(false);
     } catch (error) {
@@ -73,16 +92,17 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Modifier le prompt système</DialogTitle>
           <DialogDescription>
-            Modifiez les paramètres du prompt système. Le prompt actif sera utilisé par l'IA pour générer du contenu.
+            Configurez le comportement de l'IA pour ce type de contenu.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
             <FormField
               control={form.control}
               name="promptSystem"
@@ -90,15 +110,14 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
                 <FormItem>
                   <FormLabel>Prompt système</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Tu es un expert en création de contenu éditorial et SEO..."
-                      className="min-h-32 resize-vertical"
+                    <Textarea
+                      placeholder="Tu es un expert en création de contenu..."
+                      className="min-h-[200px] font-mono text-sm leading-relaxed"
                       {...field}
-                      data-testid="textarea-prompt-system"
                     />
                   </FormControl>
                   <FormDescription>
-                    Le prompt système qui définit le rôle et les instructions pour l'IA
+                    Définissez le rôle, le ton et les règles strictes que l'IA doit suivre.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -107,27 +126,26 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
 
             <FormField
               control={form.control}
-              name="structureSortie"
+              name="outputStructure"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Structure de sortie (optionnel)</FormLabel>
+                  <FormLabel>Structure de sortie JSON (Optionnel)</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder='{"title": "Titre", "content": "Contenu", "suggestions": ["suggestion1"]}'
-                      className="min-h-20 resize-vertical font-mono text-sm"
+                    <Textarea
+                      placeholder='{"title": "...", "content": "..."}'
+                      className="min-h-[100px] font-mono text-sm"
                       {...field}
-                      data-testid="textarea-output-structure"
                     />
                   </FormControl>
                   <FormDescription>
-                    Format JSON attendu pour la réponse de l'IA (optionnel)
+                    Forcez l'IA à répondre avec une structure JSON spécifique.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
@@ -136,8 +154,8 @@ export function EditPromptDialog({ prompt, open, onOpenChange, onSave }: EditPro
               >
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isSubmitting}
                 data-testid="button-save-prompt"
               >

@@ -192,6 +192,72 @@ router.post('/generate-calendar-flow', async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/workflows/generate-calendar-stream
+ * Version SSE (Server-Sent Events) pour streaming de la progression en temps réel
+ */
+router.post('/generate-calendar-stream', async (req: Request, res: Response) => {
+    // Configuration SSE
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.flushHeaders();
+
+    const sendSSE = (data: any) => {
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    try {
+        const { siteId, period, platforms, keywords } = req.body;
+
+        console.log(`🚀 SSE: Génération calendrier avec progression pour site ${siteId}`);
+
+        // Créer une instance dédiée avec callback de progression
+        const { ContentCalendarService } = await import('./content-calendar-service');
+        const calendarServiceWithProgress = new ContentCalendarService();
+
+        // Configurer le callback de progression
+        calendarServiceWithProgress.onProgress = (progress) => {
+            sendSSE({
+                type: 'progress',
+                ...progress
+            });
+        };
+
+        // Générer le calendrier (les événements SSE seront émis automatiquement)
+        const calendar = await calendarServiceWithProgress.generateCalendar({
+            siteId: parseInt(siteId),
+            period,
+            platforms: platforms || ['instagram', 'facebook', 'newsletter', 'linkedin'],
+            keywords
+        });
+
+        // Lancer la génération des contenus en arrière-plan
+        contentGeneratorService.generateBatch(calendar).catch(err => {
+            console.error('❌ ERREUR BACKGROUND generateBatch:', err);
+        });
+
+        // Envoyer le résultat final
+        sendSSE({
+            type: 'complete',
+            success: true,
+            calendarCount: calendar.length,
+            message: `${calendar.length} idées générées. Rédaction en cours...`
+        });
+
+        res.end();
+
+    } catch (error: any) {
+        console.error('❌ SSE Erreur:', error);
+        sendSSE({
+            type: 'error',
+            error: error.message
+        });
+        res.end();
+    }
+});
+
+/**
  * GET /api/workflows/platforms
  * Liste les plateformes supportées
  */

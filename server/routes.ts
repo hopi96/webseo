@@ -98,7 +98,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Le programme des réseaux sociaux est requis" });
       }
 
-      await supabaseService.updateSocialMediaProgram(siteId, programme_rs);
+      let socialParams;
+      try {
+        socialParams = typeof programme_rs === 'string' ? JSON.parse(programme_rs) : programme_rs;
+      } catch (e) {
+        return res.status(400).json({ message: "Format JSON invalide pour le programme" });
+      }
+
+      await supabaseService.updateSocialParams(siteId, socialParams);
       res.json({ message: "Programme des réseaux sociaux mis à jour avec succès" });
     } catch (error) {
       console.error("❌ Erreur lors de la mise à jour du programme RS:", error);
@@ -177,6 +184,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("❌ Erreur lors du rafraîchissement de l'analyse:", error);
       res.status(500).json({ message: "Failed to refresh analysis", error: error.message });
+    }
+  });
+
+  // ============= GEO Analysis Routes =============
+
+  // Route pour lancer une analyse GEO (Generative Engine Optimization)
+  app.post("/api/sites/:id/analyze-geo", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const sites = await supabaseService.getAllSites();
+      const site = sites.find(s => s.id === siteId);
+
+      if (!site) {
+        return res.status(404).json({ message: "Site not found" });
+      }
+
+      console.log(`🤖 Lancement analyse GEO pour ${site.url}...`);
+
+      // Importer et utiliser le service GEO
+      const { geoAnalysisService } = await import('./geo-analysis-service');
+      const geoResult = await geoAnalysisService.analyzeGEO(site.url);
+
+      // Sauvegarder dans Supabase
+      await supabaseService.saveGeoAnalysis(siteId, geoResult, geoResult.geoScore);
+
+      console.log(`✅ Analyse GEO terminée - Score: ${geoResult.geoScore}/100`);
+
+      res.json({
+        success: true,
+        siteId,
+        geoScore: geoResult.geoScore,
+        analysis: geoResult
+      });
+    } catch (error: any) {
+      console.error("❌ Erreur analyse GEO:", error);
+      res.status(500).json({ message: "Failed to analyze GEO", error: error.message });
+    }
+  });
+
+  // Route pour récupérer l'analyse GEO d'un site
+  app.get("/api/sites/:id/geo-analysis", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+
+      const result = await supabaseService.getGeoAnalysis(siteId);
+
+      if (!result) {
+        return res.status(404).json({
+          message: "Aucune analyse GEO disponible",
+          hint: "Lancez une analyse GEO avec POST /api/sites/:id/analyze-geo"
+        });
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error("❌ Erreur récupération analyse GEO:", error);
+      res.status(500).json({ message: "Failed to get GEO analysis", error: error.message });
+    }
+  });
+
+  // ============= Site Prompts Routes =============
+
+  // Route pour récupérer tous les prompts d'un site (personnalisés + globaux)
+  app.get("/api/sites/:id/prompts", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+
+      console.log(`🔍 Récupération des prompts pour le site ${siteId}`);
+      const prompts = await supabaseService.getAllPromptsForSite(siteId);
+
+      res.json({
+        siteId,
+        prompts,
+        totalCount: prompts.length,
+        customCount: prompts.filter(p => p.isCustom).length
+      });
+    } catch (error: any) {
+      console.error("❌ Erreur récupération prompts site:", error);
+      res.status(500).json({ message: "Failed to get site prompts", error: error.message });
+    }
+  });
+
+  // Route pour récupérer un prompt spécifique (site-spécifique ou global)
+  app.get("/api/sites/:id/prompts/:platform", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const platform = req.params.platform;
+
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+
+      const prompt = await supabaseService.getSitePrompt(siteId, platform);
+
+      if (!prompt) {
+        return res.status(404).json({
+          message: `Aucun prompt trouvé pour ${platform}`,
+          hint: "Le prompt global par défaut sera utilisé"
+        });
+      }
+
+      res.json({
+        siteId,
+        platform,
+        prompt: prompt.promptSystem,
+        name: prompt.name
+      });
+    } catch (error: any) {
+      console.error("❌ Erreur récupération prompt:", error);
+      res.status(500).json({ message: "Failed to get prompt", error: error.message });
+    }
+  });
+
+  // Route pour sauvegarder/mettre à jour un prompt personnalisé pour un site
+  app.post("/api/sites/:id/prompts/:platform", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const platform = req.params.platform;
+      const { promptSystem, name } = req.body;
+
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+
+      if (!promptSystem || typeof promptSystem !== 'string') {
+        return res.status(400).json({ message: "promptSystem requis (string)" });
+      }
+
+      console.log(`💾 Sauvegarde prompt personnalisé: site ${siteId}, plateforme ${platform}`);
+      const result = await supabaseService.saveSitePrompt(siteId, platform, promptSystem, name);
+
+      res.json({
+        success: true,
+        message: `Prompt ${platform} personnalisé pour le site ${siteId}`,
+        ...result
+      });
+    } catch (error: any) {
+      console.error("❌ Erreur sauvegarde prompt:", error);
+      res.status(500).json({ message: "Failed to save prompt", error: error.message });
+    }
+  });
+
+  // Route pour supprimer un prompt personnalisé (revenir au global)
+  app.delete("/api/sites/:id/prompts/:platform", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const platform = req.params.platform;
+
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+
+      console.log(`🗑️ Suppression prompt personnalisé: site ${siteId}, plateforme ${platform}`);
+      const success = await supabaseService.deleteSitePrompt(siteId, platform);
+
+      res.json({
+        success,
+        message: success
+          ? `Prompt ${platform} réinitialisé (utilise maintenant le prompt global)`
+          : `Aucun prompt personnalisé à supprimer pour ${platform}`
+      });
+    } catch (error: any) {
+      console.error("❌ Erreur suppression prompt:", error);
+      res.status(500).json({ message: "Failed to delete prompt", error: error.message });
     }
   });
 
@@ -697,6 +876,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour mettre à jour le programme de publications (fréquences)
+  // Cette route est appelée par le dialogue SocialMediaProgramDialog
+  app.put("/api/sites/:id/social-program", async (req, res) => {
+    try {
+      const siteId = parseInt(req.params.id);
+      const { programme_rs } = req.body;
+
+      if (isNaN(siteId)) {
+        return res.status(400).json({ message: "ID de site invalide" });
+      }
+
+      if (!programme_rs) {
+        return res.status(400).json({ message: "programme_rs requis" });
+      }
+
+      console.log(`📅 Mise à jour du programme de publications pour le site ${siteId}`);
+
+      // Parser le JSON si c'est une chaîne
+      let programData;
+      try {
+        programData = typeof programme_rs === 'string' ? JSON.parse(programme_rs) : programme_rs;
+      } catch (e) {
+        return res.status(400).json({ message: "Format JSON invalide pour programme_rs" });
+      }
+
+      // Récupérer les paramètres existants pour fusionner
+      const existingParams = await supabaseService.getSocialParams(siteId);
+
+      // Fusionner les fréquences avec les paramètres existants
+      const updatedParams = {
+        ...existingParams,
+        frequence_publication: programData.frequence_publication
+      };
+
+      // Sauvegarder dans social_params
+      await supabaseService.updateSocialParams(siteId, updatedParams);
+
+      console.log(`✅ Programme de publications mis à jour pour le site ${siteId}`);
+      res.json({
+        message: "Programme de publications mis à jour avec succès",
+        data: updatedParams
+      });
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour du programme:', error);
+      res.status(500).json({
+        message: "Impossible de mettre à jour le programme de publications"
+      });
+    }
+  });
+
   // Route pour vérifier le statut de génération du calendrier éditorial
   app.get("/api/check-generation-status/:siteId", async (req, res) => {
     try {
@@ -1212,8 +1441,11 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
   // Récupérer tous les prompts système
   app.get("/api/system-prompts", async (req, res) => {
     try {
-      console.log('🔍 Récupération de tous les prompts système');
-      const prompts = await supabaseService.getAllSystemPrompts();
+      const siteIdParam = req.query.siteId;
+      const siteId = siteIdParam ? parseInt(siteIdParam as string) : undefined;
+
+      console.log('🔍 Récupération des prompts système', siteId ? `pour le site ${siteId}` : '(Global)');
+      const prompts = await supabaseService.getAllSystemPrompts(siteId);
       console.log(`✅ ${prompts.length} prompts système récupérés`);
       res.json(prompts);
     } catch (error: any) {
@@ -1237,7 +1469,7 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
         });
       }
 
-      console.log('✅ Prompt système actif récupéré:', activePrompt.nom || 'Sans nom');
+      console.log('✅ Prompt système actif récupéré:', activePrompt.name || 'Sans nom');
       res.json(activePrompt);
     } catch (error: any) {
       console.error('❌ Erreur lors de la récupération du prompt système actif:', error);
@@ -1251,10 +1483,10 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
   // Créer un nouveau prompt système
   app.post("/api/system-prompts", async (req, res) => {
     try {
-      const { promptSystem, structureSortie, nom, description, actif } = req.body;
+      const { promptSystem, outputStructure, name, description, isActive } = req.body;
 
       console.log('🆕 Création d\'un nouveau prompt système');
-      console.log('Données reçues:', { nom, description, actif, promptLength: promptSystem?.length });
+      console.log('Données reçues:', { name, description, isActive, promptLength: promptSystem?.length });
 
       if (!promptSystem || promptSystem.trim() === '') {
         return res.status(400).json({
@@ -1264,10 +1496,10 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
 
       const promptData = {
         promptSystem: promptSystem.trim(),
-        structureSortie: structureSortie || '',
-        nom: nom || '',
+        outputStructure: outputStructure || '',
+        name: name || '',
         description: description || '',
-        actif: actif || false
+        isActive: isActive || false
       };
 
       const createdPrompt = await supabaseService.createSystemPrompt(promptData);
@@ -1287,14 +1519,52 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
   app.put("/api/system-prompts/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const { promptSystem, structureSortie, nom, description, actif } = req.body;
+      const { promptSystem, outputStructure, name, description, isActive, siteId } = req.body;
 
       console.log('🔄 Mise à jour du prompt système:', id);
-      console.log('Données reçues:', { nom, description, actif, promptLength: promptSystem?.length });
+      console.log('Données reçues:', { name, description, isActive, promptLength: promptSystem?.length, siteId });
 
       if (!id) {
         return res.status(400).json({
           message: "ID du prompt système manquant"
+        });
+      }
+
+      // Check current prompt status (global or local)
+      const allPrompts = await supabaseService.getAllSystemPrompts();
+      const currentPrompt = allPrompts.find(p => p.id.toString() === id.toString());
+
+      // FORK LOGIC: If editing a global prompt for a specific site, create or update a site-specific prompt
+      // Note: We use site_prompts table now via saveSitePrompt
+      if (siteId) {  // If siteId provided, we are in site context
+        console.log('🔀 Saving site-specific prompt for site:', siteId);
+
+        // We need the platform. If it's a global prompt being forked, it has platform.
+        // If it's already a site prompt being updated, it has platform.
+        // currentPrompt comes from getAllSystemPrompts which merges both.
+        // FALLBACK: If platform is missing (legacy prompts), assume 'seo' (default)
+        const platformToUse = currentPrompt?.platform || 'seo';
+
+        if (!currentPrompt) {
+          return res.status(400).json({
+            message: "Prompt non trouvé"
+          });
+        }
+
+        const savedPrompt = await supabaseService.saveSitePrompt(
+          siteId,
+          platformToUse,
+          promptSystem !== undefined ? promptSystem.trim() : (currentPrompt.promptSystem || ''),
+          name !== undefined ? name : currentPrompt.name
+        );
+
+        return res.json({
+          id: savedPrompt.id.toString(),
+          siteId: savedPrompt.siteId,
+          platform: savedPrompt.platform,
+          name: savedPrompt.name,
+          promptSystem: savedPrompt.promptSystem,
+          isActive: true,
         });
       }
 
@@ -1309,10 +1579,11 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
         updateData.promptSystem = promptSystem.trim();
       }
 
-      if (structureSortie !== undefined) updateData.structureSortie = structureSortie;
-      if (nom !== undefined) updateData.nom = nom;
+      if (outputStructure !== undefined) updateData.outputStructure = outputStructure;
+      if (name !== undefined) updateData.name = name;
       if (description !== undefined) updateData.description = description;
-      if (actif !== undefined) updateData.actif = actif;
+      if (isActive !== undefined) updateData.isActive = isActive;
+      if (siteId !== undefined) updateData.siteId = siteId;
 
       const updatedPrompt = await supabaseService.updateSystemPrompt(id, updateData);
 

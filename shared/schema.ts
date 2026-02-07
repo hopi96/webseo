@@ -58,9 +58,25 @@ export const editorialContent = pgTable("editorial_content", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const systemPrompts = pgTable("system_prompts", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  promptSystem: text("prompt_system").notNull(),
+  outputStructure: text("output_structure"),
+  isActive: boolean("is_active").default(false),
+  siteId: integer("site_id"),
+  platform: text("platform"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertWebsiteSchema = createInsertSchema(websites).pick({
   url: true,
   name: true,
+  seoAnalysis: true,
+  socialProgram: true,
+  socialParams: true
 });
 
 export const insertSeoAnalysisSchema = createInsertSchema(seoAnalyses).omit({
@@ -73,32 +89,27 @@ export const insertEditorialContentSchema = createInsertSchema(editorialContent)
   createdAt: true,
 });
 
+export const insertSystemPromptSchema = createInsertSchema(systemPrompts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 export type Website = typeof websites.$inferSelect;
 export type InsertWebsite = z.infer<typeof insertWebsiteSchema>;
 export type SeoAnalysis = typeof seoAnalyses.$inferSelect;
 export type InsertSeoAnalysis = z.infer<typeof insertSeoAnalysisSchema>;
 export type EditorialContent = typeof editorialContent.$inferSelect;
 export type InsertEditorialContent = z.infer<typeof insertEditorialContentSchema>;
+export type SystemPrompt = typeof systemPrompts.$inferSelect;
+export type InsertSystemPrompt = z.infer<typeof insertSystemPromptSchema>;
 
-// Type pour les sites avec analyse SEO depuis Airtable
+// Type pour les sites avec analyse SEO depuis Airtable (Legacy support)
 export type AirtableSite = {
   id: number;
   name: string;
   url: string;
-  programmeRs?: string; // Nouveau champ pour le programme des réseaux sociaux
-  seoAnalysis?: any; // JSON d'analyse SEO
+  programmeRs?: string;
+  seoAnalysis?: any;
+  socialParams?: any;
 };
-
-// Type pour la gestion des prompts système depuis Airtable
-export type SystemPrompt = {
-  id: string; // ID Airtable
-  promptSystem: string; // Le prompt système
-  structureSortie?: string; // Structure de sortie attendue (optionnel)
-  nom?: string; // Nom du prompt pour l'identifier
-  description?: string; // Description du prompt
-  actif?: boolean; // Si le prompt est actif
-  createdAt?: Date;
-  updatedAt?: Date;
-};
-
-export type InsertSystemPrompt = Omit<SystemPrompt, 'id' | 'createdAt' | 'updatedAt'>;

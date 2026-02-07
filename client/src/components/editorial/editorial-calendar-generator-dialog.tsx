@@ -80,12 +80,11 @@ export function EditorialCalendarGeneratorDialog({
 
 
 
-  // Mutation pour générer le calendrier éditorial
+  // Mutation pour générer le calendrier éditorial avec progression en temps réel
   const generateCalendarMutation = useMutation({
     mutationFn: async () => {
-      // Commencer la génération
-      setCurrentStep('Analyse SEO et génération du calendrier...');
-      setProgress(10);
+      setCurrentStep('Connexion au serveur...');
+      setProgress(5);
 
       const Period = isMonthlyPeriod ? {
         startDate: new Date().toISOString().split('T')[0],
@@ -95,32 +94,58 @@ export function EditorialCalendarGeneratorDialog({
         endDate
       };
 
-      try {
-        setProgress(30);
-        setCurrentStep('Génération des idées avec GPT-4o...');
-
-        // Appel au nouveau workflow natif
-        const response = await apiRequest('POST', '/api/workflows/generate-calendar-flow', {
+      // Utiliser SSE pour la progression en temps réel
+      const response = await fetch('/api/workflows/generate-calendar-stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           siteId: websiteId,
           websiteName,
           websiteUrl,
           seoAnalysis: seoAnalysis || {},
           period: Period,
-          platforms: ['instagram', 'facebook', 'newsletter', 'linkedin'] // Plateformes par défaut
-        });
+          platforms: ['instagram', 'facebook', 'newsletter', 'linkedin', 'blog', 'pinterest', 'xtwitter', 'google my business']
+        })
+      });
 
-        setProgress(80);
-        setCurrentStep('Enregistrement des contenus...');
-
-        const data = await response.json();
-
-        setProgress(100);
-        return data;
-
-      } catch (error) {
-        console.error('Erreur génération:', error);
-        throw error;
+      if (!response.body) {
+        throw new Error('SSE not supported');
       }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let result: any = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const text = decoder.decode(value);
+        const lines = text.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+
+              if (data.type === 'progress') {
+                setProgress(data.percent);
+                setCurrentStep(data.step);
+              } else if (data.type === 'complete') {
+                result = data;
+              } else if (data.type === 'error') {
+                throw new Error(data.error);
+              }
+            } catch (e) {
+              // Ignore parsing errors for incomplete chunks
+            }
+          }
+        }
+      }
+
+      return result || { success: true, calendarCount: 0 };
     },
     onSuccess: (data) => {
       setGenerationResult(data);
@@ -360,7 +385,7 @@ export function EditorialCalendarGeneratorDialog({
                   {isMonthlyPeriod
                     ? "Le calendrier sera généré pour 1 mois complet à partir d'aujourd'hui"
                     : startDate && endDate
-                      ? `Le calendrier sera généré du ${new Date(startDate).toLocaleDateString('fr-FR')} au ${new Date(endDate).toLocaleDateString('fr-FR')}`
+                      ? `Le calendrier sera généré du ${new Date(startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} au ${new Date(endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`
                       : "Veuillez sélectionner une période personnalisée"
                   }
                 </div>

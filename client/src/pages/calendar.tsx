@@ -14,6 +14,7 @@ import { UnifiedHeader } from "@/components/layout/unified-header";
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
 import { DeleteArticleDialog } from "@/components/editorial/delete-article-dialog";
+import { ArticlePreviewDialog } from "@/components/editorial/article-preview-dialog";
 import {
   Calendar as CalendarIcon,
   Plus,
@@ -26,7 +27,8 @@ import {
   Check,
   Square,
   CheckSquare,
-  MoreHorizontal
+  MoreHorizontal,
+  Eye
 } from "lucide-react";
 import type { EditorialContent } from "@shared/schema";
 
@@ -50,6 +52,8 @@ export default function Calendar() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+  const [previewingArticle, setPreviewingArticle] = useState<EditorialContent | null>(null);
   const [addDialogDate, setAddDialogDate] = useState<string>("");
   const [selectedSiteFilter, setSelectedSiteFilter] = useState<number | null>(null);
   const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string | null>(null);
@@ -664,8 +668,8 @@ export default function Calendar() {
                       <div
                         key={event.id}
                         className={`p-3 border rounded-lg transition-colors ${isSelectionMode && selectedArticles.has(event.id)
-                            ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20'
-                            : 'border-gray-100 dark:border-gray-700'
+                          ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20'
+                          : 'border-gray-100 dark:border-gray-700'
                           }`}
                       >
                         <div className="flex items-start justify-between mb-2">
@@ -686,6 +690,21 @@ export default function Calendar() {
                             </h4>
                           </div>
                           <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1 hover:bg-purple-100 dark:hover:bg-purple-900/20"
+                              title="Prévisualiser"
+                              onClick={() => {
+                                const content = editorialContent.find(c => c.id === event.id);
+                                if (content) {
+                                  setPreviewingArticle(content);
+                                  setIsPreviewDialogOpen(true);
+                                }
+                              }}
+                            >
+                              <Eye className="h-3 w-3 text-purple-500" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1085,6 +1104,14 @@ export default function Calendar() {
           article={deletingArticle}
         />
       )}
+
+      {/* Dialog de prévisualisation d'article */}
+      <ArticlePreviewDialog
+        open={isPreviewDialogOpen}
+        onOpenChange={setIsPreviewDialogOpen}
+        article={previewingArticle}
+        siteName={previewingArticle ? getSiteName(previewingArticle.idSite) : undefined}
+      />
 
       {/* Conteneur pour le chatbot n8n */}
       <div id="n8n-chat"></div>
