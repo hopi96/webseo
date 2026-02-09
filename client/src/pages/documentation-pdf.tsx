@@ -612,7 +612,7 @@ export default function DocumentationPDF() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen app-shell page-enter p-4">
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader className="text-center">

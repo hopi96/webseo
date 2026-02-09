@@ -30,6 +30,7 @@ import {
   Youtube,
   Facebook,
   Twitter,
+  Linkedin,
   Mail,
   Calendar,
   Eye,
@@ -56,6 +57,8 @@ const socialMediaProgramSchema = z.object({
   youtube_mois: z.number().min(0).max(50),
   facebook_semaine: z.number().min(0).max(50),
   facebook_mois: z.number().min(0).max(50),
+  linkedin_semaine: z.number().min(0).max(50),
+  linkedin_mois: z.number().min(0).max(50),
   blog_semaine: z.number().min(0).max(50),
   blog_mois: z.number().min(0).max(50),
   pinterest_semaine: z.number().min(0).max(50),
@@ -114,6 +117,8 @@ export function SocialMediaProgramDialog({
     youtube_mois: program?.youtube?.posts_par_mois || 0,
     facebook_semaine: program?.facebook?.posts_par_semaine || 0,
     facebook_mois: program?.facebook?.posts_par_mois || 0,
+    linkedin_semaine: program?.linkedin?.posts_par_semaine || 0,
+    linkedin_mois: program?.linkedin?.posts_par_mois || 0,
     blog_semaine: program?.blog?.posts_par_semaine || 0,
     blog_mois: program?.blog?.posts_par_mois || 0,
     pinterest_semaine: program?.pinterest?.posts_par_semaine || 0,
@@ -158,6 +163,7 @@ export function SocialMediaProgramDialog({
           xtwitter: calculateFrequency(data.xtwitter_semaine, data.xtwitter_mois),
           youtube: calculateFrequency(data.youtube_semaine, data.youtube_mois),
           facebook: calculateFrequency(data.facebook_semaine, data.facebook_mois),
+          linkedin: calculateFrequency(data.linkedin_semaine, data.linkedin_mois),
           blog: calculateFrequency(data.blog_semaine, data.blog_mois),
           pinterest: calculateFrequency(data.pinterest_semaine, data.pinterest_mois)
         }
@@ -203,6 +209,7 @@ export function SocialMediaProgramDialog({
     xtwitter: <Twitter className="w-5 h-5 text-blue-400" />,
     youtube: <Youtube className="w-5 h-5 text-red-600" />,
     facebook: <Facebook className="w-5 h-5 text-blue-700" />,
+    linkedin: <Linkedin className="w-5 h-5 text-sky-700" />,
     blog: <FileText className="w-5 h-5 text-green-600" />,
     pinterest: <Image className="w-5 h-5 text-red-500" />,
   };
@@ -214,6 +221,7 @@ export function SocialMediaProgramDialog({
     xtwitter: "X (Twitter)",
     youtube: "YouTube",
     facebook: "Facebook",
+    linkedin: "LinkedIn",
     blog: "Blog",
     pinterest: "Pinterest",
   };

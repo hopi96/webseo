@@ -137,7 +137,7 @@ export default function DashboardWebhook() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen app-shell page-enter">
         <UnifiedHeader />
         <div className="p-6 space-y-6">
           <div className="text-center py-12">
@@ -150,7 +150,7 @@ export default function DashboardWebhook() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen app-shell page-enter">
       <UnifiedHeader />
       <div className="p-6 space-y-6 animate-in fade-in duration-700 smart-scroll-vertical">
         {/* En-tête avec infos du site et boutons d'action */}
@@ -168,7 +168,7 @@ export default function DashboardWebhook() {
                   onClick={() => setIsSocialProgramOpen(true)}
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  className="flex items-center gap-2 transition-colors hover:bg-accent"
                   disabled={!selectedWebsiteId}
                 >
                   <Share2 className="h-4 w-4" />
@@ -179,7 +179,7 @@ export default function DashboardWebhook() {
                   onClick={() => setIsCalendarGeneratorOpen(true)}
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  className="flex items-center gap-2 transition-colors hover:bg-accent"
                   disabled={!selectedWebsiteId}
                 >
                   <Calendar className="h-4 w-4" />
@@ -190,7 +190,7 @@ export default function DashboardWebhook() {
                   onClick={() => setIsAnalysisOpen(true)}
                   variant="default"
                   size="sm"
-                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  className="flex items-center gap-2 transition-colors hover:bg-accent"
                   disabled={refreshAnalysisMutation.isPending}
                 >
                   {refreshAnalysisMutation.isPending ? (
@@ -278,7 +278,7 @@ export default function DashboardWebhook() {
             {/* Métriques principales en cartes */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Score SEO */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-100">
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                     Score SEO
@@ -301,7 +301,7 @@ export default function DashboardWebhook() {
               </Card>
 
               {/* PageSpeed */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-200">
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                     PageSpeed
@@ -320,7 +320,7 @@ export default function DashboardWebhook() {
               </Card>
 
               {/* Mots-clés */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-300">
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                     Mots-clés
@@ -339,13 +339,13 @@ export default function DashboardWebhook() {
               </Card>
 
               {/* Liens */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-in slide-in-from-left-4 duration-500 delay-[400ms]">
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-shadow hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                     Liens internes
                     <HelpTooltip content="Nombre de liens internes qui relient les pages de votre site entre elles. Améliore la navigation et le référencement" />
                   </CardTitle>
-                  <Link className="h-4 w-4 text-purple-600" />
+                  <Link className="h-4 w-4 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">

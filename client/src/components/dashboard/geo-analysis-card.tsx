@@ -137,16 +137,16 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
     };
 
     return (
-        <Card className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/10 dark:to-indigo-900/10 border-purple-200 dark:border-purple-800">
+        <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                        <Bot className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <div className="p-2 bg-muted rounded-md">
+                        <Bot className="h-5 w-5 text-foreground" />
                     </div>
                     <div>
                         <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                             Analyse GEO
-                            <Sparkles className="h-4 w-4 text-purple-500" />
+                            <Sparkles className="h-4 w-4 text-muted-foreground" />
                         </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                             Generative Engine Optimization
@@ -159,7 +159,6 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                     size="sm"
                     onClick={() => analyzeMutation.mutate()}
                     disabled={analyzeMutation.isPending}
-                    className="border-purple-200 hover:border-purple-300 hover:bg-purple-50"
                 >
                     {analyzeMutation.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -172,7 +171,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
 
             {isLoading ? (
                 <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
             ) : analysis ? (
                 <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -240,7 +239,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                                         {factor.improvements.length > 0 && (
                                             <ul className="mt-2 space-y-1">
                                                 {factor.improvements.slice(0, 2).map((imp, i) => (
-                                                    <li key={i} className="text-xs text-purple-600 dark:text-purple-400 flex items-start gap-1">
+                                                    <li key={i} className="text-xs text-primary flex items-start gap-1">
                                                         <span className="mt-0.5">→</span>
                                                         <span>{imp}</span>
                                                     </li>
@@ -278,7 +277,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                 </Collapsible>
             ) : (
                 <div className="text-center py-6">
-                    <Bot className="h-10 w-10 text-purple-300 mx-auto mb-3" />
+                    <Bot className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                         Analysez l'optimisation de votre site pour les moteurs de recherche IA
                     </p>

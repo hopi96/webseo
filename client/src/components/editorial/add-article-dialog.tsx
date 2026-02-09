@@ -26,7 +26,7 @@ import {
 
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
-  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog", "google my business", "pinterest"]),
+  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "linkedin", "blog", "google my business", "pinterest"]),
   statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
@@ -270,6 +270,8 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
         return "YouTube";
       case "facebook":
         return "Facebook";
+      case "linkedin":
+        return "LinkedIn";
       case "blog":
         return "Blog";
       case "google my business":
@@ -312,7 +314,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     variant="outline"
                     size="sm"
                     onClick={() => setShowAIDialog(true)}
-                    className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                    className="flex items-center gap-2 text-primary border-input hover:bg-accent"
                   >
                     <Sparkles className="h-4 w-4" />
                     Générer avec GPT-4o
@@ -358,6 +360,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                       <SelectItem value="xtwitter">X (Twitter)</SelectItem>
                       <SelectItem value="youtube">YouTube</SelectItem>
                       <SelectItem value="facebook">Facebook</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
                       <SelectItem value="blog">Blog</SelectItem>
                       <SelectItem value="google my business">Google My Business</SelectItem>
                       <SelectItem value="pinterest">Pinterest</SelectItem>
@@ -476,7 +479,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
               {/* Section gestion d'images */}
               {form.watch("hasImage") && (
-                <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-blue-50">
+                <div className="space-y-4 p-4 border rounded-lg bg-muted">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium flex items-center gap-2">
                       <Image className="h-4 w-4" />
@@ -515,7 +518,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                           size="sm"
                           onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"), customPrompt)}
                           disabled={generatingImage || imageState.uploadedImageUrl !== ""}
-                          className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50 disabled:opacity-50"
+                          className="w-full flex items-center gap-2 text-primary border-input hover:bg-accent disabled:opacity-50"
                         >
                           <Sparkles className="h-4 w-4" />
                           {generatingImage ? "Génération..." : "Générer avec DALL-E 3"}
@@ -565,7 +568,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
 
                   {generatingImage && (
                     <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                       <span className="ml-2 text-sm text-gray-600">Génération de l'image en cours...</span>
                     </div>
                   )}
@@ -581,7 +584,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                           onClick={() => setShowImageModal(true)}
                           title="Cliquer pour agrandir l'image"
                         />
-                        <div className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-1 rounded text-xs">
+                        <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs">
                           DALL-E 3
                         </div>
                       </div>
@@ -602,7 +605,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                           onClick={() => setShowImageModal(true)}
                           title="Cliquer pour agrandir l'image"
                         />
-                        <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs">
+                        <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs">
                           UPLOADÉE
                         </div>
                       </div>
@@ -641,7 +644,6 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
               <Button
                 type="submit"
                 disabled={loading || createMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
               >
                 {loading || createMutation.isPending ? (
                   <>

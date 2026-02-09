@@ -53,7 +53,7 @@ interface EditArticleDialogProps {
 const editArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est obligatoire"),
   statut: z.enum(["en attente", "à réviser", "validé", "publié"]),
-  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog", "google my business", "pinterest"]),
+  typeContent: z.enum(["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "linkedin", "blog", "google my business", "pinterest"]),
   hasImage: z.boolean(),
   imageUrl: z.string().optional(),
   imageSource: z.enum(["upload", "ai"]).optional(),
@@ -93,8 +93,8 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
     return validStatuts.includes(statut) ? statut as any : "en attente";
   };
 
-  const normalizeTypeContent = (type: string): "newsletter" | "tiktok" | "instagram" | "xtwitter" | "youtube" | "facebook" | "blog" | "google my business" | "pinterest" => {
-    const validTypes = ["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "blog", "google my business", "pinterest"];
+  const normalizeTypeContent = (type: string): "newsletter" | "tiktok" | "instagram" | "xtwitter" | "youtube" | "facebook" | "linkedin" | "blog" | "google my business" | "pinterest" => {
+    const validTypes = ["newsletter", "tiktok", "instagram", "xtwitter", "youtube", "facebook", "linkedin", "blog", "google my business", "pinterest"];
     return validTypes.includes(type) ? type as any : "newsletter";
   };
 
@@ -330,6 +330,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
       case 'xtwitter': return 'X (Twitter)';
       case 'youtube': return 'YouTube';
       case 'facebook': return 'Facebook';
+      case 'linkedin': return 'LinkedIn';
       case 'blog': return 'Blog';
       default: return type;
     }
@@ -366,7 +367,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                       variant="outline"
                       size="sm"
                       onClick={() => setShowAIDialog(true)}
-                      className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                      className="flex items-center gap-2 text-primary border-input hover:bg-accent"
                     >
                       <Sparkles className="h-4 w-4" />
                       Générer avec GPT-4o
@@ -404,6 +405,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         <SelectItem value="xtwitter">X (Twitter)</SelectItem>
                         <SelectItem value="youtube">YouTube</SelectItem>
                         <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="linkedin">LinkedIn</SelectItem>
                         <SelectItem value="blog">Blog</SelectItem>
                         <SelectItem value="google my business">Google My Business</SelectItem>
                         <SelectItem value="pinterest">Pinterest</SelectItem>
@@ -533,7 +535,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         {(() => {
                           const imageUrl = getDisplayImageUrl(imageState)!;
                           const { label, color } = getImageSourceLabel(imageUrl);
-                          const colorClass = color === 'purple' ? 'bg-purple-500' :
+                          const colorClass = color === 'primary' ? 'bg-primary' :
                             color === 'blue' ? 'bg-blue-500' : 'bg-green-500';
                           return (
                             <span className={`absolute top-2 left-2 ${colorClass} text-white px-2 py-1 rounded text-xs`}>
@@ -565,7 +567,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                               size="sm"
                               onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"), customPrompt)}
                               disabled={generatingImage}
-                              className="flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50"
+                              className="flex items-center gap-2 text-primary border-input hover:bg-accent"
                             >
                               <Sparkles className="h-4 w-4" />
                               Régénérer avec DALL-E 3
@@ -626,7 +628,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                         size="sm"
                         onClick={() => generateImageWithAI(form.watch("contentText"), form.watch("typeContent"), customPrompt)}
                         disabled={generatingImage || imageState.uploadedImageUrl !== ""}
-                        className="w-full flex items-center gap-2 text-purple-600 border-purple-200 hover:bg-purple-50 disabled:opacity-50"
+                        className="w-full flex items-center gap-2 text-primary border-input hover:bg-accent disabled:opacity-50"
                       >
                         <Sparkles className="h-4 w-4" />
                         {generatingImage ? "Génération..." : "Générer avec DALL-E 3"}

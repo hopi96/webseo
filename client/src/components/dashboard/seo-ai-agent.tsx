@@ -75,8 +75,8 @@ export function SEOAIAgent({ siteId, seoData }: SEOAIAgentProps) {
     <Card className="w-full">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg">
-            <Bot className="h-5 w-5 text-white" />
+          <div className="p-2 bg-muted rounded-md">
+            <Bot className="h-5 w-5 text-foreground" />
           </div>
           <div>
             <CardTitle className="text-lg font-semibold">Agent IA SEO</CardTitle>
@@ -91,7 +91,7 @@ export function SEOAIAgent({ siteId, seoData }: SEOAIAgentProps) {
         {!analysis && !isAnalyzing && (
           <div className="text-center py-8">
             <div className="mb-4">
-              <Sparkles className="h-12 w-12 text-purple-500 mx-auto mb-2" />
+              <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
               <h3 className="text-lg font-medium text-gray-900 mb-1">
                 Analyse SEO intelligente
               </h3>
@@ -102,7 +102,6 @@ export function SEOAIAgent({ siteId, seoData }: SEOAIAgentProps) {
             </div>
             <Button 
               onClick={generateAnalysis}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
             >
               <Sparkles className="h-4 w-4 mr-2" />
               Analyser avec l'IA
@@ -112,7 +111,7 @@ export function SEOAIAgent({ siteId, seoData }: SEOAIAgentProps) {
 
         {isAnalyzing && (
           <div className="text-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-600 mx-auto mb-4" />
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Analyse en cours...
             </h3>
@@ -125,11 +124,11 @@ export function SEOAIAgent({ siteId, seoData }: SEOAIAgentProps) {
         {analysis && (
           <div className="space-y-6">
             {/* Score global et résumé */}
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-100">
+            <div className="bg-muted rounded-lg p-4 border">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-gray-900">Évaluation globale</h3>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-purple-600">{analysis.overallScore}/100</div>
+                  <div className="text-2xl font-bold text-foreground">{analysis.overallScore}/100</div>
                   <div className="text-xs text-gray-600">Score IA</div>
                 </div>
               </div>
@@ -173,14 +172,14 @@ export function SEOAIAgent({ siteId, seoData }: SEOAIAgentProps) {
             {/* Recommandations */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-purple-600" />
+                <TrendingUp className="h-5 w-5 text-foreground" />
                 Recommandations personnalisées
               </h3>
               
               <div className="h-96 overflow-y-auto pr-4 smart-scroll-vertical">
                 <div className="space-y-4">
                   {analysis.recommendations.map((rec, index) => (
-                    <Card key={index} className="border-l-4 border-l-purple-500">
+                    <Card key={index} className="border-l-2 border-l-primary">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -219,7 +218,7 @@ export function SEOAIAgent({ siteId, seoData }: SEOAIAgentProps) {
                           <ol className="space-y-1">
                             {rec.actionSteps.map((step, stepIndex) => (
                               <li key={stepIndex} className="text-sm text-gray-700 flex items-start gap-2">
-                                <span className="text-purple-600 font-medium mt-0.5">
+                                <span className="text-primary font-medium mt-0.5">
                                   {stepIndex + 1}.
                                 </span>
                                 {step}

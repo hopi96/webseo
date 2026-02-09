@@ -1,17 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UnifiedHeader } from "@/components/layout/unified-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Trash2, RefreshCw, Bell, Moon, Sun, Plus, Globe, MessageSquare, Edit, Check, X } from "lucide-react";
+import { Trash2, RefreshCw, Bell, Moon, Sun, Plus, Globe, MessageSquare, Edit } from "lucide-react";
 import { AddWebsiteDialog } from "@/components/website/add-website-dialog";
 import { EditPromptDialog } from "@/components/prompts/edit-prompt-dialog";
 import { useTheme } from "@/hooks/use-theme";
 import { useToast } from "@/hooks/use-toast";
 import { useSite } from "@/lib/site-context";
 import { apiRequest } from "@/lib/queryClient";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +39,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { Website, SystemPrompt } from "@shared/schema";
+import type { SystemPrompt } from "@shared/schema";
+
+type SitePrompt = SystemPrompt & { isCustom?: boolean };
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
@@ -36,22 +54,35 @@ export default function Settings() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzingWebsite, setAnalyzingWebsite] = useState<string>("");
   const [editingPrompt, setEditingPrompt] = useState<SystemPrompt | null>(null);
+  const [editingPromptSiteId, setEditingPromptSiteId] = useState<number | null>(null);
+  const [promptsDialogOpen, setPromptsDialogOpen] = useState(false);
+  const [selectedPromptSiteId, setSelectedPromptSiteId] = useState<number | null>(null);
 
   const { data: websites = [] } = useQuery<any[]>({
     queryKey: ["/api/sites"],
   });
 
+  useEffect(() => {
+    if (promptsDialogOpen) {
+      setSelectedPromptSiteId(null);
+    }
+  }, [promptsDialogOpen]);
+
   const { data: promptsData, isLoading: isLoadingPrompts } = useQuery({
-    queryKey: ["/api/sites", currentSite?.id, "prompts"],
+    queryKey: ["/api/sites", selectedPromptSiteId, "prompts"],
     queryFn: async () => {
-      if (!currentSite?.id) return { prompts: [] };
-      const res = await apiRequest("GET", `/api/sites/${currentSite.id}/prompts`);
+      if (!selectedPromptSiteId) return { prompts: [] };
+      const res = await apiRequest("GET", `/api/sites/${selectedPromptSiteId}/prompts`);
       return res.json();
     },
-    enabled: !!currentSite?.id,
+    enabled: !!selectedPromptSiteId && promptsDialogOpen,
   });
 
-  const systemPrompts: SystemPrompt[] = promptsData?.prompts || [];
+  const systemPrompts: SitePrompt[] = promptsData?.prompts || [];
+  const selectedPromptSite = websites?.find((website) => website.id === selectedPromptSiteId);
+  const totalPromptsCount = promptsData?.totalCount ?? systemPrompts.length;
+  const customPromptsCount =
+    promptsData?.customCount ?? systemPrompts.filter((prompt) => prompt.isCustom).length;
 
   const deleteWebsiteMutation = useMutation({
     mutationFn: async (websiteId: number) => {
@@ -104,20 +135,33 @@ export default function Settings() {
   });
 
   const updateSystemPromptMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<SystemPrompt> & { siteId?: number } }) => {
-      return await apiRequest("PUT", `/api/system-prompts/${id}`, data);
-    },
-    onSuccess: () => {
-      // Invalidation stricte pour forcer le rafraîchissement de la liste des prompts du site
-      queryClient.invalidateQueries({
-        queryKey: ["/api/sites", currentSite?.id, "prompts"]
+    mutationFn: async ({
+      id,
+      data,
+      siteId,
+    }: {
+      id: string;
+      data: Partial<SystemPrompt>;
+      siteId?: number;
+    }) => {
+      return await apiRequest("PUT", `/api/system-prompts/${id}`, {
+        ...data,
+        siteId,
       });
-      // Invalider aussi les prompts system globaux au cas où
+    },
+    onSuccess: (_data, variables) => {
+      const targetSiteId = variables?.siteId ?? selectedPromptSiteId ?? currentSite?.id;
+      if (targetSiteId) {
+        queryClient.invalidateQueries({
+          queryKey: ["/api/sites", targetSiteId, "prompts"],
+        });
+      }
       queryClient.invalidateQueries({
-        queryKey: ["/api/system-prompts"]
+        queryKey: ["/api/system-prompts"],
       });
 
       setEditingPrompt(null);
+      setEditingPromptSiteId(null);
       toast({
         title: "Succès",
         description: "Prompt système et configuration mis à jour.",
@@ -132,30 +176,6 @@ export default function Settings() {
     },
   });
 
-  const deleteSystemPromptMutation = useMutation({
-    mutationFn: async (promptId: string) => {
-      // Pour supprimer un prompt custom, on utilise l'endpoint delete site prompt
-      // Le promptId ici est l'ID global, mais on a besoin de la plateforme
-      // On retrouvera la plateforme via le prompt object dans le handler
-      await apiRequest("DELETE", `/api/system-prompts/${promptId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["/api/sites", currentSite?.id, "prompts"]
-      });
-      toast({
-        title: "Succès",
-        description: "Prompt système supprimé avec succès",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de supprimer le prompt système",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleDeleteWebsite = (websiteId: number) => {
     deleteWebsiteMutation.mutate(websiteId);
@@ -165,38 +185,48 @@ export default function Settings() {
     analyzeWebsiteMutation.mutate(websiteId);
   };
 
-  const handleTogglePromptActive = (prompt: SystemPrompt) => {
-    updateSystemPromptMutation.mutate({
-      id: String(prompt.id),
-      data: { isActive: !prompt.isActive }
-    });
-  };
-
-  const handleDeletePrompt = (prompt: SystemPrompt) => {
-    // Si c'est un prompt custom, on le supprime (revient au default)
-    // Si c'est un global, on ne peut pas vraiment le supprimer d'ici sans être admin, 
-    // mais pour l'instant on garde la logique existante ou on adapte.
-    // L'endpoint DELETE /api/sites/:id/prompts/:platform est préférable pour les custom.
-
-    if (prompt.platform && currentSite?.id) {
-      // Use the specific delete endpoint to reset to global
-      apiRequest("DELETE", `/api/sites/${currentSite.id}/prompts/${prompt.platform}`)
-        .then(() => {
-          queryClient.invalidateQueries({
-            queryKey: ["/api/sites", currentSite.id, "prompts"]
-          });
-          toast({ title: "Succès", description: "Prompt réinitialisé au défaut" });
-        })
-        .catch((e) => toast({ title: "Erreur", description: "Erreur suppression", variant: "destructive" }));
-    } else {
-      deleteSystemPromptMutation.mutate(String(prompt.id));
+  const handleEditPrompt = (prompt: SitePrompt) => {
+    if (!selectedPromptSiteId) {
+      toast({
+        title: "Site requis",
+        description: "Selectionnez un site avant de modifier les prompts.",
+        variant: "destructive",
+      });
+      return;
     }
+    setEditingPrompt(prompt);
+    setEditingPromptSiteId(selectedPromptSiteId);
   };
 
-  const activePrompt = systemPrompts.find(p => p.isActive);
+  const handleDeletePrompt = (prompt: SitePrompt, siteId?: number | null) => {
+    const isCustom = prompt.isCustom === true;
+
+    if (!isCustom) {
+      return;
+    }
+
+    if (!siteId || !prompt.platform) {
+      toast({
+        title: "Site requis",
+        description: "Selectionnez un site avant de modifier les prompts.",
+        variant: "destructive",
+      });
+      return;
+    }
+    apiRequest("DELETE", `/api/sites/${siteId}/prompts/${prompt.platform}`)
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["/api/sites", siteId, "prompts"],
+        });
+        toast({ title: "Succes", description: "Prompt reinitialise au defaut" });
+      })
+      .catch(() =>
+        toast({ title: "Erreur", description: "Erreur suppression", variant: "destructive" })
+      );
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen app-shell page-enter">
       <UnifiedHeader />
 
       <main className="px-6 py-6 smart-scroll-vertical">
@@ -273,101 +303,29 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* Gestion des prompts système */}
+          {/* Gestion des prompts systeme */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <MessageSquare className="w-5 h-5 mr-2" />
-                Prompts système IA
+                Prompts systeme IA
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {activePrompt && (
-                <div className="mb-4 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-green-900 dark:text-green-100">
-                        Prompt actif : {activePrompt.name || 'Sans nom'}
-                      </div>
-                      <div className="text-sm text-green-700 dark:text-green-300">
-                        {activePrompt.description || 'Aucune description'}
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {systemPrompts?.map((prompt) => (
-                  <div
-                    key={prompt.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border ${prompt.isActive
-                      ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
-                      : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                      }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center">
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {prompt.name || 'Prompt sans nom'}
-                        </div>
-                        {prompt.isActive && (
-                          <span className="ml-2 px-2 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">
-                            Actif
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                        {prompt.description || 'Aucune description'}
-                      </div>
-                      <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {prompt.promptSystem?.length || 0} caractères
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2 ml-4">
-                      {!prompt.isActive && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleTogglePromptActive(prompt)}
-                          disabled={updateSystemPromptMutation.isPending}
-                          data-testid={`button-activate-prompt-${prompt.id}`}
-                        >
-                          <Check className="w-4 h-4" />
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingPrompt(prompt)}
-                        data-testid={`button-edit-prompt-${prompt.id}`}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => handleDeletePrompt(prompt)}
-                        data-testid={`button-delete-prompt-${prompt.id}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-
-                    </div>
-                  </div>
-                ))}
-
-                {(!systemPrompts || systemPrompts.length === 0) && (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    Aucun prompt système configuré. Les prompts par défaut seront utilisés.
-                  </div>
-                )}
+              <div className="space-y-3">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Les prompts sont lies a chaque site web. Ouvrez la fenetre de gestion pour choisir un site
+                  puis modifier ses prompts.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedPromptSiteId(null);
+                    setPromptsDialogOpen(true);
+                  }}
+                >
+                  Gerer les prompts par site
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -484,16 +442,168 @@ export default function Settings() {
         onOpenChange={setShowAddWebsiteDialog}
       />
 
+      <Dialog open={promptsDialogOpen} onOpenChange={setPromptsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Prompts par site</DialogTitle>
+            <DialogDescription>
+              Selectionnez un site puis modifiez les prompts associes.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Site web</Label>
+              <Select
+                value={selectedPromptSiteId ? String(selectedPromptSiteId) : ""}
+                onValueChange={(value) => setSelectedPromptSiteId(Number(value))}
+                disabled={!websites || websites.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir un site" />
+                </SelectTrigger>
+                <SelectContent>
+                  {websites?.map((website) => (
+                    <SelectItem key={website.id} value={String(website.id)}>
+                      {website.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {!websites || websites.length === 0 ? (
+              <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                Ajoutez un site pour pouvoir gerer les prompts.
+              </div>
+            ) : !selectedPromptSite ? (
+              <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                Selectionnez un site pour afficher les prompts.
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{selectedPromptSite.name}</span>
+                <span>-</span>
+                <span>{totalPromptsCount} prompts</span>
+                <span>-</span>
+                <span>{customPromptsCount} personnalises</span>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {!selectedPromptSiteId ? (
+                <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                  Selectionnez un site pour voir la liste des prompts.
+                </div>
+              ) : isLoadingPrompts ? (
+                <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                  Chargement des prompts...
+                </div>
+              ) : systemPrompts.length === 0 ? (
+                <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                  Aucun prompt disponible pour ce site.
+                </div>
+              ) : (
+                systemPrompts.map((prompt) => {
+                  const isCustom = prompt.isCustom === true;
+                  const promptLabel = prompt.name || prompt.platform || "Prompt";
+
+                  return (
+                    <div key={`${prompt.platform ?? prompt.id}`} className="rounded-lg border p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-medium text-foreground">{promptLabel}</span>
+                            {prompt.platform && (
+                              <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                                {prompt.platform}
+                              </span>
+                            )}
+                            <Badge variant={isCustom ? "secondary" : "outline"}>
+                              {isCustom ? "Personnalise" : "Global"}
+                            </Badge>
+                            {prompt.isActive === false && (
+                              <span className="text-xs text-muted-foreground">Inactif</span>
+                            )}
+                          </div>
+                          {prompt.description && (
+                            <p className="text-xs text-muted-foreground">{prompt.description}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEditPrompt(prompt)}>
+                            <Edit className="w-4 h-4" />
+                            Modifier
+                          </Button>
+                          {isCustom && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Trash2 className="w-4 h-4" />
+                                  Reinitialiser
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Reinitialiser le prompt</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Ce prompt personnalise sera supprime et le prompt global sera utilise.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeletePrompt(prompt, selectedPromptSiteId)}
+                                    className="bg-destructive text-destructive-foreground hover:opacity-90"
+                                  >
+                                    Reinitialiser
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPromptsDialogOpen(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog d'édition de prompt système */}
       {editingPrompt && (
         <EditPromptDialog
           prompt={editingPrompt}
           open={!!editingPrompt}
-          onOpenChange={(open) => !open && setEditingPrompt(null)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingPrompt(null);
+              setEditingPromptSiteId(null);
+            }
+          }}
           onSave={(data) => {
+            const targetSiteId = editingPromptSiteId ?? selectedPromptSiteId ?? currentSite?.id;
+            if (!targetSiteId) {
+              toast({
+                title: "Site requis",
+                description: "Selectionnez un site avant de modifier les prompts.",
+                variant: "destructive",
+              });
+              return;
+            }
             updateSystemPromptMutation.mutate({
               id: String(editingPrompt.id),
-              data: { ...data, siteId: currentSite?.id }
+              data,
+              siteId: targetSiteId,
             });
           }}
         />

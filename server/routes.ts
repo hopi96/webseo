@@ -5,6 +5,7 @@ import { insertWebsiteSchema, insertSeoAnalysisSchema, insertEditorialContentSch
 import { requestSeoAnalysisFromWebhook } from "./webhook-service";
 import { supabaseService } from "./supabase-service";
 import { openaiService } from "./openai-service";
+import { buildMonitoringSummary } from "./monitoring-agent-service";
 import workflowRoutes from "./workflow-routes";
 import { z } from "zod";
 import multer from "multer";
@@ -878,6 +879,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Route pour mettre à jour le programme de publications (fréquences)
   // Cette route est appelée par le dialogue SocialMediaProgramDialog
+
+  // Monitoring & Agent IA
+  app.get("/api/monitoring/overview", async (req, res) => {
+    try {
+      const siteId = req.query.siteId ? parseInt(req.query.siteId as string) : undefined;
+      const overview = await supabaseService.getMonitoringSnapshot(siteId);
+      res.json(overview);
+    } catch (error: any) {
+      console.error('❌ Erreur monitoring overview:', error);
+      res.status(500).json({ message: error.message || 'Erreur monitoring' });
+    }
+  });
+
+  app.post("/api/monitoring/summary", async (req, res) => {
+    try {
+      const siteId = req.body?.siteId ? parseInt(req.body.siteId) : undefined;
+      const overview = await supabaseService.getMonitoringSnapshot(siteId);
+      const summary = await buildMonitoringSummary(overview);
+      res.json({ summary });
+    } catch (error: any) {
+      console.error('❌ Erreur monitoring summary:', error);
+      res.status(500).json({ message: error.message || 'Erreur monitoring' });
+    }
+  });
+
   app.put("/api/sites/:id/social-program", async (req, res) => {
     try {
       const siteId = parseInt(req.params.id);

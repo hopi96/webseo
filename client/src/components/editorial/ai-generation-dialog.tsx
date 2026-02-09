@@ -106,6 +106,7 @@ export function AIGenerationDialog({
     switch (type) {
       case 'xtwitter': return 'X (Twitter)';
       case 'instagram': return 'Instagram';
+      case 'linkedin': return 'LinkedIn';
       case 'article': return 'Article';
       case 'newsletter': return 'Newsletter';
       default: return type;
@@ -139,7 +140,7 @@ export function AIGenerationDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-600" />
+            <Sparkles className="h-5 w-5 text-muted-foreground" />
             Générer du contenu avec GPT-4o
           </DialogTitle>
           <p className="text-sm text-gray-600">
@@ -231,7 +232,6 @@ export function AIGenerationDialog({
               <Button
                 type="submit"
                 disabled={isGenerating}
-                className="bg-purple-600 hover:bg-purple-700"
               >
                 {isGenerating ? (
                   <>

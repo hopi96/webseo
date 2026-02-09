@@ -92,7 +92,7 @@ export function ArticlePreviewDialog({
     const TwitterPreview = () => (
         <Card className="max-w-[500px] mx-auto p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
             <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
                     {siteName.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1">
@@ -134,7 +134,7 @@ export function ArticlePreviewDialog({
     const InstagramPreview = () => (
         <Card className="max-w-[400px] mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <div className="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-gray-700">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center text-white font-bold text-xs">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
                     {siteName.charAt(0).toUpperCase()}
                 </div>
                 <span className="font-semibold text-gray-900 dark:text-white text-sm">{siteName.toLowerCase().replace(/\s/g, '_')}</span>
@@ -143,7 +143,7 @@ export function ArticlePreviewDialog({
             {article.hasImage && article.imageUrl ? (
                 <img src={article.imageUrl} alt="Post image" className="w-full aspect-square object-cover" />
             ) : (
-                <div className="w-full aspect-square bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 flex items-center justify-center">
+                <div className="w-full aspect-square bg-muted flex items-center justify-center">
                     <Image className="h-16 w-16 text-gray-400" />
                 </div>
             )}
@@ -166,7 +166,7 @@ export function ArticlePreviewDialog({
     const FacebookPreview = () => (
         <Card className="max-w-[500px] mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <div className="flex items-center gap-3 p-3">
-                <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
                     {siteName.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -186,7 +186,7 @@ export function ArticlePreviewDialog({
                 <img src={article.imageUrl} alt="Post image" className="w-full h-auto max-h-[400px] object-cover" />
             )}
             <div className="flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2 text-gray-500 hover:text-blue-600 cursor-pointer">
+                <div className="flex items-center gap-2 text-gray-500 hover:text-primary cursor-pointer">
                     <ThumbsUp className="h-5 w-5" />
                     <span>J'aime</span>
                 </div>
@@ -206,7 +206,7 @@ export function ArticlePreviewDialog({
     const LinkedinPreview = () => (
         <Card className="max-w-[500px] mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <div className="flex items-center gap-3 p-4">
-                <div className="w-12 h-12 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
                     {siteName.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1">
@@ -275,7 +275,7 @@ export function ArticlePreviewDialog({
     // Preview Newsletter - Full HTML/Markdown rendering
     const NewsletterPreview = () => (
         <Card className="max-w-[600px] mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white text-center">
+            <div className="bg-primary p-6 text-primary-foreground text-center">
                 <h1 className="text-2xl font-bold">{siteName}</h1>
                 <p className="text-sm opacity-80">Newsletter du {publicationDate}</p>
             </div>
@@ -289,7 +289,7 @@ export function ArticlePreviewDialog({
                     className="text-gray-700 dark:text-gray-300 leading-relaxed"
                 />
                 <div className="mt-6 text-center">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                    <button className="bg-primary text-primary-foreground hover:brightness-95 px-6 py-2 rounded-lg font-medium">
                         En savoir plus
                     </button>
                 </div>

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Facebook, Instagram, Twitter, Youtube, Clock, Loader2, Eye, EyeOff, ExternalLink, HelpCircle, CheckCircle, AlertCircle, Info, Star, PlayCircle } from "lucide-react";
+import { Settings, Facebook, Instagram, Twitter, Youtube, Clock, Loader2, Eye, EyeOff, ExternalLink, HelpCircle, CheckCircle, AlertCircle, Info, Star, PlayCircle, Linkedin } from "lucide-react";
 
 interface SocialParamsDialogProps {
   siteId: number;
@@ -46,6 +46,11 @@ interface SocialParams {
   tiktok?: {
     access_token: string;
   };
+  linkedin?: {
+    author_urn: string;
+    access_token: string;
+    visibility?: string;
+  };
   prestashop_blog?: {
     base_url: string;
     api_key: string;
@@ -61,7 +66,7 @@ const platformGroups = {
     title: "Réseaux sociaux principaux",
     description: "Plateformes de publication sociale",
     priority: "high",
-    platforms: ['facebook', 'instagram', 'xtwitter']
+    platforms: ['facebook', 'instagram', 'linkedin', 'xtwitter']
   },
   content: {
     title: "Création de contenu",
@@ -115,6 +120,22 @@ const platformConfigs = [
     videoTutorials: [
       { label: '📹 Trouver ton Instagram User ID', url: 'https://www.youtube.com/watch?v=YhGTNJzdFaU', description: 'Guide complet pour localiser votre identifiant utilisateur Instagram' },
       { label: '📹 Générer un long-lived access token', url: 'https://www.youtube.com/watch?v=9btrKUO9Jo0', description: 'Indispensable pour l\'automatisation Instagram' }
+    ]
+  },
+  {
+    key: 'linkedin',
+    name: 'LinkedIn',
+    icon: Linkedin,
+    color: 'text-sky-700',
+    difficulty: 'Moyen',
+    description: 'Publiez automatiquement sur votre profil ou page LinkedIn',
+    fields: [
+      { name: 'author_urn', label: 'Author URN', placeholder: 'urn:li:person:xxxx', description: "URN du profil ou de l'organisation" },
+      { name: 'access_token', label: 'Token d\'accès', placeholder: 'Token d\'accès LinkedIn', description: 'Token OAuth (scope w_member_social ou w_organization_social)' },
+      { name: 'visibility', label: 'Visibilité', placeholder: 'PUBLIC', description: 'PUBLIC ou CONNECTIONS (optionnel)' }
+    ],
+    helpLinks: [
+      { label: 'Documentation LinkedIn UGC Posts', url: 'https://learn.microsoft.com/linkedin/consumer/integrations/self-serve/share-on-linkedin' }
     ]
   },
   {
@@ -570,7 +591,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                             {platform.videoTutorials && platform.videoTutorials.length > 0 && (
                               <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <PlayCircle className="h-4 w-4 text-purple-500" />
+                                  <PlayCircle className="h-4 w-4 text-muted-foreground" />
                                   <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Tutoriels vidéo YouTube</span>
                                 </div>
                                 <div className="space-y-2">
@@ -580,20 +601,20 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                                       href={tutorial.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="block p-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-md border border-purple-100 dark:border-purple-800 hover:border-purple-200 dark:hover:border-purple-700 transition-colors group"
+                                      className="block p-2 rounded-md border bg-background hover:bg-muted transition-colors group"
                                       data-testid={`video-tutorial-${platform.key}-${index}`}
                                     >
                                       <div className="flex items-start gap-2">
-                                        <PlayCircle className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors" />
+                                        <PlayCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0 group-hover:text-foreground transition-colors" />
                                         <div className="min-w-0 flex-1">
-                                          <div className="text-xs font-medium text-purple-800 dark:text-purple-200 mb-1 line-clamp-1">
+                                          <div className="text-xs font-medium text-foreground mb-1 line-clamp-1">
                                             {tutorial.label}
                                           </div>
-                                          <div className="text-xs text-purple-600 dark:text-purple-400 line-clamp-2">
+                                          <div className="text-xs text-muted-foreground line-clamp-2">
                                             {tutorial.description}
                                           </div>
                                         </div>
-                                        <ExternalLink className="h-3 w-3 text-purple-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                                       </div>
                                     </a>
                                   ))}

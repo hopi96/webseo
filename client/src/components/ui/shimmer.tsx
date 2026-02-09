@@ -24,7 +24,7 @@ interface MetricShimmerProps {
 
 export function MetricShimmer({ className }: MetricShimmerProps) {
   return (
-    <div className={cn("bg-white/70 backdrop-blur rounded-xl p-6 border-0 shadow-lg", className)}>
+    <div className={cn("bg-background rounded-lg p-6 border shadow-sm", className)}>
       <div className="flex items-center justify-between">
         <div className="space-y-3">
           <Shimmer className="h-8 w-16 rounded" />
@@ -42,7 +42,7 @@ interface ScoreShimmerProps {
 
 export function ScoreShimmer({ className }: ScoreShimmerProps) {
   return (
-    <div className={cn("bg-slate-50 border-2 border-slate-200 rounded-xl p-8", className)}>
+    <div className={cn("bg-muted border rounded-lg p-8", className)}>
       <div className="flex items-center justify-between">
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
@@ -71,7 +71,7 @@ export function KeywordShimmer({ count = 3 }: KeywordShimmerProps) {
   return (
     <div className="space-y-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+        <div key={i} className="flex items-center justify-between p-4 bg-muted rounded-lg">
           <div className="flex-1 space-y-2">
             <Shimmer className="h-5 w-32 rounded" />
             <Shimmer className="h-4 w-24 rounded" />
@@ -94,7 +94,7 @@ export function RecommendationShimmer({ count = 2 }: RecommendationShimmerProps)
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="p-6 bg-slate-50 rounded-xl border-l-4 border-l-blue-500 space-y-3">
+        <div key={i} className="p-6 bg-muted rounded-lg border space-y-3">
           <div className="flex items-start justify-between">
             <Shimmer className="h-5 w-48 rounded" />
             <Shimmer className="h-5 w-16 rounded-full" />

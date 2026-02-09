@@ -40,6 +40,19 @@ export interface DbSystemPrompt {
     updated_at: string;
 }
 
+export interface DbPublicationLog {
+    id: number;
+    content_id: number | null;
+    site_id: number | null;
+    platform: string;
+    status: 'success' | 'failed';
+    message: string | null;
+    external_id: string | null;
+    publication_date: string | null;
+    content_excerpt: string | null;
+    created_at: string;
+}
+
 // Initialisation du client Supabase
 let supabase: SupabaseClient | null = null;
 
@@ -393,6 +406,264 @@ export class SupabaseService {
             console.error('❌ Erreur lors de la récupération des contenus par date:', error);
             throw error;
         }
+    }
+
+    /**
+     * Récupère les contenus à publier sur une période donnée
+     */
+    async getContentForPublishing(params: {
+        start: Date;
+        end: Date;
+        statuses: string[];
+        limit?: number;
+    }): Promise<EditorialContent[]> {
+        try {
+            const client = initializeSupabase();
+
+            const { data, error } = await client
+                .from('editorial_contents')
+                .select('*')
+                .in('status', params.statuses)
+                .gte('publication_date', params.start.toISOString())
+                .lte('publication_date', params.end.toISOString())
+                .order('publication_date', { ascending: true })
+                .limit(params.limit ?? 200);
+
+            if (error) throw error;
+
+            return (data || []).map((content: DbEditorialContent) => this.mapDbContentToEditorial(content));
+        } catch (error) {
+            console.error('❌ Erreur lors de la récupération des contenus à publier:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Log des tentatives de publication (succès/échec)
+     */
+    async createPublicationLog(params: {
+        contentId?: number;
+        siteId?: number;
+        platform: string;
+        status: 'success' | 'failed';
+        message?: string;
+        externalId?: string;
+        publicationDate?: Date | string;
+        contentExcerpt?: string;
+    }): Promise<void> {
+        try {
+            const client = initializeSupabase();
+            const payload: any = {
+                content_id: params.contentId ?? null,
+                site_id: params.siteId ?? null,
+                platform: params.platform,
+                status: params.status,
+                message: params.message || null,
+                external_id: params.externalId || null,
+                publication_date: params.publicationDate
+                    ? (params.publicationDate instanceof Date ? params.publicationDate.toISOString() : params.publicationDate)
+                    : null,
+                content_excerpt: params.contentExcerpt || null
+            };
+
+            const { error } = await client
+                .from('publication_logs')
+                .insert(payload);
+
+            if (error) throw error;
+        } catch (error) {
+            console.warn('⚠️ Erreur création publication_log:', error);
+        }
+    }
+
+    /**
+     * Snapshot monitoring (comptes + listes)
+     */
+    async getMonitoringSnapshot(siteId?: number): Promise<{
+        now: string;
+        counts: {
+            total: number;
+            byStatus: Record<string, number>;
+            dueToday: number;
+            publishedToday: number;
+            pendingToday: number;
+            overdue: number;
+            upcoming7d: number;
+        };
+        lastPublished: Array<{
+            id: number;
+            siteId: number;
+            platform: string;
+            status: string;
+            publicationDate: string;
+            excerpt: string;
+        }>;
+        nextScheduled: Array<{
+            id: number;
+            siteId: number;
+            platform: string;
+            status: string;
+            publicationDate: string;
+            excerpt: string;
+        }>;
+        failedPosts: Array<{
+            id: number;
+            contentId: number | null;
+            siteId: number | null;
+            platform: string;
+            message: string;
+            createdAt: string;
+            publicationDate: string | null;
+            excerpt: string;
+        }>;
+    }> {
+        const client = initializeSupabase();
+        const now = new Date();
+        const startDay = new Date(now);
+        startDay.setHours(0, 0, 0, 0);
+        const endDay = new Date(now);
+        endDay.setHours(23, 59, 59, 999);
+        const next7d = new Date(now);
+        next7d.setDate(next7d.getDate() + 7);
+        next7d.setHours(23, 59, 59, 999);
+
+        const statuses = ['en attente', 'à réviser', 'validé', 'publié'];
+
+        const baseCount = () => {
+            let query = client
+                .from('editorial_contents')
+                .select('id', { count: 'exact', head: true });
+            if (siteId) query = query.eq('site_id', siteId);
+            return query;
+        };
+
+        const countWith = async (apply: (q: ReturnType<typeof baseCount>) => ReturnType<typeof baseCount>) => {
+            const { count, error } = await apply(baseCount());
+            if (error) throw error;
+            return count || 0;
+        };
+
+        const byStatus: Record<string, number> = {};
+        for (const status of statuses) {
+            byStatus[status] = await countWith(q => q.eq('status', status));
+        }
+
+        const total = await countWith(q => q);
+        const dueToday = await countWith(q => q.gte('publication_date', startDay.toISOString()).lte('publication_date', endDay.toISOString()));
+        const publishedToday = await countWith(q =>
+            q.eq('status', 'publié')
+                .gte('publication_date', startDay.toISOString())
+                .lte('publication_date', endDay.toISOString())
+        );
+        const overdue = await countWith(q =>
+            q.neq('status', 'publié')
+                .lt('publication_date', now.toISOString())
+        );
+        const upcoming7d = await countWith(q =>
+            q.gte('publication_date', now.toISOString())
+                .lte('publication_date', next7d.toISOString())
+        );
+
+        const pendingToday = Math.max(0, dueToday - publishedToday);
+
+        let publishedQuery = client
+            .from('editorial_contents')
+            .select('id, site_id, content_type, status, publication_date, content_text')
+            .eq('status', 'publié')
+            .order('publication_date', { ascending: false })
+            .limit(5);
+
+        if (siteId) {
+            publishedQuery = publishedQuery.eq('site_id', siteId);
+        }
+
+        const { data: publishedData, error: publishedError } = await publishedQuery;
+        if (publishedError) throw publishedError;
+
+        let nextQuery = client
+            .from('editorial_contents')
+            .select('id, site_id, content_type, status, publication_date, content_text')
+            .neq('status', 'publié')
+            .gte('publication_date', now.toISOString())
+            .order('publication_date', { ascending: true })
+            .limit(5);
+
+        if (siteId) {
+            nextQuery = nextQuery.eq('site_id', siteId);
+        }
+
+        const { data: nextData, error: nextError } = await nextQuery;
+        if (nextError) throw nextError;
+
+        let failedPosts: Array<{
+            id: number;
+            contentId: number | null;
+            siteId: number | null;
+            platform: string;
+            message: string;
+            createdAt: string;
+            publicationDate: string | null;
+            excerpt: string;
+        }> = [];
+
+        try {
+            let failureQuery = client
+                .from('publication_logs')
+                .select('id, content_id, site_id, platform, status, message, publication_date, content_excerpt, created_at')
+                .eq('status', 'failed')
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (siteId) {
+                failureQuery = failureQuery.eq('site_id', siteId);
+            }
+
+            const { data: failureData, error: failureError } = await failureQuery;
+            if (failureError) throw failureError;
+
+            failedPosts = (failureData || []).map((row: DbPublicationLog) => ({
+                id: row.id,
+                contentId: row.content_id ?? null,
+                siteId: row.site_id ?? null,
+                platform: row.platform,
+                message: row.message || 'Erreur inconnue',
+                createdAt: row.created_at,
+                publicationDate: row.publication_date ?? null,
+                excerpt: row.content_excerpt || ''
+            }));
+        } catch (error) {
+            console.warn('⚠️ Erreur récupération publication_logs:', error);
+        }
+
+        return {
+            now: now.toISOString(),
+            counts: {
+                total,
+                byStatus,
+                dueToday,
+                publishedToday,
+                pendingToday,
+                overdue,
+                upcoming7d
+            },
+            lastPublished: (publishedData || []).map((row: any) => ({
+                id: row.id,
+                siteId: row.site_id,
+                platform: row.content_type,
+                status: row.status,
+                publicationDate: row.publication_date,
+                excerpt: (row.content_text || '').slice(0, 140)
+            })),
+            nextScheduled: (nextData || []).map((row: any) => ({
+                id: row.id,
+                siteId: row.site_id,
+                platform: row.content_type,
+                status: row.status,
+                publicationDate: row.publication_date,
+                excerpt: (row.content_text || '').slice(0, 140)
+            })),
+            failedPosts
+        };
     }
 
     /**

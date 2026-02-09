@@ -54,6 +54,7 @@ export const SUPPORTED_PLATFORMS = [
     'xtwitter',
     'youtube',
     'facebook',
+    'linkedin',
     'blog',
     'google my business',
     'pinterest'

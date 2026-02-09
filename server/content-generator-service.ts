@@ -6,6 +6,7 @@
 import OpenAI from 'openai';
 import { supabaseService } from './supabase-service';
 import type { CalendarEntry } from './content-calendar-service';
+import { researchAgentService, type ResearchBrief } from './research-agent-service';
 
 // Types
 export interface ContentGenerationRequest {
@@ -171,10 +172,18 @@ export class ContentGeneratorService {
         console.log(systemPrompt);
         console.log('--------------------------------');
 
-        // 2. Générer le contenu via OpenAI
-        const contentText = await this.callOpenAI(systemPrompt, request);
+        // 2. Assistant IA de recherche (web) pour enrichir le contenu
+        const researchBrief = await researchAgentService.buildBrief({
+            siteId: request.siteId,
+            platform: request.platform,
+            theme: request.theme,
+            context: request.context
+        });
 
-        // 3. Générer une image si demandé (Instagram, Pinterest)
+        // 3. Générer le contenu via OpenAI
+        const contentText = await this.callOpenAI(systemPrompt, request, researchBrief || undefined);
+
+        // 4. Générer une image si demandé (Instagram, Pinterest)
         let imageUrl: string | undefined;
         let imageSource: 'ai' | 'upload' | undefined;
 
@@ -187,7 +196,7 @@ export class ContentGeneratorService {
             }
         }
 
-        // 4. Sauvegarder dans Supabase
+        // 5. Sauvegarder dans Supabase
         const content = await supabaseService.createContent({
             idSite: request.siteId,
             typeContent: request.platform,
@@ -256,12 +265,26 @@ export class ContentGeneratorService {
     /**
      * Appelle OpenAI pour générer le contenu
      */
-    private async callOpenAI(systemPrompt: string, request: ContentGenerationRequest): Promise<string> {
+    private async callOpenAI(
+        systemPrompt: string,
+        request: ContentGenerationRequest,
+        researchBrief?: ResearchBrief
+    ): Promise<string> {
         // Construction du prompt utilisateur avec le contexte spécifique du post
+        const researchSection = researchBrief ? this.formatResearchBrief(researchBrief) : '';
+
         const userPrompt = `DÉTAILS DU POST À CRÉER :
 Thème: ${request.theme}
 Contexte/Angle: ${request.context}
 Date de publication: ${request.publicationDate}
+
+RAPPEL IMPORTANT :
+Un agent IA de support a réalisé une recherche web récente pour améliorer la qualité du post.
+Utilise ces informations en complément des instructions du prompt.
+N'invente aucun fait, reste fidèle au brief.
+
+ASSISTANT IA DE RECHERCHE (WEB À JOUR) :
+${researchSection || 'Aucun brief de recherche disponible.'}
 
 MISSION: Rédige le contenu final prêt à être publié.
 N'ajoute pas de guillemets autour du texte.
@@ -372,6 +395,48 @@ Description: ${description}`;
         // Fallback: Retourner le prompt construit dynamiquement (en dur)
         console.log(`📋 Utilisation du prompt par défaut pour ${platform}`);
         return buildSystemPrompt(platform, contextString);
+    }
+
+    
+
+    /**
+     * Formate le brief de recherche pour l'injection dans le prompt
+     */
+    private formatResearchBrief(brief: ResearchBrief): string {
+        const lines: string[] = [];
+
+        if (brief.synthese) {
+            lines.push(`Synthèse: ${brief.synthese}`);
+        }
+
+        if (brief.faitsCles?.length) {
+            lines.push(`Faits clés: ${brief.faitsCles.join(' | ')}`);
+        }
+
+        if (brief.angles?.length) {
+            lines.push(`Angles possibles: ${brief.angles.join(' | ')}`);
+        }
+
+        if (brief.conseilsPlateforme?.length) {
+            lines.push(`Conseils plateforme: ${brief.conseilsPlateforme.join(' | ')}`);
+        }
+
+        if (brief.elementsAEviter?.length) {
+            lines.push(`À éviter: ${brief.elementsAEviter.join(' | ')}`);
+        }
+
+        if (brief.ctaSuggeres?.length) {
+            lines.push(`CTA suggérés: ${brief.ctaSuggeres.join(' | ')}`);
+        }
+
+        if (brief.sources?.length) {
+            const sources = brief.sources
+                .map(source => `${source.title} (${source.url})`)
+                .join(' | ');
+            lines.push(`Sources: ${sources}`);
+        }
+
+        return lines.join('\n');
     }
 
     /**

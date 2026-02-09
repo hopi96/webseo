@@ -8,6 +8,7 @@ import { SiteProvider } from "@/lib/site-context";
 import Dashboard from "@/pages/dashboard";
 import Keywords from "@/pages/keywords";
 import Calendar from "@/pages/calendar";
+import Monitoring from "@/pages/monitoring";
 import Settings from "@/pages/settings";
 import DocumentationPDF from "@/pages/documentation-pdf";
 import NotFound from "@/pages/not-found";
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/keywords" component={Keywords} />
       <Route path="/calendar" component={Calendar} />
+      <Route path="/monitoring" component={Monitoring} />
       <Route path="/settings" component={Settings} />
       <Route path="/documentation-pdf" component={DocumentationPDF} />
       <Route component={NotFound} />

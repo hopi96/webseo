@@ -52,7 +52,7 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteA
           </div>
           <Button
             onClick={() => setShowAddDialog(true)}
-            className="ml-3 p-3 bg-primary text-white rounded-lg hover:bg-blue-700"
+            className="ml-3 p-3"
           >
             <Plus className="w-4 h-4" />
           </Button>

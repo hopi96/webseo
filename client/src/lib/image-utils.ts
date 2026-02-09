@@ -182,7 +182,7 @@ export function getImageSourceLabel(imageUrl: string): {
   const analysis = analyzeImageSource(imageUrl);
   
   if (analysis.isDALLE) {
-    return { label: "IA", color: "purple" };
+    return { label: "IA", color: "primary" };
   } else if (analysis.isLocal) {
     return { label: "Upload", color: "blue" };
   } else {

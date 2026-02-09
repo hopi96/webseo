@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UnifiedHeader } from "@/components/layout/unified-header";
+import { useSite } from "@/lib/site-context";
 
 import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
@@ -55,7 +56,6 @@ export default function Calendar() {
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [previewingArticle, setPreviewingArticle] = useState<EditorialContent | null>(null);
   const [addDialogDate, setAddDialogDate] = useState<string>("");
-  const [selectedSiteFilter, setSelectedSiteFilter] = useState<number | null>(null);
   const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string | null>(null);
 
   // États pour l'édition en lot
@@ -68,6 +68,9 @@ export default function Calendar() {
   const [statsFilter, setStatsFilter] = useState<{ kind: 'status' | 'type', value: string } | null>(null);
   const [visibleCount, setVisibleCount] = useState(50);
   const { toast } = useToast();
+
+  const { currentSite, selectedSiteId } = useSite();
+  const activeSiteId = selectedSiteId ?? currentSite?.id ?? null;
 
   // Initialiser le chatbot n8n
   useEffect(() => {
@@ -136,7 +139,7 @@ export default function Calendar() {
 
   // Filtrer les événements par site et plateforme sélectionnés
   const events = allEvents.filter(event => {
-    const siteMatch = selectedSiteFilter ? event.siteId === selectedSiteFilter : true;
+    const siteMatch = activeSiteId ? event.siteId === activeSiteId : false;
     const platformMatch = selectedPlatformFilter ? event.type === selectedPlatformFilter : true;
     return siteMatch && platformMatch;
   });
@@ -332,10 +335,11 @@ export default function Calendar() {
       case 'xtwitter': return 'bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200';
       case 'instagram': return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200';
       case 'facebook': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'linkedin': return 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200';
       case 'pinterest': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'google my business': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'article': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
-      case 'newsletter': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'newsletter': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -365,7 +369,7 @@ export default function Calendar() {
   const days = getDaysInMonth(currentDate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen app-shell page-enter">
       <UnifiedHeader />
 
       <main className="container mx-auto px-4 pt-20 pb-20 max-w-7xl">
@@ -382,7 +386,6 @@ export default function Calendar() {
             </div>
             <Button
               onClick={() => handleAddArticle()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nouveau contenu
@@ -396,17 +399,13 @@ export default function Calendar() {
                 {/* Filtre par site */}
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Site :
+                    Site sélectionné :
                   </label>
-                  <Select
-                    value={selectedSiteFilter?.toString() || "all"}
-                    onValueChange={(value) => setSelectedSiteFilter(value === "all" ? null : parseInt(value))}
-                  >
-                    <SelectTrigger className="w-56">
-                      <SelectValue placeholder="Tous les sites" />
+                  <Select value={activeSiteId?.toString()}>
+                    <SelectTrigger className="w-56" disabled>
+                      <SelectValue placeholder="Site sélectionné" />
                     </SelectTrigger>
                     <SelectContent className="smart-scroll-vertical max-h-60">
-                      <SelectItem value="all">Tous les sites</SelectItem>
                       {sites.sort((a, b) => b.id - a.id).map((site) => (
                         <SelectItem key={site.id} value={site.id.toString()}>
                           {site.name}
@@ -436,6 +435,7 @@ export default function Calendar() {
                       <SelectItem value="xtwitter">X (Twitter)</SelectItem>
                       <SelectItem value="youtube">YouTube</SelectItem>
                       <SelectItem value="facebook">Facebook</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
                       <SelectItem value="blog">Article de blog</SelectItem>
                       <SelectItem value="google my business">Google My Business</SelectItem>
                       <SelectItem value="pinterest">Pinterest</SelectItem>
@@ -494,7 +494,6 @@ export default function Calendar() {
                       <Button
                         onClick={handleBulkUpdate}
                         disabled={!bulkStatus || bulkUpdateMutation.isPending}
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
                         data-testid="apply-bulk-update"
                       >
                         {bulkUpdateMutation.isPending ? (
@@ -528,24 +527,24 @@ export default function Calendar() {
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
               <div>
                 📊 {events.length} contenu(s) affiché(s)
-                {selectedSiteFilter && ` • Site: ${getSiteName(selectedSiteFilter)}`}
+                {activeSiteId && ` • Site: ${getSiteName(activeSiteId)}`}
                 {selectedPlatformFilter && ` • Plateforme: ${selectedPlatformFilter === 'xtwitter' ? 'X (Twitter)' :
                   selectedPlatformFilter === 'google my business' ? 'Google My Business' :
-                    selectedPlatformFilter === 'article' ? 'Article de blog' :
-                      selectedPlatformFilter.charAt(0).toUpperCase() + selectedPlatformFilter.slice(1)}`}
+                    selectedPlatformFilter === 'linkedin' ? 'LinkedIn' :
+                      selectedPlatformFilter === 'article' ? 'Article de blog' :
+                        selectedPlatformFilter.charAt(0).toUpperCase() + selectedPlatformFilter.slice(1)}`}
               </div>
 
-              {(selectedSiteFilter || selectedPlatformFilter) && (
+              {selectedPlatformFilter && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setSelectedSiteFilter(null);
                     setSelectedPlatformFilter(null);
                   }}
                   className="text-xs"
                 >
-                  ✕ Effacer les filtres
+                  ✕ Effacer le filtre
                 </Button>
               )}
             </div>
@@ -555,7 +554,7 @@ export default function Calendar() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendrier principal */}
           <div className="lg:col-span-2">
-            <Card className="shadow-lg border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+            <Card className="shadow-sm">
               <CardHeader className="border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -651,7 +650,7 @@ export default function Calendar() {
           <div className="space-y-6">
             {/* Événements du jour sélectionné */}
             {selectedDate && (
-              <Card className="shadow-lg border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+              <Card className="shadow-sm">
                 <CardHeader className="border-b border-gray-100 dark:border-gray-700">
                   <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                     {selectedDate.toLocaleDateString('fr-FR', {
@@ -693,7 +692,7 @@ export default function Calendar() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="p-1 hover:bg-purple-100 dark:hover:bg-purple-900/20"
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-900/20"
                               title="Prévisualiser"
                               onClick={() => {
                                 const content = editorialContent.find(c => c.id === event.id);
@@ -703,7 +702,7 @@ export default function Calendar() {
                                 }
                               }}
                             >
-                              <Eye className="h-3 w-3 text-purple-500" />
+                              <Eye className="h-3 w-3 text-muted-foreground" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -769,7 +768,7 @@ export default function Calendar() {
             )}
 
             {/* Statistiques rapides */}
-            <Card className="shadow-lg border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+            <Card className="shadow-sm">
               <CardHeader className="border-b border-gray-100 dark:border-gray-700">
                 <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                   Statistiques du mois
@@ -869,7 +868,7 @@ export default function Calendar() {
                         <span className="text-sm text-gray-600 dark:text-gray-300">
                           Avec images
                         </span>
-                        <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
                           {monthlyEvents.filter(e => e.hasImage).length}
                         </Badge>
                       </div>

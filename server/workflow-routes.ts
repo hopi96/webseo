@@ -7,6 +7,7 @@ import { Router, Request, Response } from 'express';
 import { seoAnalysisService } from './seo-analysis-service';
 import { contentCalendarService, SUPPORTED_PLATFORMS } from './content-calendar-service';
 import { contentGeneratorService } from './content-generator-service';
+import { socialPublisherService } from './social-publisher-service';
 
 const router = Router();
 
@@ -111,7 +112,7 @@ router.post('/generate-calendar', async (req: Request, res: Response) => {
         // Plateformes par défaut si non spécifiées
         const selectedPlatforms = platforms?.length > 0
             ? platforms
-            : ['instagram', 'facebook', 'newsletter'];
+            : ['instagram', 'facebook', 'newsletter', 'linkedin'];
 
         // Valider les plateformes
         const invalidPlatforms = selectedPlatforms.filter(
@@ -161,7 +162,7 @@ router.post('/generate-calendar-flow', async (req: Request, res: Response) => {
         const calendar = await contentCalendarService.generateCalendar({
             siteId: parseInt(siteId),
             period,
-            platforms: platforms || ['instagram', 'facebook', 'newsletter'],
+            platforms: platforms || ['instagram', 'facebook', 'newsletter', 'linkedin'],
             keywords
         });
 
@@ -268,6 +269,7 @@ router.get('/platforms', (req: Request, res: Response) => {
             newsletter: 'Email marketing HTML',
             instagram: 'Posts et carrousels Instagram',
             facebook: 'Posts Facebook',
+            linkedin: 'Posts LinkedIn',
             xtwitter: 'Threads Twitter/X',
             blog: 'Articles de blog SEO',
             pinterest: 'Pins Pinterest',
@@ -366,6 +368,23 @@ router.post('/generate-batch', async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/workflows/publish-due
+ * Publie les contenus du jour (auto-publisher)
+ */
+router.post('/publish-due', async (_req: Request, res: Response) => {
+    try {
+        const result = await socialPublisherService.runOnce();
+        res.json({
+            success: true,
+            ...result
+        });
+    } catch (error: any) {
+        console.error('❌ API Erreur publication auto:', error);
+        res.status(500).json({ error: error.message || 'Erreur publication auto' });
+    }
+});
+
+/**
  * POST /api/workflows/generate-image
  * Génère une image DALL-E pour un contenu existant
  */
@@ -431,7 +450,7 @@ router.post('/full-pipeline', async (req: Request, res: Response) => {
                 startDate: new Date().toISOString().split('T')[0],
                 endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
             },
-            platforms: platforms || ['instagram', 'facebook', 'newsletter']
+            platforms: platforms || ['instagram', 'facebook', 'newsletter', 'linkedin']
         });
 
         // 3. Génération contenus (optionnel)

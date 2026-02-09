@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 
 export default function Keywords() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen app-shell page-enter">
       <UnifiedHeader />
       
       <div className="p-6">

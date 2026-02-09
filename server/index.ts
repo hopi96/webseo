@@ -3,6 +3,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
+import { socialPublisherService } from "./social-publisher-service";
 
 const app = express();
 app.use(express.json());
@@ -60,6 +61,9 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
+
+  // Lancer le publisher automatique des réseaux sociaux
+  socialPublisherService.start();
 
   // Serve the app - tries port 5000 first, then finds an available port
   const startPort = process.env.PORT ? parseInt(process.env.PORT) : 5000;
