@@ -84,7 +84,7 @@ export function AIGenerationDialog({
       
       toast({
         title: "Contenu généré avec succès",
-        description: "Le contenu a été créé par GPT-4o selon votre prompt",
+        description: `Le contenu a été créé par Claude et optimisé pour ${getContentTypeLabel(contentType)}.`,
         variant: "default"
       });
     } catch (error: any) {
@@ -141,7 +141,7 @@ export function AIGenerationDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-muted-foreground" />
-            Générer du contenu avec GPT-4o
+            Générer du contenu avec Claude
           </DialogTitle>
           <p className="text-sm text-gray-600">
             Type de contenu : {getContentTypeLabel(contentType)}

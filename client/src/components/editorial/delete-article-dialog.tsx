@@ -2,7 +2,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { EditorialContent } from "@/shared/schema";
+import type { EditorialContent } from "@shared/schema";
 
 interface DeleteArticleDialogProps {
   open: boolean;

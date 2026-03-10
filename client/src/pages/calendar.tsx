@@ -16,6 +16,7 @@ import { EditArticleDialog } from "@/components/editorial/edit-article-dialog";
 import { AddArticleDialog } from "@/components/editorial/add-article-dialog";
 import { DeleteArticleDialog } from "@/components/editorial/delete-article-dialog";
 import { ArticlePreviewDialog } from "@/components/editorial/article-preview-dialog";
+import { ExpressContentDialog } from "@/components/editorial/express-content-dialog";
 import {
   Calendar as CalendarIcon,
   Plus,
@@ -28,9 +29,20 @@ import {
   Check,
   Square,
   CheckSquare,
-  MoreHorizontal,
-  Eye
+  Eye,
+  Mail,
+  Music2,
+  Instagram,
+  Twitter,
+  Youtube,
+  Facebook,
+  Linkedin,
+  FileText,
+  Building2,
+  Image as ImageIcon,
+  Zap
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { EditorialContent } from "@shared/schema";
 
 // Types pour le calendrier éditorial (basé sur le schéma de la base de données)
@@ -57,6 +69,11 @@ export default function Calendar() {
   const [previewingArticle, setPreviewingArticle] = useState<EditorialContent | null>(null);
   const [addDialogDate, setAddDialogDate] = useState<string>("");
   const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string | null>(null);
+  const [calendarView, setCalendarView] = useState<'month' | 'agenda'>('month');
+
+  // États pour le dialogue Contenu Express
+  const [isExpressDialogOpen, setIsExpressDialogOpen] = useState(false);
+  const [expressDialogDate, setExpressDialogDate] = useState<string>("");
 
   // États pour l'édition en lot
   const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
@@ -74,49 +91,45 @@ export default function Calendar() {
 
   // Initialiser le chatbot n8n
   useEffect(() => {
-    createChat({
-      webhookUrl: 'https://doseit.app.n8n.cloud/webhook/7682526e-bf2c-4be3-8a9c-161ea2c7098a/chat',
-      mode: 'window',
-      defaultLanguage: 'en',
-      initialMessages: [
-        'Bonjour ! 👋',
-        'Je suis votre assistant IA pour le calendrier éditorial. Comment puis-je vous aider aujourd\'hui ?'
-      ],
-      i18n: {
-        en: {
-          title: 'Assistant IA Éditorial',
-          subtitle: 'Créez du contenu SEO optimisé avec l\'aide de l\'IA',
-          footer: '',
-          getStarted: 'Nouvelle conversation',
-          inputPlaceholder: 'Tapez votre question...',
-          closeButtonTooltip: 'Fermer le chat',
+    try {
+      createChat({
+        webhookUrl: 'https://doseit.app.n8n.cloud/webhook/7682526e-bf2c-4be3-8a9c-161ea2c7098a/chat',
+        mode: 'window',
+        defaultLanguage: 'en',
+        initialMessages: [
+          'Bonjour ! 👋',
+          'Je suis votre assistant IA pour le calendrier éditorial. Comment puis-je vous aider aujourd\'hui ?'
+        ],
+        i18n: {
+          en: {
+            title: 'Assistant IA Éditorial',
+            subtitle: 'Créez du contenu SEO optimisé avec l\'aide de l\'IA',
+            footer: '',
+            getStarted: 'Nouvelle conversation',
+            inputPlaceholder: 'Tapez votre question...',
+            closeButtonTooltip: 'Fermer le chat',
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Chat n8n init failed:", error);
+    }
   }, []);
 
   // Récupérer les contenus éditoriaux depuis l'API
-  const { data: editorialContent = [], isLoading } = useQuery({
-    queryKey: ['/api/editorial-content'],
+  const { data: editorialContent = [], isLoading } = useQuery<EditorialContent[]>({
+    queryKey: ['/api/editorial-content', activeSiteId],
+    enabled: !!activeSiteId,
     queryFn: async (): Promise<EditorialContent[]> => {
-      const response = await fetch('/api/editorial-content');
-      if (!response.ok) {
-        throw new Error('Failed to fetch editorial content');
-      }
+      if (!activeSiteId) return [];
+      const response = await apiRequest("GET", `/api/editorial-content?siteId=${activeSiteId}`);
       return response.json();
     }
   });
 
   // Récupérer les sites
-  const { data: sites = [] } = useQuery({
+  const { data: sites = [] } = useQuery<Array<{ id: number, name: string, url: string }>>({
     queryKey: ['/api/sites'],
-    queryFn: async (): Promise<Array<{ id: number, name: string, url: string }>> => {
-      const response = await fetch('/api/sites');
-      if (!response.ok) {
-        throw new Error('Failed to fetch sites');
-      }
-      return response.json();
-    }
   });
 
   // Fonction pour récupérer le nom du site par ID
@@ -126,16 +139,22 @@ export default function Calendar() {
   };
 
   // Transformer les données de l'API en format pour le calendrier
-  const allEvents: EditorialEvent[] = editorialContent.map(content => ({
-    id: content.id,
-    title: content.contentText.length > 50 ? content.contentText.substring(0, 50) + '...' : content.contentText,
-    description: content.contentText,
-    date: new Date(content.dateDePublication),
-    type: content.typeContent,
-    status: content.statut,
-    hasImage: content.hasImage || false,
-    siteId: content.idSite
-  }));
+  const allEvents: EditorialEvent[] = Array.isArray(editorialContent) ? editorialContent.map((content) => {
+    const safeText = typeof content.contentText === "string" ? content.contentText : "";
+    const rawDate = content.dateDePublication ? new Date(content.dateDePublication) : new Date();
+    const safeDate = Number.isNaN(rawDate.getTime()) ? new Date() : rawDate;
+
+    return {
+      id: content.id,
+      title: safeText.length > 50 ? safeText.substring(0, 50) + '...' : safeText || "Contenu sans titre",
+      description: safeText,
+      date: safeDate,
+      type: content.typeContent || "newsletter",
+      status: content.statut || "en attente",
+      hasImage: Boolean(content.hasImage),
+      siteId: Number(content.idSite) || Number(activeSiteId) || 0
+    };
+  }) : [];
 
   // Filtrer les événements par site et plateforme sélectionnés
   const events = allEvents.filter(event => {
@@ -143,6 +162,13 @@ export default function Calendar() {
     const platformMatch = selectedPlatformFilter ? event.type === selectedPlatformFilter : true;
     return siteMatch && platformMatch;
   });
+
+  const getDateKey = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   // Fonction helper pour vérifier si un événement appartient au mois courant
   const isSameMonth = (eventDate: Date, referenceDate: Date) => {
@@ -155,6 +181,28 @@ export default function Calendar() {
     events.filter(event => isSameMonth(event.date, currentDate)),
     [events, currentDate]
   );
+
+  // Regroupement des evenements par date pour accelerer l'affichage du calendrier
+  const eventsByDate = useMemo(() => {
+    const groupedEvents = new Map<string, EditorialEvent[]>();
+
+    for (const event of events) {
+      const dateKey = getDateKey(event.date);
+      const existingEvents = groupedEvents.get(dateKey);
+
+      if (existingEvents) {
+        existingEvents.push(event);
+      } else {
+        groupedEvents.set(dateKey, [event]);
+      }
+    }
+
+    groupedEvents.forEach((dayEvents) => {
+      dayEvents.sort((a: EditorialEvent, b: EditorialEvent) => a.date.getTime() - b.date.getTime());
+    });
+
+    return groupedEvents;
+  }, [events]);
 
   // Liste filtrée pour le dialogue de statistiques (optimisé avec useMemo)
   const filteredList = useMemo(() => {
@@ -195,10 +243,15 @@ export default function Calendar() {
   };
 
   // Fonction pour obtenir les événements d'une date
+  const monthDays = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    return Array.from({ length: totalDays }, (_, index) => new Date(year, month, index + 1));
+  }, [currentDate]);
+
   const getEventsForDate = (date: Date) => {
-    return events.filter(event =>
-      event.date.toDateString() === date.toDateString()
-    );
+    return eventsByDate.get(getDateKey(date)) || [];
   };
 
   const handleEditArticle = (event: EditorialEvent) => {
@@ -233,6 +286,12 @@ export default function Calendar() {
   const handleCloseAddDialog = () => {
     setIsAddDialogOpen(false);
     setAddDialogDate("");
+  };
+
+  const handleExpressContent = (date?: Date) => {
+    const selectedDateString = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    setExpressDialogDate(selectedDateString);
+    setIsExpressDialogOpen(true);
   };
 
   const handleCloseDeleteDialog = () => {
@@ -329,6 +388,40 @@ export default function Calendar() {
     });
   };
 
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'newsletter': return 'Newsletter';
+      case 'tiktok': return 'TikTok';
+      case 'instagram': return 'Instagram';
+      case 'xtwitter': return 'X (Twitter)';
+      case 'youtube': return 'YouTube';
+      case 'facebook': return 'Facebook';
+      case 'linkedin': return 'LinkedIn';
+      case 'blog':
+      case 'article': return 'Blog';
+      case 'google my business': return 'Google My Business';
+      case 'pinterest': return 'Pinterest';
+      default: return type;
+    }
+  };
+
+  const getTypeIcon = (type: string): { Icon: LucideIcon; className: string } => {
+    switch (type) {
+      case 'newsletter': return { Icon: Mail, className: 'text-blue-600' };
+      case 'tiktok': return { Icon: Music2, className: 'text-black dark:text-white' };
+      case 'instagram': return { Icon: Instagram, className: 'text-pink-600' };
+      case 'xtwitter': return { Icon: Twitter, className: 'text-slate-700 dark:text-slate-200' };
+      case 'youtube': return { Icon: Youtube, className: 'text-red-600' };
+      case 'facebook': return { Icon: Facebook, className: 'text-blue-700' };
+      case 'linkedin': return { Icon: Linkedin, className: 'text-sky-700' };
+      case 'blog':
+      case 'article': return { Icon: FileText, className: 'text-indigo-700 dark:text-indigo-300' };
+      case 'google my business': return { Icon: Building2, className: 'text-green-700 dark:text-green-300' };
+      case 'pinterest': return { Icon: ImageIcon, className: 'text-red-600' };
+      default: return { Icon: CalendarIcon, className: 'text-gray-500' };
+    }
+  };
+
   // Fonction pour obtenir la couleur selon le type
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -338,6 +431,9 @@ export default function Calendar() {
       case 'linkedin': return 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200';
       case 'pinterest': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'google my business': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'tiktok': return 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200';
+      case 'youtube': return 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200';
+      case 'blog':
       case 'article': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
       case 'newsletter': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
@@ -406,7 +502,7 @@ export default function Calendar() {
                       <SelectValue placeholder="Site sélectionné" />
                     </SelectTrigger>
                     <SelectContent className="smart-scroll-vertical max-h-60">
-                      {sites.sort((a, b) => b.id - a.id).map((site) => (
+                      {[...sites].sort((a, b) => b.id - a.id).map((site) => (
                         <SelectItem key={site.id} value={site.id.toString()}>
                           {site.name}
                         </SelectItem>
@@ -528,11 +624,7 @@ export default function Calendar() {
               <div>
                 📊 {events.length} contenu(s) affiché(s)
                 {activeSiteId && ` • Site: ${getSiteName(activeSiteId)}`}
-                {selectedPlatformFilter && ` • Plateforme: ${selectedPlatformFilter === 'xtwitter' ? 'X (Twitter)' :
-                  selectedPlatformFilter === 'google my business' ? 'Google My Business' :
-                    selectedPlatformFilter === 'linkedin' ? 'LinkedIn' :
-                      selectedPlatformFilter === 'article' ? 'Article de blog' :
-                        selectedPlatformFilter.charAt(0).toUpperCase() + selectedPlatformFilter.slice(1)}`}
+                {selectedPlatformFilter && ` • Plateforme: ${getTypeLabel(selectedPlatformFilter)}`}
               </div>
 
               {selectedPlatformFilter && (
@@ -561,6 +653,26 @@ export default function Calendar() {
                     {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
                   </CardTitle>
                   <div className="flex items-center gap-2">
+                    <div className="flex items-center rounded-lg border border-gray-200 dark:border-gray-700 p-1">
+                      <Button
+                        size="sm"
+                        variant={calendarView === 'month' ? 'default' : 'ghost'}
+                        className="h-8 px-2"
+                        onClick={() => setCalendarView('month')}
+                      >
+                        <CalendarIcon className="h-4 w-4 mr-1" />
+                        Mois
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={calendarView === 'agenda' ? 'default' : 'ghost'}
+                        className="h-8 px-2"
+                        onClick={() => setCalendarView('agenda')}
+                      >
+                        <Clock className="h-4 w-4 mr-1" />
+                        Agenda
+                      </Button>
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
@@ -581,67 +693,183 @@ export default function Calendar() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                {/* Grille du calendrier */}
-                <div className="grid grid-cols-7 gap-1 mb-4">
-                  {/* En-têtes des jours */}
-                  {dayNames.map(day => (
-                    <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                      {day}
-                    </div>
-                  ))}
+                {calendarView === 'month' ? (
+                  <div className="grid grid-cols-7 gap-1 mb-4">
+                    {/* En-têtes des jours */}
+                    {dayNames.map(day => (
+                      <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {day}
+                      </div>
+                    ))}
 
-                  {/* Jours du mois */}
-                  {days.map((day, index) => (
-                    <div
-                      key={index}
-                      className={`
-                        min-h-[80px] p-1 border border-gray-100 dark:border-gray-700 rounded-lg group
-                        ${day ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''}
-                        ${selectedDate && day && selectedDate.toDateString() === day.toDateString()
-                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
-                          : ''
-                        }
-                      `}
-                      onClick={() => day && setSelectedDate(day)}
-                    >
-                      {day && (
-                        <>
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {day.getDate()}
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddArticle(day);
-                              }}
+                    {/* Jours du mois */}
+                    {days.map((day, index) => {
+                      const dayEvents = day ? getEventsForDate(day) : [];
+
+                      return (
+                        <div
+                          key={index}
+                          className={`
+                            min-h-[80px] p-1 border border-gray-100 dark:border-gray-700 rounded-lg group
+                            ${day ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''}
+                            ${selectedDate && day && selectedDate.toDateString() === day.toDateString()
+                              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
+                              : ''
+                            }
+                          `}
+                          onClick={() => day && setSelectedDate(day)}
+                        >
+                          {day && (
+                            <>
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {day.getDate()}
+                                </div>
+                                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-5 w-5 p-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAddArticle(day);
+                                    }}
+                                    title="Ajouter du contenu"
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-5 w-5 p-0 text-orange-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleExpressContent(day);
+                                    }}
+                                    title="Contenu Express IA"
+                                  >
+                                    <Zap className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                {dayEvents.slice(0, 2).map(event => {
+                                  const { Icon, className: iconClassName } = getTypeIcon(event.type);
+
+                                  return (
+                                    <div
+                                      key={event.id}
+                                      className={`text-xs p-1 rounded truncate flex items-center gap-1 ${getTypeColor(event.type)}`}
+                                    >
+                                      <Icon className={`h-3 w-3 shrink-0 ${iconClassName}`} />
+                                      <span className="truncate">{event.title}</span>
+                                    </div>
+                                  );
+                                })}
+                                {dayEvents.length > 2 && (
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    +{dayEvents.length - 2} autres
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-gray-100 dark:border-gray-700 max-h-[620px] overflow-y-auto smart-scroll-vertical">
+                    {monthDays.map((day) => {
+                      const dayEvents = getEventsForDate(day);
+                      const isSelected = selectedDate ? selectedDate.toDateString() === day.toDateString() : false;
+                      const isToday = getDateKey(day) === getDateKey(new Date());
+
+                      return (
+                        <div
+                          key={day.toISOString()}
+                          className={`flex flex-col sm:flex-row gap-3 p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                        >
+                          <div className="sm:w-28 shrink-0">
+                            <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                              {day.toLocaleDateString('fr-FR', { weekday: 'short' })}
+                            </p>
+                            <button
+                              className="mt-1 text-left"
+                              onClick={() => setSelectedDate(day)}
                             >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <div className="space-y-1">
-                            {getEventsForDate(day).slice(0, 2).map(event => (
-                              <div
-                                key={event.id}
-                                className="text-xs p-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 truncate"
-                              >
-                                {event.title}
+                              <div className={`text-lg font-semibold ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                {day.getDate()}
                               </div>
-                            ))}
-                            {getEventsForDate(day).length > 2 && (
                               <div className="text-xs text-gray-500 dark:text-gray-400">
-                                +{getEventsForDate(day).length - 2} autres
+                                {day.toLocaleDateString('fr-FR', { month: 'short' })}
                               </div>
+                            </button>
+                            <div className="flex items-center gap-1 mt-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => handleAddArticle(day)}
+                              >
+                                <Plus className="h-3 w-3 mr-1" />
+                                Ajouter
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2 text-xs text-orange-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                                onClick={() => handleExpressContent(day)}
+                              >
+                                <Zap className="h-3 w-3 mr-1" />
+                                Express
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex-1 space-y-2">
+                            {dayEvents.length === 0 ? (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 py-2">
+                                Aucun contenu prévu
+                              </p>
+                            ) : (
+                              dayEvents.map((event) => {
+                                const { Icon, className: iconClassName } = getTypeIcon(event.type);
+
+                                return (
+                                  <div
+                                    key={event.id}
+                                    className="p-2 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    onClick={() => setSelectedDate(day)}
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <Icon className={`h-4 w-4 shrink-0 ${iconClassName}`} />
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{event.title}</p>
+                                    </div>
+                                    <div className="mt-2 flex items-center gap-2 flex-wrap">
+                                      <Badge className={`${getTypeColor(event.type)} text-xs`}>
+                                        {getTypeLabel(event.type)}
+                                      </Badge>
+                                      <Badge className={`${getStatusColor(event.status)} text-xs`}>
+                                        {event.status}
+                                      </Badge>
+                                      {event.hasImage && (
+                                        <Badge variant="outline" className="text-xs">
+                                          <Tag className="h-3 w-3 mr-1" />
+                                          Image
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })
                             )}
                           </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -663,89 +891,96 @@ export default function Calendar() {
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="space-y-3 smart-scroll-vertical max-h-80">
-                    {getEventsForDate(selectedDate).map(event => (
-                      <div
-                        key={event.id}
-                        className={`p-3 border rounded-lg transition-colors ${isSelectionMode && selectedArticles.has(event.id)
-                          ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20'
-                          : 'border-gray-100 dark:border-gray-700'
-                          }`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-start gap-3 flex-1">
-                            {isSelectionMode && (
-                              <div className="pt-1">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedArticles.has(event.id)}
-                                  onChange={() => toggleArticleSelection(event.id)}
-                                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                                  data-testid={`checkbox-article-${event.id}`}
-                                />
+                    {getEventsForDate(selectedDate).map(event => {
+                      const { Icon, className: iconClassName } = getTypeIcon(event.type);
+
+                      return (
+                        <div
+                          key={event.id}
+                          className={`p-3 border rounded-lg transition-colors ${isSelectionMode && selectedArticles.has(event.id)
+                            ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20'
+                            : 'border-gray-100 dark:border-gray-700'
+                            }`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-start gap-3 flex-1">
+                              {isSelectionMode && (
+                                <div className="pt-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedArticles.has(event.id)}
+                                    onChange={() => toggleArticleSelection(event.id)}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                    data-testid={`checkbox-article-${event.id}`}
+                                  />
+                                </div>
+                              )}
+                              <div className="flex items-start gap-2 flex-1 min-w-0">
+                                <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${iconClassName}`} />
+                                <h4 className="font-medium text-gray-900 dark:text-white">
+                                  {event.title}
+                                </h4>
                               </div>
-                            )}
-                            <h4 className="font-medium text-gray-900 dark:text-white">
-                              {event.title}
-                            </h4>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-900/20"
+                                title="Prévisualiser"
+                                onClick={() => {
+                                  const content = editorialContent.find(c => c.id === event.id);
+                                  if (content) {
+                                    setPreviewingArticle(content);
+                                    setIsPreviewDialogOpen(true);
+                                  }
+                                }}
+                              >
+                                <Eye className="h-3 w-3 text-muted-foreground" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                                onClick={() => handleEditArticle(event)}
+                              >
+                                <Edit3 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20"
+                                data-testid={`delete-article-${event.id}`}
+                                title="Supprimer cet article"
+                                onClick={() => handleDeleteArticle(event)}
+                              >
+                                <Trash2 className="h-3 w-3 text-red-500" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-900/20"
-                              title="Prévisualiser"
-                              onClick={() => {
-                                const content = editorialContent.find(c => c.id === event.id);
-                                if (content) {
-                                  setPreviewingArticle(content);
-                                  setIsPreviewDialogOpen(true);
-                                }
-                              }}
-                            >
-                              <Eye className="h-3 w-3 text-muted-foreground" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/20"
-                              onClick={() => handleEditArticle(event)}
-                            >
-                              <Edit3 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20"
-                              data-testid={`delete-article-${event.id}`}
-                              title="Supprimer cet article"
-                              onClick={() => handleDeleteArticle(event)}
-                            >
-                              <Trash2 className="h-3 w-3 text-red-500" />
-                            </Button>
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                          {event.description}
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="secondary" className="text-xs">
-                            {getSiteName(event.siteId)}
-                          </Badge>
-                          <Badge className={getTypeColor(event.type)}>
-                            {event.type}
-                          </Badge>
-                          <Badge className={getStatusColor(event.status)}>
-                            {event.status}
-                          </Badge>
-                          {event.hasImage && (
-                            <Badge variant="outline" className="text-xs">
-                              <Tag className="h-3 w-3 mr-1" />
-                              Image
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                            {event.description}
+                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs">
+                              {getSiteName(event.siteId)}
                             </Badge>
-                          )}
+                            <Badge className={getTypeColor(event.type)}>
+                              {getTypeLabel(event.type)}
+                            </Badge>
+                            <Badge className={getStatusColor(event.status)}>
+                              {event.status}
+                            </Badge>
+                            {event.hasImage && (
+                              <Badge variant="outline" className="text-xs">
+                                <Tag className="h-3 w-3 mr-1" />
+                                Image
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                     {getEventsForDate(selectedDate).length === 0 && (
                       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -990,6 +1225,7 @@ export default function Calendar() {
               {filteredList.slice(0, visibleCount).map((event) => {
                 const content = editorialContent.find(c => c.id === event.id);
                 if (!content) return null;
+                const { Icon, className: iconClassName } = getTypeIcon(event.type);
 
                 return (
                   <div key={event.id} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" data-testid={`row-content-${event.id}`}>
@@ -1008,13 +1244,16 @@ export default function Calendar() {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                         <div className="flex-1 min-w-0 space-y-2">
-                          <h4 className="font-medium text-sm sm:text-base leading-tight">{event.title}</h4>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Icon className={`h-4 w-4 shrink-0 ${iconClassName}`} />
+                            <h4 className="font-medium text-sm sm:text-base leading-tight truncate">{event.title}</h4>
+                          </div>
                           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                             <Badge variant="secondary" className="text-xs px-2 py-1">
                               {getSiteName(event.siteId)}
                             </Badge>
                             <Badge className={`${getTypeColor(event.type)} text-xs px-2 py-1`}>
-                              {event.type}
+                              {getTypeLabel(event.type)}
                             </Badge>
                             <Badge className={`${getStatusColor(event.status)} text-xs px-2 py-1`}>
                               {event.status}
@@ -1112,8 +1351,16 @@ export default function Calendar() {
         siteName={previewingArticle ? getSiteName(previewingArticle.idSite) : undefined}
       />
 
+      {/* Dialog Contenu Express */}
+      <ExpressContentDialog
+        open={isExpressDialogOpen}
+        onOpenChange={setIsExpressDialogOpen}
+        selectedDate={expressDialogDate}
+      />
+
       {/* Conteneur pour le chatbot n8n */}
       <div id="n8n-chat"></div>
     </div>
   );
 }
+

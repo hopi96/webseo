@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { supabaseService } from "./supabase-service";
+import { extractClaudeText, getClaudeModel, requireAnthropic } from "./claude-client";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 let openai: OpenAI | null = null;
 
 if (process.env.OPENAI_API_KEY) {
@@ -9,7 +9,23 @@ if (process.env.OPENAI_API_KEY) {
     apiKey: process.env.OPENAI_API_KEY
   });
 } else {
-  console.warn('⚠️ OPENAI_API_KEY non configurée. Les fonctionnalités de génération de contenu seront désactivées.');
+  console.warn('⚠️ OPENAI_API_KEY non configurée. La génération d\'images et le test OpenAI seront désactivés.');
+}
+
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('⚠️ ANTHROPIC_API_KEY non configurée. La génération de contenu via Claude sera désactivée.');
+}
+
+const CONTENT_GEN_DEBUG = process.env.CONTENT_GEN_DEBUG === 'true';
+
+const countWords = (text: string): number => {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (!normalized) return 0;
+  return normalized.split(' ').length;
+};
+
+if (CONTENT_GEN_DEBUG) {
+  console.log('🧠 Content generation debug logs enabled (CONTENT_GEN_DEBUG=true).');
 }
 
 export interface ArticleGenerationRequest {
@@ -63,17 +79,16 @@ export class OpenAIService {
   }
 
   /**
-   * Génère ou régénère un article avec GPT-4o basé sur les mots-clés et paramètres
+   * Génère ou régénère un article avec Claude basé sur les mots-clés et paramètres
    */
   async generateArticle(request: ArticleGenerationRequest): Promise<GeneratedArticle> {
-    if (!openai) {
-      throw new Error('OpenAI non configuré. Veuillez définir la variable OPENAI_API_KEY.');
-    }
     try {
+      const anthropic = requireAnthropic();
       // Récupérer le prompt système depuis Airtable
       const { systemMessage, outputStructure } = await this.getSystemPrompt();
 
       const isRegeneration = !!request.existingContent;
+      const platformGuidelines = this.getPlatformGuidelines(request.contentType);
 
       let prompt = "";
 
@@ -90,6 +105,9 @@ export class OpenAIService {
 Contenu existant : "${request.existingContent}"
 
 Type de contenu : ${request.contentType}
+Contraintes de plateforme :
+${platformGuidelines}
+
 Mots-clés à optimiser : ${request.keywords.join(', ')}
 ${request.targetAudience ? `Public cible : ${request.targetAudience}` : ''}
 ${request.tone ? `Ton souhaité : ${request.tone}` : ''}
@@ -100,6 +118,8 @@ Instructions :
 - Optimise pour le SEO sans sacrifier la qualité
 - Garde un style engageant et authentique
 - Adapte la longueur au type de contenu (court pour Twitter/Instagram, plus long pour articles/newsletters)
+- Respecte strictement les contraintes de la plateforme
+- Le contenu doit être prêt à publier (aucune explication ou méta-texte)
 
 Réponds en JSON avec ce format exact :
 ${outputFormat}`;
@@ -107,6 +127,9 @@ ${outputFormat}`;
         prompt = `Génère un nouveau contenu optimisé basé sur les paramètres fournis.
 
 Type de contenu : ${request.contentType}
+Contraintes de plateforme :
+${platformGuidelines}
+
 Mots-clés principaux : ${request.keywords.join(', ')}
 ${request.topic ? `Sujet principal : ${request.topic}` : ''}
 ${request.targetAudience ? `Public cible : ${request.targetAudience}` : ''}
@@ -118,38 +141,71 @@ Instructions :
 - Optimise pour le SEO sans sur-optimisation
 - Adapte le style et la longueur au type de contenu
 - Utilise un langage accessible et captivant
+- Respecte strictement les contraintes de la plateforme
+- Le contenu doit être prêt à publier (aucune explication ou méta-texte)
 
 Réponds en JSON avec ce format exact :
 ${outputFormat}`;
       }
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+      if (CONTENT_GEN_DEBUG) {
+        console.log('🧠 [Claude][Article] Request', {
+          model: getClaudeModel(),
+          max_tokens: 12000,
+          temperature: 0.7,
+          contentType: request.contentType,
+          targetAudience: request.targetAudience,
+          tone: request.tone,
+          keywordsCount: request.keywords?.length || 0,
+          hasExistingContent: Boolean(request.existingContent)
+        });
+        console.log('🧠 [Claude][Article] System prompt:\n' + systemMessage);
+        console.log('🧠 [Claude][Article] Platform guidelines:\n' + platformGuidelines);
+        console.log('🧠 [Claude][Article] User prompt:\n' + prompt);
+      }
+
+      const response = await anthropic.messages.create({
+        model: getClaudeModel(),
+        max_tokens: 12000,
+        system: systemMessage,
         messages: [
-          {
-            role: "system",
-            content: systemMessage
-          },
           {
             role: "user",
             content: prompt
           }
         ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-        max_tokens: 2000
+        temperature: 0.7
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      const content = extractClaudeText(response);
+      if (!content) {
+        throw new Error('Pas de réponse Claude');
+      }
+
+      const result = this.parseJsonResponse(content) ?? {};
+
+      const finalTitle = this.pickString(result.title, 'Titre généré');
+      const finalContent = this.pickString(result.content, 'Contenu généré');
+      const finalSuggestions = this.pickStringArray(result.suggestions);
+
+      if (CONTENT_GEN_DEBUG) {
+        console.log('🧠 [Claude][Article] Usage', response.usage);
+        console.log('🧠 [Claude][Article] Stop reason', response.stop_reason);
+        console.log('🧠 [Claude][Article] Output stats', {
+          words: countWords(finalContent),
+          characters: finalContent.length,
+          suggestions: finalSuggestions.length
+        });
+      }
 
       return {
-        title: result.title || 'Titre généré',
-        content: result.content || 'Contenu généré',
-        suggestions: result.suggestions || []
+        title: finalTitle,
+        content: finalContent,
+        suggestions: finalSuggestions
       };
 
     } catch (error) {
-      console.error('Erreur lors de la génération avec OpenAI:', error);
+      console.error('Erreur lors de la génération avec Claude:', error);
       throw new Error(`Impossible de générer le contenu: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   }
@@ -158,10 +214,6 @@ ${outputFormat}`;
    * Génère des suggestions de mots-clés basées sur un sujet
    */
   async suggestKeywords(topic: string, contentType: string): Promise<string[]> {
-    if (!openai) {
-      console.warn('OpenAI non configuré, suggestion de mots-clés désactivée.');
-      return [];
-    }
     try {
       // Récupérer le prompt système depuis Airtable (avec un fallback spécialisé pour les mots-clés)
       const { systemMessage } = await this.getSystemPrompt();
@@ -184,30 +236,188 @@ Réponds en JSON avec ce format exact :
   "keywords": ["mot-clé 1", "mot-clé 2", ...]
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+      const anthropic = requireAnthropic();
+      const response = await anthropic.messages.create({
+        model: getClaudeModel(),
+        max_tokens: 500,
+        system: keywordSystemPrompt,
         messages: [
-          {
-            role: "system",
-            content: keywordSystemPrompt
-          },
           {
             role: "user",
             content: prompt
           }
         ],
-        response_format: { type: "json_object" },
-        temperature: 0.5,
-        max_tokens: 500
+        temperature: 0.5
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
-      return result.keywords || [];
+      const content = extractClaudeText(response);
+      const result = content ? this.parseJsonResponse(content) : null;
+      return this.pickStringArray(result?.keywords);
 
     } catch (error) {
-      console.error('Erreur lors de la suggestion de mots-clés:', error);
+      console.error('Erreur lors de la suggestion de mots-clés (Claude):', error);
       return [];
     }
+  }
+
+  /**
+   * Adapte et enrichit un prompt système pour un sujet spécifique
+   */
+  async adaptSystemPrompt(basePrompt: string, topic: string, platform: string): Promise<string> {
+    try {
+      const anthropic = requireAnthropic();
+
+      const systemMessage = `Tu es un expert en ingénierie de prompt (Prompt Engineer) spécialisé dans la création de contenu pour le web.
+Ton rôle est de prendre un prompt système de base et de l'hyper-spécialiser pour un sujet précis, en y ajoutant des directives pour une recherche approfondie.`;
+
+      const prompt = `Voici un prompt système de base conçu pour la plateforme "${platform}" :
+"""
+${basePrompt}
+"""
+
+Je veux générer du contenu sur le sujet exact suivant : "${topic}"
+
+Ta tâche :
+Réécris et enrichis ce prompt système de base pour qu'il soit parfaitement adapté à ce sujet.
+Ajoute spécifiquement des directives exigeant de l'IA (qui exécutera ce prompt) qu'elle effectue une recherche approfondie sur ce sujet précis.
+Le résultat doit être un prompt DIRECT (sans méta-commentaire comme "Voici le prompt...") prêt à être exécuté.
+
+Le prompt enrichi DOIT inclure des consignes comme :
+- "Agis comme un expert incontesté sur le sujet de [Sujet]"
+- "Effectue une analyse profonde et factuelle"
+- "Utilise un angle original et évite les banalités"
+- Garder toutes les consignes de formatage du prompt de base relatives à la plateforme.
+
+Renvoie UNIQUEMENT le texte du nouveau prompt.`;
+
+      if (CONTENT_GEN_DEBUG) {
+        console.log(`🧠 [Claude][AdaptPrompt] Sujet: ${topic}, Plateforme: ${platform}`);
+      }
+
+      const response = await anthropic.messages.create({
+        model: getClaudeModel(),
+        max_tokens: 4000,
+        system: systemMessage,
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7
+      });
+
+      const content = extractClaudeText(response);
+      return content ? content.trim() : basePrompt;
+
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'adaptation du prompt:', error);
+      // Fallback: On retourne le prompt de base en cas d'erreur
+      return basePrompt;
+    }
+  }
+
+  private parseJsonResponse(content: string): Record<string, unknown> | null {
+    const cleaned = content
+      .replace(/```json\s*/gi, '')
+      .replace(/```/g, '')
+      .trim();
+
+    try {
+      return JSON.parse(cleaned) as Record<string, unknown>;
+    } catch {
+      const start = cleaned.indexOf('{');
+      const end = cleaned.lastIndexOf('}');
+      if (start === -1 || end === -1 || end <= start) {
+        return null;
+      }
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    }
+  }
+
+  private getPlatformGuidelines(contentType: string): string {
+    const platform = (contentType || '').toLowerCase();
+    switch (platform) {
+      case 'newsletter':
+        return `Format attendu :
+- Objet (max 50 caractères) et Preheader.
+- Introduction courte.
+- Corps structuré avec titres (H2) et paragraphes aérés.
+- CTA unique et clair.
+Ton : proche, expert, accessible.
+Inclure "Objet:" et "Preheader:" dans le contenu.`;
+      case 'instagram':
+        return `Format attendu :
+- Hook fort dès la 1ère phrase.
+- Valeur concise (listes courtes possibles).
+- Question finale pour commentaires.
+- 12 à 25 hashtags ciblés en fin de post.
+Ton : visuel, dynamique, authentique.
+Ne dépasse pas ~1 200 caractères.`;
+      case 'facebook':
+        return `Format attendu :
+- Accroche émotionnelle ou curieuse.
+- Storytelling avec ton chaleureux.
+- Longueur 300-800 caractères.
+- Invitation à commenter/partager/identifier.`;
+      case 'linkedin':
+        return `Format attendu :
+- Punchline d'ouverture.
+- Paragraphes très courts (lecture mobile).
+- Expertise concrète / opinion tranchée.
+- Conclusion + question de débat.
+Ton : professionnel, leader d'opinion.`;
+      case 'xtwitter':
+        return `Format attendu :
+- Texte ultra-concis.
+- Si thread : 3 à 7 tweets séparés par des sauts de ligne, avec un 1er tweet accrocheur.
+- 1 à 2 hashtags maximum.
+Ton : incisif, direct.`;
+      case 'pinterest':
+        return `Format attendu :
+- Titre SEO + description inspirante.
+- Mots-clés longue traîne intégrés naturellement.
+- Mentionner l'idée visuelle en une ligne.`;
+      case 'google my business':
+        return `Format attendu :
+- Quoi/Quand/Où clairement.
+- Mention de la ville/quartier et service.
+- CTA vers Appeler/Réserver/Itinéraire.
+Ton : informatif, local, accueillant.`;
+      case 'youtube':
+        return `Format attendu :
+- Script avec Hook (0-15s), Intro courte, Corps structuré, CTA abonnement, Outro.
+- Inclure "Titre:" et "Description SEO:" dans le contenu.`;
+      case 'tiktok':
+        return `Format attendu :
+- Script 30-45s.
+- Hook visuel/sonore dès 1ère seconde.
+- Structure Problème → Solution → Résultat.
+- Mentionner une tendance ou un style de montage.`;
+      case 'blog':
+      case 'article':
+        return `Format attendu :
+- Titre clair.
+- Introduction, sections H2/H3, listes si utile, conclusion.
+- Ton pédagogique et SEO.`;
+      default:
+        return `Respecte les codes de la plateforme et livre un contenu prêt à publier.`;
+    }
+  }
+
+  private pickString(value: unknown, fallback: string): string {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value;
+    }
+    return fallback;
+  }
+
+  private pickStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value.filter((item): item is string => typeof item === 'string');
   }
 
   /**

@@ -42,7 +42,7 @@ export function WebsiteSelector({ selectedWebsiteId, onWebsiteChange, onWebsiteA
                 <SelectValue placeholder="Select a website" />
               </SelectTrigger>
               <SelectContent className="smart-scroll-vertical max-h-60">
-                {websites?.sort((a, b) => b.id - a.id).map((website) => (
+                {[...(websites || [])].sort((a, b) => b.id - a.id).map((website) => (
                   <SelectItem key={website.id} value={website.id.toString()}>
                     {website.name}
                   </SelectItem>

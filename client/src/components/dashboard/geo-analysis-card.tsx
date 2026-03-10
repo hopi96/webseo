@@ -28,6 +28,8 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { apiRequest } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 
 interface GEOFactor {
     score: number;
@@ -80,19 +82,40 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
     const queryClient = useQueryClient();
 
     // Récupérer l'analyse GEO existante
-    const { data: geoData, isLoading } = useQuery<{ geoAnalysis: GEOAnalysis; geoScore: number }>({
+    const { data: geoData, isLoading } = useQuery<{ geoAnalysis: GEOAnalysis; geoScore: number } | null>({
         queryKey: [`/api/sites/${siteId}/geo-analysis`],
         enabled: !!siteId,
-        retry: false
+        retry: false,
+        queryFn: async () => {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const token = sessionData?.session?.access_token;
+            const headers: Record<string, string> = {};
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`/api/sites/${siteId}/geo-analysis`, {
+                headers,
+                credentials: "include",
+            });
+
+            if (response.status === 404) {
+                return null;
+            }
+
+            if (!response.ok) {
+                const text = (await response.text()) || response.statusText;
+                throw new Error(`${response.status}: ${text}`);
+            }
+
+            return response.json();
+        },
     });
 
     // Mutation pour lancer une nouvelle analyse
     const analyzeMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/api/sites/${siteId}/analyze-geo`, {
-                method: 'POST'
-            });
-            if (!response.ok) throw new Error('Erreur analyse GEO');
+            const response = await apiRequest("POST", `/api/sites/${siteId}/analyze-geo`);
             return response.json();
         },
         onSuccess: () => {
@@ -173,7 +196,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
-            ) : analysis ? (
+            ) : analysis && analysis.factors ? (
                 <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
                     {/* Score principal */}
                     <div className="flex items-center justify-between mb-4">
@@ -209,7 +232,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                                 title={`${factorConfig[key as keyof typeof factorConfig]?.label}: ${factor.score}/100`}
                             >
                                 <div className={`w-full h-2 rounded-full ${factor.status === 'good' ? 'bg-green-400' :
-                                        factor.status === 'warning' ? 'bg-yellow-400' : 'bg-red-400'
+                                    factor.status === 'warning' ? 'bg-yellow-400' : 'bg-red-400'
                                     }`} />
                             </div>
                         ))}
@@ -236,7 +259,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                                         </div>
                                         <Progress value={factor.score} className="h-1.5 mb-2" />
                                         <p className="text-xs text-gray-600 dark:text-gray-400">{factor.details}</p>
-                                        {factor.improvements.length > 0 && (
+                                        {factor.improvements?.length > 0 && (
                                             <ul className="mt-2 space-y-1">
                                                 {factor.improvements.slice(0, 2).map((imp, i) => (
                                                     <li key={i} className="text-xs text-primary flex items-start gap-1">
@@ -252,7 +275,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                         </div>
 
                         {/* Recommandations */}
-                        {analysis.recommendations.length > 0 && (
+                        {analysis.recommendations?.length > 0 && (
                             <div className="space-y-2 mt-4">
                                 <h4 className="font-medium text-gray-900 dark:text-white text-sm">Recommandations prioritaires</h4>
                                 {analysis.recommendations.slice(0, 3).map((rec, i) => (
@@ -271,7 +294,7 @@ export function GEOAnalysisCard({ siteId }: GEOAnalysisCardProps) {
                         )}
 
                         <div className="text-xs text-gray-400 text-right mt-2">
-                            Analysé le {new Date(analysis.analyzedAt).toLocaleDateString('fr-FR')}
+                            Analysé le {analysis.analyzedAt ? new Date(analysis.analyzedAt).toLocaleDateString('fr-FR') : 'N/A'}
                         </div>
                     </CollapsibleContent>
                 </Collapsible>

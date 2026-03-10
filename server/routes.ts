@@ -1,11 +1,12 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertWebsiteSchema, insertSeoAnalysisSchema, insertEditorialContentSchema } from "@shared/schema";
 import { requestSeoAnalysisFromWebhook } from "./webhook-service";
-import { supabaseService } from "./supabase-service";
+import { supabaseService, getSupabaseAdmin } from "./supabase-service";
 import { openaiService } from "./openai-service";
 import { buildMonitoringSummary } from "./monitoring-agent-service";
+import { contentGeneratorService } from "./content-generator-service";
 import workflowRoutes from "./workflow-routes";
 import { z } from "zod";
 import multer from "multer";
@@ -41,6 +42,14 @@ const upload = multer({
   }
 });
 
+function extractAccessToken(req: Request): string | undefined {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7);
+  }
+  return undefined;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Enregistrer les routes de workflow (remplacent n8n)
   app.use('/api/workflows', workflowRoutes);
@@ -59,7 +68,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/sites", async (req, res) => {
     try {
       console.log('🔍 Récupération des sites depuis Supabase...');
-      const sites = await supabaseService.getAllSites();
+
+      const token = extractAccessToken(req);
+
+      let sites;
+      try {
+        sites = await supabaseService.getAllSites(token);
+      } catch (tokenError) {
+        if (!token) throw tokenError;
+        console.warn('⚠️ /api/sites: echec avec token, fallback service role');
+        sites = await supabaseService.getAllSites();
+      }
       console.log('✅ Sites récupérés:', sites.length);
       res.json(sites);
     } catch (error) {
@@ -616,12 +635,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/editorial-content", async (req, res) => {
     try {
       const siteId = req.query.siteId ? parseInt(req.query.siteId as string) : undefined;
+      const token = extractAccessToken(req);
       // Utiliser supabaseService au lieu de storage (qui pointe vers AirTable/Memory)
       let content;
-      if (siteId) {
-        content = await supabaseService.getContentBySite(siteId);
-      } else {
-        content = await supabaseService.getAllContent();
+      try {
+        if (siteId) {
+          content = await supabaseService.getContentBySite(siteId, token);
+        } else {
+          content = await supabaseService.getAllContent(token);
+        }
+      } catch (tokenError) {
+        if (!token) throw tokenError;
+        console.warn('⚠️ /api/editorial-content: echec avec token, fallback service role');
+        if (siteId) {
+          content = await supabaseService.getContentBySite(siteId);
+        } else {
+          content = await supabaseService.getAllContent();
+        }
       }
       res.json(content);
     } catch (error) {
@@ -633,8 +663,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/editorial-content/date/:date", async (req, res) => {
     try {
       const date = new Date(req.params.date);
+      const token = extractAccessToken(req);
       // Utiliser supabaseService au lieu de storage
-      const content = await supabaseService.getContentByDate(date);
+      let content;
+      try {
+        content = await supabaseService.getContentByDate(date, token);
+      } catch (tokenError) {
+        if (!token) throw tokenError;
+        console.warn('⚠️ /api/editorial-content/date: echec avec token, fallback service role');
+        content = await supabaseService.getContentByDate(date);
+      }
       res.json(content);
     } catch (error) {
       console.error('Erreur GET /api/editorial-content/date/:date :', error);
@@ -799,6 +837,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route Express Content Generation — Génère du contenu IA en un clic
+  app.post("/api/express-content", async (req, res) => {
+    try {
+      const { siteId, platform, topic, publicationDate, systemPrompt } = req.body;
+
+      if (!siteId || !platform || !topic || !publicationDate) {
+        return res.status(400).json({
+          message: "Champs requis: siteId, platform, topic, publicationDate"
+        });
+      }
+
+      const parsedSiteId = parseInt(siteId.toString());
+      console.log(`⚡ Génération Express — Site ${parsedSiteId}, Plateforme: ${platform}, Sujet: ${topic}`);
+      console.log(`📅 Date de publication: ${publicationDate}`);
+      if (systemPrompt) {
+        console.log(`📝 Prompt système personnalisé fourni (${systemPrompt.length} caractères)`);
+      }
+
+      // Construire le contexte enrichi avec le prompt système custom si fourni
+      const contextParts = [`Sujet principal: ${topic}`];
+      if (systemPrompt) {
+        contextParts.push(`Instructions supplémentaires: ${systemPrompt}`);
+      }
+
+      // Sauvegarder le contenu directement via supabaseService après génération IA
+      // On utilise le service de contenu qui gère prompt DB + recherche + Claude
+      const result = await contentGeneratorService.generateContent({
+        siteId: parsedSiteId,
+        platform,
+        theme: topic,
+        context: contextParts.join('\n'),
+        publicationDate: new Date(publicationDate).toISOString(),
+        generateImage: ['instagram', 'pinterest'].includes(platform)
+      });
+
+      console.log(`✅ Contenu Express créé: ID ${result.id}`);
+
+      res.status(201).json(result);
+    } catch (error: any) {
+      console.error('❌ Erreur génération express:', error);
+      const errorMsg = error.message || 'Erreur inconnue';
+
+      // Identifier les erreurs les plus courantes
+      let userMessage = "Erreur lors de la génération express du contenu";
+      if (errorMsg.includes('API key') || errorMsg.includes('ANTHROPIC') || errorMsg.includes('authentication')) {
+        userMessage = "Clé API Claude/Anthropic non configurée ou invalide.";
+      } else if (errorMsg.includes('rate limit') || errorMsg.includes('429')) {
+        userMessage = "Trop de requêtes. Veuillez réessayer dans quelques secondes.";
+      } else if (errorMsg.includes('timeout') || errorMsg.includes('ECONNREFUSED')) {
+        userMessage = "Le service IA est temporairement indisponible.";
+      }
+
+      res.status(500).json({
+        message: userMessage,
+        error: errorMsg
+      });
+    }
+  });
+
+  // Route pour adapter un prompt système (enrichissement via l'IA)
+  app.post("/api/adapt-prompt", async (req, res) => {
+    try {
+      const { basePrompt, topic, platform } = req.body;
+
+      if (!basePrompt || !topic || !platform) {
+        return res.status(400).json({
+          message: "Champs requis: basePrompt, topic, platform"
+        });
+      }
+
+      console.log(`✨ Adaptation du prompt pour le sujet: "${topic}" (${platform})`);
+
+      const adaptedPrompt = await openaiService.adaptSystemPrompt(basePrompt, topic, platform);
+
+      res.json({ prompt: adaptedPrompt });
+    } catch (error: any) {
+      console.error('❌ Erreur lors de l\'adaptation du prompt:', error);
+      res.status(500).json({
+        message: "Erreur lors de l'adaptation du prompt",
+        error: error.message
+      });
+    }
+  });
+
   // Route pour générer des images avec DALL-E 3
   app.post("/api/generate-image", async (req, res) => {
     try {
@@ -884,7 +1006,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/monitoring/overview", async (req, res) => {
     try {
       const siteId = req.query.siteId ? parseInt(req.query.siteId as string) : undefined;
-      const overview = await supabaseService.getMonitoringSnapshot(siteId);
+      const token = extractAccessToken(req);
+      let overview;
+      try {
+        overview = await supabaseService.getMonitoringSnapshot(siteId, token);
+      } catch (tokenError) {
+        if (!token) throw tokenError;
+        console.warn('⚠️ /api/monitoring/overview: echec avec token, fallback service role');
+        overview = await supabaseService.getMonitoringSnapshot(siteId);
+      }
       res.json(overview);
     } catch (error: any) {
       console.error('❌ Erreur monitoring overview:', error);
@@ -895,7 +1025,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/monitoring/summary", async (req, res) => {
     try {
       const siteId = req.body?.siteId ? parseInt(req.body.siteId) : undefined;
-      const overview = await supabaseService.getMonitoringSnapshot(siteId);
+      const token = extractAccessToken(req);
+      let overview;
+      try {
+        overview = await supabaseService.getMonitoringSnapshot(siteId, token);
+      } catch (tokenError) {
+        if (!token) throw tokenError;
+        console.warn('⚠️ /api/monitoring/summary: echec avec token, fallback service role');
+        overview = await supabaseService.getMonitoringSnapshot(siteId);
+      }
       const summary = await buildMonitoringSummary(overview);
       res.json({ summary });
     } catch (error: any) {
@@ -1294,12 +1432,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // OpenAI article generation routes
+  // Claude article generation routes
   app.post("/api/generate-article", async (req, res) => {
     try {
       const { keywords, topic, contentType, targetAudience, tone, existingContent } = req.body;
 
-      console.log('🤖 Génération d\'article avec OpenAI GPT-4o');
+      console.log('🤖 Génération d\'article avec Claude');
+      console.log('🔎 CONTENT_GEN_DEBUG:', process.env.CONTENT_GEN_DEBUG === 'true' ? 'enabled' : 'disabled');
       console.log('Paramètres:', { keywords, topic, contentType, existingContent: !!existingContent });
 
       const generatedArticle = await openaiService.generateArticle({
@@ -1311,7 +1450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         existingContent
       });
 
-      console.log('✅ Article généré avec succès');
+      console.log('✅ Article généré avec succès (Claude)');
       res.json(generatedArticle);
     } catch (error) {
       console.error('Erreur lors de la génération d\'article:', error);
@@ -1653,6 +1792,137 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
         message: "Impossible de supprimer le prompt système",
         error: error.message
       });
+    }
+  });
+
+  // ============= User Management Routes (Admin only) =============
+
+  const allowedAdminRoles = z.enum(["superadmin", "admin", "site_user"]);
+  const createAdminUserSchema = z.object({
+    email: z.string().min(1, "Identifiant requis"),
+    password: z.string().min(6, "Le mot de passe doit faire au moins 6 caracteres"),
+    role: allowedAdminRoles,
+    sites: z.array(z.number().int().positive()).optional().default([]),
+  });
+
+  const normalizeUserEmail = (identifier: string): string => {
+    const normalized = identifier.trim().toLowerCase();
+    return normalized.includes("@") ? normalized : `${normalized}@webseo.local`;
+  };
+
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      // NOTE: En production, il faudrait verifier le role de l'utilisateur qui fait la requete
+      // via req.headers.authorization (le JWT). Ici on suppose que le middleware le fera ou 
+      // que le client frontend le gere en RLS. Mais ce endpoint doit lire toute la liste
+      // via l'admin client.
+      const adminClient = getSupabaseAdmin();
+
+      const { data: users, error: usersError } = await adminClient.auth.admin.listUsers();
+      if (usersError) throw usersError;
+
+      const { data: roles, error: rolesError } = await supabaseService.getAllRoles();
+      if (rolesError) throw rolesError;
+
+      const { data: sites, error: sitesError } = await supabaseService.getAllUserSites();
+      if (sitesError) throw sitesError;
+
+      const safeRoles = Array.isArray(roles) ? roles : [];
+      const safeSites = Array.isArray(sites) ? sites : [];
+
+      const formattedUsers = users.users.map(u => ({
+        id: u.id,
+        email: u.email,
+        role: safeRoles.find((r: any) => r.user_id === u.id)?.role || 'inconnu',
+        sites: safeSites.filter((s: any) => s.user_id === u.id).map((s: any) => s.site_id)
+      }));
+
+      res.json(formattedUsers);
+    } catch (error: any) {
+      console.error("Erreur recuperation utilisateurs:", error);
+      res.status(500).json({ message: "Erreur lecture utilisateurs", error: error.message });
+    }
+  });
+
+  app.post("/api/admin/users", async (req, res) => {
+    try {
+      const parsedBody = createAdminUserSchema.safeParse(req.body);
+      if (!parsedBody.success) {
+        return res.status(400).json({
+          message: "Donnees utilisateur invalides",
+          error: parsedBody.error.issues.map((issue) => issue.message).join(", "),
+        });
+      }
+
+      const { email, password, role, sites } = parsedBody.data;
+      const normalizedEmail = normalizeUserEmail(email);
+      const emailValidation = z.string().email().safeParse(normalizedEmail);
+      if (!emailValidation.success) {
+        return res.status(400).json({
+          message: "Adresse email invalide",
+          error: "Utilisez un email valide ou un identifiant simple (ex: jean -> jean@webseo.local)",
+        });
+      }
+
+      const siteIds = role === "site_user" ? sites : [];
+      if (role === "site_user" && siteIds.length === 0) {
+        return res.status(400).json({
+          message: "Au moins un site est requis",
+          error: "Selectionnez au moins un site pour un utilisateur de type site_user.",
+        });
+      }
+
+      const adminClient = getSupabaseAdmin();
+
+      // 1. Create User
+      const { data, error: createError } = await adminClient.auth.admin.createUser({
+        email: normalizedEmail,
+        password,
+        email_confirm: true
+      });
+
+      if (createError) {
+        const loweredMessage = (createError.message || "").toLowerCase();
+        const statusCode = loweredMessage.includes("already") ? 409 : 400;
+        return res.status(statusCode).json({
+          message: "Erreur creation utilisateur",
+          error: createError.message,
+        });
+      }
+
+      const userId = data.user?.id;
+      if (!userId) {
+        throw new Error("Impossible de recuperer l'identifiant du nouvel utilisateur.");
+      }
+
+      // 2. Set Role
+      const roleResult = await supabaseService.setUserRole(userId, role);
+      if (roleResult.error) throw roleResult.error;
+
+      // 3. Set Sites (if applicable)
+      const sitesResult = await supabaseService.setUserSites(userId, siteIds);
+      if (sitesResult.error) throw sitesResult.error;
+
+      res.status(201).json({
+        success: true,
+        user: data.user,
+        normalizedEmail,
+      });
+    } catch (error: any) {
+      console.error("Erreur creation utilisateur:", error);
+      res.status(500).json({ message: "Erreur creation utilisateur", error: error.message });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const adminClient = getSupabaseAdmin();
+      const { error } = await adminClient.auth.admin.deleteUser(userId);
+      if (error) throw error;
+      res.json({ success: true, message: "Utilisateur supprime" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Erreur suppression", error: error.message });
     }
   });
 

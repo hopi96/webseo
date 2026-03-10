@@ -217,11 +217,23 @@ router.post('/generate-calendar-stream', async (req: Request, res: Response) => 
         const { ContentCalendarService } = await import('./content-calendar-service');
         const calendarServiceWithProgress = new ContentCalendarService();
 
+        const CALENDAR_WEIGHT = 40;
+        const CONTENT_WEIGHT = 60;
+        let lastPercent = 0;
+
         // Configurer le callback de progression
         calendarServiceWithProgress.onProgress = (progress) => {
+            const scaled = Math.min(
+                CALENDAR_WEIGHT,
+                Math.round((progress.percent / 100) * CALENDAR_WEIGHT)
+            );
+            const clamped = Math.max(lastPercent, scaled);
+            lastPercent = clamped;
             sendSSE({
                 type: 'progress',
-                ...progress
+                ...progress,
+                percent: clamped,
+                phase: 'calendar'
             });
         };
 
@@ -233,9 +245,42 @@ router.post('/generate-calendar-stream', async (req: Request, res: Response) => 
             keywords
         });
 
-        // Lancer la génération des contenus en arrière-plan
-        contentGeneratorService.generateBatch(calendar).catch(err => {
-            console.error('❌ ERREUR BACKGROUND generateBatch:', err);
+        if (calendar.length === 0) {
+            sendSSE({
+                type: 'progress',
+                percent: 100,
+                step: 'Aucune idée générée.',
+                phase: 'calendar'
+            });
+            sendSSE({
+                type: 'complete',
+                success: true,
+                calendarCount: 0,
+                message: 'Aucune idée générée pour la période sélectionnée.'
+            });
+            res.end();
+            return;
+        }
+
+        sendSSE({
+            type: 'progress',
+            percent: Math.max(lastPercent, CALENDAR_WEIGHT),
+            step: `Calendrier généré (${calendar.length} idées). Rédaction en cours...`,
+            phase: 'content'
+        });
+
+        const contentResult = await contentGeneratorService.generateBatch(calendar, (contentProgress) => {
+            const scaled = CALENDAR_WEIGHT + Math.round((contentProgress.percent / 100) * CONTENT_WEIGHT);
+            const clamped = Math.max(lastPercent, scaled);
+            lastPercent = clamped;
+            const step = `Rédaction des contenus ${contentProgress.current}/${contentProgress.total}` +
+                (contentProgress.platform ? ` (${contentProgress.platform})` : '');
+            sendSSE({
+                type: 'progress',
+                percent: clamped,
+                step,
+                phase: 'content'
+            });
         });
 
         // Envoyer le résultat final
@@ -243,7 +288,11 @@ router.post('/generate-calendar-stream', async (req: Request, res: Response) => 
             type: 'complete',
             success: true,
             calendarCount: calendar.length,
-            message: `${calendar.length} idées générées. Rédaction en cours...`
+            generated: contentResult.generated,
+            errors: contentResult.errors,
+            message: contentResult.errors > 0
+                ? `Calendrier généré. ${contentResult.generated} contenus créés, ${contentResult.errors} erreurs.`
+                : `Calendrier généré. ${contentResult.generated} contenus créés avec succès.`
         });
 
         res.end();

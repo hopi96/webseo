@@ -7,6 +7,7 @@ import OpenAI from 'openai';
 import { supabaseService } from './supabase-service';
 import type { CalendarEntry } from './content-calendar-service';
 import { researchAgentService, type ResearchBrief } from './research-agent-service';
+import { extractClaudeText, getClaudeModel, requireAnthropic } from './claude-client';
 
 // Types
 export interface ContentGenerationRequest {
@@ -151,10 +152,22 @@ Génère un contenu optimisé pour cette plateforme avec une structure claire : 
     }
 };
 
-// Initialisation OpenAI
+// OpenAI uniquement pour la génération d'images (DALL-E)
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
+
+const CONTENT_GEN_DEBUG = process.env.CONTENT_GEN_DEBUG === 'true';
+
+const countWords = (text: string): number => {
+    const normalized = text.replace(/\s+/g, ' ').trim();
+    if (!normalized) return 0;
+    return normalized.split(' ').length;
+};
+
+if (CONTENT_GEN_DEBUG) {
+    console.log('🧠 Content generation debug logs enabled (CONTENT_GEN_DEBUG=true).');
+}
 
 export class ContentGeneratorService {
 
@@ -180,8 +193,8 @@ export class ContentGeneratorService {
             context: request.context
         });
 
-        // 3. Générer le contenu via OpenAI
-        const contentText = await this.callOpenAI(systemPrompt, request, researchBrief || undefined);
+        // 3. Générer le contenu via Claude
+        const contentText = await this.callClaude(systemPrompt, request, researchBrief || undefined);
 
         // 4. Générer une image si demandé (Instagram, Pinterest)
         let imageUrl: string | undefined;
@@ -228,7 +241,17 @@ export class ContentGeneratorService {
     /**
      * Génère le contenu pour un batch d'entrées du calendrier
      */
-    async generateBatch(calendarEntries: CalendarEntry[]): Promise<{
+    async generateBatch(
+        calendarEntries: CalendarEntry[],
+        onProgress?: (progress: {
+            percent: number;
+            current: number;
+            total: number;
+            platform?: string;
+            generated: number;
+            errors: number;
+        }) => void
+    ): Promise<{
         generated: number;
         errors: number;
         contents: GeneratedContent[];
@@ -237,6 +260,18 @@ export class ContentGeneratorService {
 
         const contents: GeneratedContent[] = [];
         let errors = 0;
+        const total = calendarEntries.length;
+        let processed = 0;
+
+        if (onProgress) {
+            onProgress({
+                percent: total > 0 ? 0 : 100,
+                current: 0,
+                total,
+                generated: 0,
+                errors: 0
+            });
+        }
 
         for (const entry of calendarEntries) {
             console.log(`🔄 Traitement entrée: ${entry.plateforme} - ${entry.date_de_publication}`);
@@ -250,11 +285,24 @@ export class ContentGeneratorService {
                 });
                 contents.push(content);
 
-                // Pause pour éviter les rate limits OpenAI
+                // Pause pour éviter les rate limits Claude
                 await this.delay(1000);
             } catch (error) {
                 console.error(`❌ Erreur génération pour ${entry.plateforme} (${entry.date_de_publication}):`, error);
                 errors++;
+            }
+
+            processed += 1;
+            if (onProgress) {
+                const percent = total > 0 ? Math.round((processed / total) * 100) : 100;
+                onProgress({
+                    percent,
+                    current: processed,
+                    total,
+                    platform: entry.plateforme,
+                    generated: contents.length,
+                    errors
+                });
             }
         }
 
@@ -263,9 +311,9 @@ export class ContentGeneratorService {
     }
 
     /**
-     * Appelle OpenAI pour générer le contenu
+     * Appelle Claude pour générer le contenu
      */
-    private async callOpenAI(
+    private async callClaude(
         systemPrompt: string,
         request: ContentGenerationRequest,
         researchBrief?: ResearchBrief
@@ -290,22 +338,48 @@ MISSION: Rédige le contenu final prêt à être publié.
 N'ajoute pas de guillemets autour du texte.
 N'ajoute pas de texte d'introduction type "Voici le post".`;
 
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt }
-            ],
+        const anthropic = requireAnthropic();
+        if (CONTENT_GEN_DEBUG) {
+            console.log('🧠 [Claude][Content] Request', {
+                model: getClaudeModel(),
+                max_tokens: 12000,
+                temperature: 0.7,
+                platform: request.platform,
+                siteId: request.siteId,
+                publicationDate: request.publicationDate,
+                theme: request.theme,
+                hasResearchBrief: Boolean(researchBrief)
+            });
+            console.log('🧠 [Claude][Content] System prompt:\n' + systemPrompt);
+            console.log('🧠 [Claude][Content] User prompt:\n' + userPrompt);
+        }
+
+        const response = await anthropic.messages.create({
+            model: getClaudeModel(),
+            max_tokens: 12000,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
             temperature: 0.7
         });
 
-        const content = response.choices[0]?.message?.content;
+        const content = extractClaudeText(response);
         if (!content) {
-            throw new Error('Pas de réponse OpenAI');
+            throw new Error('Pas de réponse Claude');
         }
 
         // Nettoyer le markdown si présent
-        return this.cleanContent(content);
+        const cleaned = this.cleanContent(content);
+
+        if (CONTENT_GEN_DEBUG) {
+            console.log('🧠 [Claude][Content] Usage', response.usage);
+            console.log('🧠 [Claude][Content] Stop reason', response.stop_reason);
+            console.log('🧠 [Claude][Content] Output stats', {
+                words: countWords(cleaned),
+                characters: cleaned.length
+            });
+        }
+
+        return cleaned;
     }
 
     /**

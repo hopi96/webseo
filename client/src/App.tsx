@@ -12,17 +12,48 @@ import Monitoring from "@/pages/monitoring";
 import Settings from "@/pages/settings";
 import DocumentationPDF from "@/pages/documentation-pdf";
 import NotFound from "@/pages/not-found";
+import Login from "@/pages/login";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/components/layout/protected-route";
+import { AppErrorBoundary } from "@/components/layout/app-error-boundary";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/keywords" component={Keywords} />
-      <Route path="/calendar" component={Calendar} />
-      <Route path="/monitoring" component={Monitoring} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/documentation-pdf" component={DocumentationPDF} />
-      <Route component={NotFound} />
+      <Route path="/login" component={Login} />
+      <Route path="/">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/keywords">
+        <ProtectedRoute>
+          <Keywords />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/calendar">
+        <ProtectedRoute>
+          <Calendar />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/monitoring">
+        <ProtectedRoute>
+          <Monitoring />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/documentation-pdf">
+        <ProtectedRoute>
+          <DocumentationPDF />
+        </ProtectedRoute>
+      </Route>
+      <Route path="*">
+        <NotFound />
+      </Route>
     </Switch>
   );
 }
@@ -32,10 +63,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="seo-dashboard-theme">
         <TooltipProvider>
-          <SiteProvider>
-            <Toaster />
-            <Router />
-          </SiteProvider>
+          <AuthProvider>
+            <SiteProvider>
+              <Toaster />
+              <AppErrorBoundary>
+                <Router />
+              </AppErrorBoundary>
+            </SiteProvider>
+          </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

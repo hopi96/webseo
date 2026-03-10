@@ -21,21 +21,33 @@ interface SiteContextType {
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined);
 
+function readStoredSiteId(): number | null {
+    const saved = localStorage.getItem('selectedWebsiteId');
+    if (!saved) return null;
+
+    const parsed = Number.parseInt(saved, 10);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+        localStorage.removeItem('selectedWebsiteId');
+        return null;
+    }
+
+    return parsed;
+}
+
 export function SiteProvider({ children }: { children: ReactNode }) {
-    const [selectedSiteId, setSelectedSiteIdState] = useState<number | null>(() => {
-        const saved = localStorage.getItem('selectedWebsiteId');
-        return saved ? parseInt(saved) : null;
-    });
+    const [selectedSiteId, setSelectedSiteIdState] = useState<number | null>(() => readStoredSiteId());
 
     // Fetch all sites
-    const { data: sites = [], isLoading } = useQuery<Site[]>({
+    const { data: rawSites, isLoading } = useQuery<Site[]>({
         queryKey: ['/api/sites'],
         refetchInterval: 30000,
         refetchOnWindowFocus: true,
     });
+    const sites = Array.isArray(rawSites) ? rawSites : [];
 
     // Persist selection to localStorage
     const setSelectedSiteId = (id: number) => {
+        if (!Number.isFinite(id) || id <= 0) return;
         setSelectedSiteIdState(id);
         localStorage.setItem('selectedWebsiteId', id.toString());
     };
@@ -51,7 +63,14 @@ export function SiteProvider({ children }: { children: ReactNode }) {
         }
     }, [sites, isLoading, selectedSiteId]);
 
-    const currentSite = sites.find(s => s.id === selectedSiteId);
+    useEffect(() => {
+        if (!isLoading && sites.length === 0 && selectedSiteId !== null) {
+            setSelectedSiteIdState(null);
+            localStorage.removeItem('selectedWebsiteId');
+        }
+    }, [sites, isLoading, selectedSiteId]);
+
+    const currentSite = selectedSiteId ? sites.find(s => s.id === selectedSiteId) : undefined;
 
     return (
         <SiteContext.Provider value={{

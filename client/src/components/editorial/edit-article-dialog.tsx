@@ -31,7 +31,7 @@ import { z } from "zod";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { EditorialContent } from "@shared/schema";
+import type { EditorialContent } from "@shared/schema";
 import { Sparkles, Globe, Upload, X, RotateCcw } from "lucide-react";
 import { AIGenerationDialog } from "./ai-generation-dialog";
 import { ImageModal } from "@/components/ui/image-modal";
@@ -370,7 +370,7 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                       className="flex items-center gap-2 text-primary border-input hover:bg-accent"
                     >
                       <Sparkles className="h-4 w-4" />
-                      Générer avec GPT-4o
+                      Générer avec Claude
                     </Button>
                   </div>
                   <FormControl>

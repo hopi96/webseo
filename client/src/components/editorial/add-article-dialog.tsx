@@ -317,7 +317,7 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                     className="flex items-center gap-2 text-primary border-input hover:bg-accent"
                   >
                     <Sparkles className="h-4 w-4" />
-                    Générer avec GPT-4o
+                    Générer avec Claude
                   </Button>
                 </div>
                 <Textarea

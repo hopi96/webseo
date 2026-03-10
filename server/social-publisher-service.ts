@@ -171,6 +171,22 @@ export class SocialPublisherService {
                 return this.publishLinkedIn(content, socialParams.linkedin);
             case 'tiktok':
                 return this.publishTikTok(content, socialParams.tiktok);
+            case 'blog':
+                return this.publishWordPress(content, socialParams.wordpress_blog);
+            case 'newsletter':
+                return {
+                    contentId: content.id,
+                    platform: 'newsletter',
+                    success: false,
+                    message: 'Publication Newsletter Brevo non implémentée'
+                };
+            case 'youtube':
+                return {
+                    contentId: content.id,
+                    platform: 'youtube',
+                    success: false,
+                    message: 'Publication YouTube non implémentée'
+                };
             default:
                 return {
                     contentId: content.id,
@@ -591,6 +607,69 @@ export class SocialPublisherService {
                 platform: 'linkedin',
                 success: false,
                 message: error?.message || 'Erreur LinkedIn'
+            };
+        }
+    }
+    private async publishWordPress(content: EditorialContent, config?: { base_url?: string; username?: string; application_password?: string }): Promise<PublishResult> {
+        if (!config?.base_url || !config?.username || !config?.application_password) {
+            return {
+                contentId: content.id,
+                platform: 'blog',
+                success: false,
+                message: 'Config WordPress manquante (base_url/username/application_password)'
+            };
+        }
+
+        // Préparer le titre à partir du contenu (première ligne ou premiers 100 caractères)
+        const lines = content.contentText.split('\n').filter(l => l.trim());
+        const title = lines[0]?.slice(0, 150) || 'Publication automatique';
+        const body = content.contentText;
+
+        // Construire le payload WordPress REST API
+        const payload: Record<string, any> = {
+            title,
+            content: body,
+            status: 'publish'
+        };
+
+        // Authentification Basic Auth avec Application Password
+        const credentials = Buffer.from(`${config.username}:${config.application_password}`).toString('base64');
+        const baseUrl = config.base_url.replace(/\/$/, '');
+        const endpoint = `${baseUrl}/wp-json/wp/v2/posts`;
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Basic ${credentials}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                return {
+                    contentId: content.id,
+                    platform: 'blog',
+                    success: false,
+                    message: data?.message || data?.code || 'Erreur WordPress'
+                };
+            }
+
+            return {
+                contentId: content.id,
+                platform: 'blog',
+                success: true,
+                message: 'Publié sur WordPress',
+                externalId: String(data?.id)
+            };
+        } catch (error: any) {
+            return {
+                contentId: content.id,
+                platform: 'blog',
+                success: false,
+                message: error?.message || 'Erreur WordPress'
             };
         }
     }

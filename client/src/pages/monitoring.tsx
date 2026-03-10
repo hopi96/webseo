@@ -61,12 +61,10 @@ export default function Monitoring() {
 
   const { data: overview, isLoading, refetch } = useQuery({
     queryKey: ["/api/monitoring/overview", siteId],
+    enabled: !!siteId,
     queryFn: async (): Promise<MonitoringOverview> => {
-      const url = siteId ? `/api/monitoring/overview?siteId=${siteId}` : "/api/monitoring/overview";
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch monitoring overview");
-      }
+      const url = `/api/monitoring/overview?siteId=${siteId}`;
+      const response = await apiRequest("GET", url);
       const data = await response.json();
       return {
         ...data,
@@ -88,10 +86,10 @@ export default function Monitoring() {
   });
 
   useEffect(() => {
-    if (overview && !summary && !summaryMutation.isPending) {
+    if (siteId && overview && !summary && !summaryMutation.isPending) {
       summaryMutation.mutate();
     }
-  }, [overview, summary, summaryMutation.isPending]);
+  }, [siteId, overview, summary, summaryMutation.isPending]);
 
   const formatDate = (value: string) =>
     new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -117,11 +115,11 @@ export default function Monitoring() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+            <Button variant="outline" onClick={() => refetch()} disabled={isLoading || !siteId}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Rafraîchir
             </Button>
-            <Button onClick={() => summaryMutation.mutate()} disabled={summaryMutation.isPending}>
+            <Button onClick={() => summaryMutation.mutate()} disabled={summaryMutation.isPending || !siteId}>
               {summaryMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -137,6 +135,14 @@ export default function Monitoring() {
             <CardContent className="py-8 flex items-center justify-center gap-2">
               <Loader2 className="h-5 w-5 animate-spin" />
               Chargement des données...
+            </CardContent>
+          </Card>
+        )}
+
+        {!siteId && !isLoading && (
+          <Card>
+            <CardContent className="py-8 text-sm text-muted-foreground text-center">
+              Aucun site selectionne. Choisissez un site pour afficher le monitoring.
             </CardContent>
           </Card>
         )}
@@ -234,11 +240,13 @@ export default function Monitoring() {
                 <CardTitle>Répartition par statut</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2">
-                {Object.entries(overview.counts.byStatus).map(([status, value]) => (
+                {overview.counts?.byStatus ? Object.entries(overview.counts.byStatus).map(([status, value]) => (
                   <Badge key={status} variant="outline" className="text-xs">
                     {status}: {value}
                   </Badge>
-                ))}
+                )) : (
+                  <p className="text-sm text-gray-500">Aucune donnée de statut.</p>
+                )}
               </CardContent>
             </Card>
 
@@ -247,10 +255,10 @@ export default function Monitoring() {
                 <CardTitle>Publications échouées</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {overview.failedPosts.length === 0 && (
+                {(overview.failedPosts || []).length === 0 && (
                   <p className="text-sm text-gray-500">Aucun échec de publication récent.</p>
                 )}
-                {overview.failedPosts.map((item) => (
+                {(overview.failedPosts || []).map((item) => (
                   <div key={item.id} className="border rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -276,10 +284,10 @@ export default function Monitoring() {
                   <CardTitle>Derniers contenus publiés</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {overview.lastPublished.length === 0 && (
+                  {(overview.lastPublished || []).length === 0 && (
                     <p className="text-sm text-gray-500">Aucun contenu publié récemment.</p>
                   )}
-                  {overview.lastPublished.map((item) => (
+                  {(overview.lastPublished || []).map((item) => (
                     <div key={item.id} className="border rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline">{item.platform}</Badge>
@@ -296,10 +304,10 @@ export default function Monitoring() {
                   <CardTitle>À publier prochainement</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {overview.nextScheduled.length === 0 && (
+                  {(overview.nextScheduled || []).length === 0 && (
                     <p className="text-sm text-gray-500">Aucun contenu planifié.</p>
                   )}
-                  {overview.nextScheduled.map((item) => (
+                  {(overview.nextScheduled || []).map((item) => (
                     <div key={item.id} className="border rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary">{item.platform}</Badge>

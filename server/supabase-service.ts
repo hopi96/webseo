@@ -56,7 +56,7 @@ export interface DbPublicationLog {
 // Initialisation du client Supabase
 let supabase: SupabaseClient | null = null;
 
-function initializeSupabase(): SupabaseClient {
+function getSupabaseAdmin(): SupabaseClient {
     if (!supabase) {
         const supabaseUrl = process.env.SUPABASE_URL;
         const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -82,6 +82,25 @@ export interface AirtableSite {
 }
 
 export class SupabaseService {
+    private getClientWithAccessToken(accessToken?: string): SupabaseClient {
+        if (!accessToken) {
+            // Fallback robuste: sans token utilisateur, on lit avec le service role.
+            // Cela évite les retours vides liés au RLS quand le bearer n'est pas transmis.
+            return getSupabaseAdmin();
+        }
+
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+        if (!supabaseUrl || !supabaseAnonKey) {
+            throw new Error('Variables SUPABASE_URL et SUPABASE_ANON_KEY requises');
+        }
+
+        return createClient(
+            supabaseUrl,
+            supabaseAnonKey,
+            { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+        );
+    }
 
     // ============================================
     // GESTION DES SITES
@@ -89,10 +108,18 @@ export class SupabaseService {
 
     /**
      * Récupère tous les sites avec données SEO
+     * @param accessToken Optionnel. JWT de l'utilisateur pour appliquer les RLS.
      */
-    async getAllSites(): Promise<AirtableSite[]> {
+    async getAllSites(accessToken?: string): Promise<AirtableSite[]> {
         try {
-            const client = initializeSupabase();
+            // Si on a un token utilisateur, on recrée un client avec ce token pour appliquer le RLS
+            // Sinon on utilise le service_role par défaut pour l'admin systeme
+            let client;
+            if (accessToken) {
+                client = this.getClientWithAccessToken(accessToken);
+            } else {
+                client = getSupabaseAdmin();
+            }
 
             const { data, error } = await client
                 .from('sites')
@@ -122,7 +149,7 @@ export class SupabaseService {
      */
     async getSiteById(siteId: number): Promise<AirtableSite | null> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('sites')
@@ -154,7 +181,7 @@ export class SupabaseService {
      */
     async createSite(siteData: { name: string; url: string; seoAnalysis?: any }): Promise<AirtableSite> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('sites')
@@ -189,7 +216,7 @@ export class SupabaseService {
      */
     async updateSite(siteId: number, updates: { seoAnalysis?: any; socialParams?: any; name?: string; url?: string }): Promise<AirtableSite> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const updateData: any = {};
             if (updates.seoAnalysis !== undefined) updateData.seo_analysis = updates.seoAnalysis;
@@ -227,7 +254,7 @@ export class SupabaseService {
      */
     async deleteSite(siteId: number): Promise<boolean> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client
                 .from('sites')
@@ -249,7 +276,7 @@ export class SupabaseService {
      */
     async updateSocialMediaProgram(siteId: number, programData: string): Promise<void> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client
                 .from('sites')
@@ -270,7 +297,7 @@ export class SupabaseService {
      */
     async getSocialMediaProgram(siteId: number): Promise<string | null> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('sites')
@@ -292,7 +319,7 @@ export class SupabaseService {
      */
     async updateSocialParams(siteId: number, socialParams: any): Promise<void> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client
                 .from('sites')
@@ -313,7 +340,7 @@ export class SupabaseService {
      */
     async getSocialParams(siteId: number): Promise<any> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('sites')
@@ -337,9 +364,9 @@ export class SupabaseService {
     /**
      * Récupère tous les contenus éditoriaux
      */
-    async getAllContent(): Promise<EditorialContent[]> {
+    async getAllContent(accessToken?: string): Promise<EditorialContent[]> {
         try {
-            const client = initializeSupabase();
+            const client = this.getClientWithAccessToken(accessToken);
 
             const { data, error } = await client
                 .from('editorial_contents')
@@ -360,9 +387,9 @@ export class SupabaseService {
     /**
      * Récupère les contenus pour un site spécifique
      */
-    async getContentBySite(siteId: number): Promise<EditorialContent[]> {
+    async getContentBySite(siteId: number, accessToken?: string): Promise<EditorialContent[]> {
         try {
-            const client = initializeSupabase();
+            const client = this.getClientWithAccessToken(accessToken);
 
             const { data, error } = await client
                 .from('editorial_contents')
@@ -382,9 +409,9 @@ export class SupabaseService {
     /**
      * Récupère les contenus pour une date spécifique
      */
-    async getContentByDate(date: Date): Promise<EditorialContent[]> {
+    async getContentByDate(date: Date, accessToken?: string): Promise<EditorialContent[]> {
         try {
-            const client = initializeSupabase();
+            const client = this.getClientWithAccessToken(accessToken);
 
             const startOfDay = new Date(date);
             startOfDay.setHours(0, 0, 0, 0);
@@ -416,9 +443,9 @@ export class SupabaseService {
         end: Date;
         statuses: string[];
         limit?: number;
-    }): Promise<EditorialContent[]> {
+    }, accessToken?: string): Promise<EditorialContent[]> {
         try {
-            const client = initializeSupabase();
+            const client = this.getClientWithAccessToken(accessToken);
 
             const { data, error } = await client
                 .from('editorial_contents')
@@ -452,7 +479,7 @@ export class SupabaseService {
         contentExcerpt?: string;
     }): Promise<void> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
             const payload: any = {
                 content_id: params.contentId ?? null,
                 site_id: params.siteId ?? null,
@@ -479,7 +506,7 @@ export class SupabaseService {
     /**
      * Snapshot monitoring (comptes + listes)
      */
-    async getMonitoringSnapshot(siteId?: number): Promise<{
+    async getMonitoringSnapshot(siteId?: number, accessToken?: string): Promise<{
         now: string;
         counts: {
             total: number;
@@ -517,7 +544,7 @@ export class SupabaseService {
             excerpt: string;
         }>;
     }> {
-        const client = initializeSupabase();
+        const client = this.getClientWithAccessToken(accessToken);
         const now = new Date();
         const startDay = new Date(now);
         startDay.setHours(0, 0, 0, 0);
@@ -680,7 +707,7 @@ export class SupabaseService {
         dateDePublication: Date | string;
     }): Promise<EditorialContent> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('editorial_contents')
@@ -715,7 +742,7 @@ export class SupabaseService {
      */
     async updateContent(contentId: string | number, updateData: Partial<EditorialContent>): Promise<EditorialContent> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const fieldsToUpdate: any = {};
 
@@ -755,7 +782,7 @@ export class SupabaseService {
      */
     async deleteContent(contentId: string | number): Promise<boolean> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client
                 .from('editorial_contents')
@@ -777,7 +804,7 @@ export class SupabaseService {
      */
     async bulkUpdateStatus(contentIds: (string | number)[], statut: string): Promise<EditorialContent[]> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const validStatuses = ['en attente', 'à réviser', 'validé', 'publié'];
             if (!validStatuses.includes(statut)) {
@@ -834,7 +861,7 @@ export class SupabaseService {
      */
     async getAllSystemPrompts(siteId?: number): Promise<SystemPrompt[]> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             // 1. Récupérer TOUS les prompts globaux (is_active=true ou false, peu importe)
             // On filtre STRICTEMENT pour que site_id soit NULL.
@@ -907,7 +934,7 @@ export class SupabaseService {
      */
     async getActiveSystemPrompt(): Promise<SystemPrompt | null> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('system_prompts')
@@ -938,7 +965,7 @@ export class SupabaseService {
      */
     async createSystemPrompt(promptData: InsertSystemPrompt & { siteId?: number }): Promise<SystemPrompt> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('system_prompts')
@@ -970,7 +997,7 @@ export class SupabaseService {
      */
     async updateSystemPrompt(promptId: string | number, updateData: Partial<InsertSystemPrompt> & { siteId?: number }): Promise<SystemPrompt> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const fieldsToUpdate: any = {};
 
@@ -1005,7 +1032,7 @@ export class SupabaseService {
      */
     async deleteSystemPrompt(promptId: string | number): Promise<boolean> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client
                 .from('system_prompts')
@@ -1027,7 +1054,7 @@ export class SupabaseService {
      */
     async getPromptByPlatform(platform: string): Promise<SystemPrompt | null> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('system_prompts')
@@ -1080,7 +1107,7 @@ export class SupabaseService {
      */
     async testConnection(): Promise<boolean> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client.from('sites').select('id').limit(1);
 
@@ -1101,7 +1128,7 @@ export class SupabaseService {
      */
     async saveGeoAnalysis(siteId: number, geoAnalysis: any, geoScore: number): Promise<void> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client
                 .from('sites')
@@ -1126,7 +1153,7 @@ export class SupabaseService {
      */
     async getGeoAnalysis(siteId: number): Promise<{ geoAnalysis: any; geoScore: number } | null> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('sites')
@@ -1160,7 +1187,7 @@ export class SupabaseService {
      */
     async getSitePrompt(siteId: number, platform: string): Promise<SystemPrompt | null> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
             const platformLower = platform.toLowerCase();
 
             // 1. D'abord chercher un prompt spécifique au site
@@ -1212,7 +1239,7 @@ export class SupabaseService {
         isActive: boolean;
     }>> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { data, error } = await client
                 .from('site_prompts')
@@ -1249,7 +1276,7 @@ export class SupabaseService {
         name: string;
     }> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
             const platformLower = platform.toLowerCase();
 
             // Upsert - insert or update if exists
@@ -1289,7 +1316,7 @@ export class SupabaseService {
      */
     async deleteSitePrompt(siteId: number, platform: string): Promise<boolean> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             const { error } = await client
                 .from('site_prompts')
@@ -1321,7 +1348,7 @@ export class SupabaseService {
         outputStructure: string;
     }>> {
         try {
-            const client = initializeSupabase();
+            const client = getSupabaseAdmin();
 
             // Récupérer les prompts personnalisés du site
             const sitePrompts = await this.listSitePrompts(siteId);
@@ -1392,6 +1419,76 @@ export class SupabaseService {
             return [];
         }
     }
+
+    // ============================================
+    // GESTION DES UTILISATEURS (ADMIN)
+    // ============================================
+
+    async getAllRoles() {
+        try {
+            const client = getSupabaseAdmin();
+            return await client.from('user_roles').select('*');
+        } catch (error) {
+            console.error('❌ Erreur getAllRoles:', error);
+            return { data: null, error };
+        }
+    }
+
+    async getAllUserSites() {
+        try {
+            const client = getSupabaseAdmin();
+            return await client.from('user_sites').select('*');
+        } catch (error) {
+            console.error('❌ Erreur getAllUserSites:', error);
+            return { data: null, error };
+        }
+    }
+
+    async setUserRole(userId: string, role: string) {
+        try {
+            const client = getSupabaseAdmin();
+            const { data, error } = await client
+                .from('user_roles')
+                .upsert({ user_id: userId, role }, { onConflict: 'user_id' })
+                .select();
+            if (error) throw error;
+            return { data, error: null };
+        } catch (error) {
+            console.error('❌ Erreur setUserRole:', error);
+            return { data: null, error };
+        }
+    }
+
+    async setUserSites(userId: string, siteIds: number[]) {
+        try {
+            const client = getSupabaseAdmin();
+            // Delete existing
+            await client.from('user_sites').delete().eq('user_id', userId);
+
+            // Insert new ones
+            if (siteIds && siteIds.length > 0) {
+                const inserts = siteIds.map(siteId => ({ user_id: userId, site_id: siteId }));
+                const { error } = await client.from('user_sites').insert(inserts);
+                if (error) throw error;
+            }
+            return { error: null };
+        } catch (error) {
+            console.error('❌ Erreur setUserSites:', error);
+            return { error };
+        }
+    }
 }
 
 export const supabaseService = new SupabaseService();
+
+export function getSupabaseAdmin(): SupabaseClient {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('La variable d\'environnement SUPABASE_SERVICE_ROLE_KEY est requise.');
+    }
+    return createClient(supabaseUrl, supabaseServiceKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+    });
+}
+

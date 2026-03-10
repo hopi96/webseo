@@ -21,6 +21,8 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/use-auth";
+import { UserManagement } from "@/components/admin/user-management";
 import {
   Select,
   SelectContent,
@@ -48,6 +50,7 @@ export default function Settings() {
   const { toast } = useToast();
   const { currentSite } = useSite();
   const queryClient = useQueryClient();
+  const { role: userRole } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [autoAnalysis, setAutoAnalysis] = useState(true);
   const [showAddWebsiteDialog, setShowAddWebsiteDialog] = useState(false);
@@ -410,6 +413,11 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* User Management (Superadmin Only) */}
+          {userRole === 'superadmin' && (
+            <UserManagement websites={websites} />
+          )}
 
           {/* À propos */}
           <Card>

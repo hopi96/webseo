@@ -51,9 +51,10 @@ interface SocialParams {
     access_token: string;
     visibility?: string;
   };
-  prestashop_blog?: {
+  wordpress_blog?: {
     base_url: string;
-    api_key: string;
+    username: string;
+    application_password: string;
   };
   brevo_newsletter?: {
     api_key: string;
@@ -72,7 +73,7 @@ const platformGroups = {
     title: "Création de contenu",
     description: "Plateformes de contenu et blog",
     priority: "medium",
-    platforms: ['tiktok', 'pinterest', 'prestashop_blog']
+    platforms: ['tiktok', 'pinterest', 'wordpress_blog']
   },
   marketing: {
     title: "Marketing et newsletter",
@@ -218,23 +219,24 @@ const platformConfigs = [
     ]
   },
   {
-    key: 'prestashop_blog',
-    name: 'Blog Prestashop',
+    key: 'wordpress_blog',
+    name: 'Blog WordPress',
     icon: Settings,
     color: 'text-blue-700',
-    difficulty: 'Moyen',
-    description: 'Publiez vos articles de blog directement sur votre site Prestashop',
+    difficulty: 'Facile',
+    description: 'Publiez vos articles de blog directement sur votre site WordPress',
     fields: [
-      { name: 'base_url', label: 'URL de base', placeholder: 'URL de base Prestashop', description: 'Adresse de votre site Prestashop' },
-      { name: 'api_key', label: 'Clé API', placeholder: 'Clé API Prestashop', description: 'Clé webservice Prestashop' }
+      { name: 'base_url', label: 'URL du site', placeholder: 'https://monsite.com', description: 'Adresse de votre site WordPress (sans /wp-admin)' },
+      { name: 'username', label: 'Nom d\'utilisateur', placeholder: 'admin', description: 'Utilisateur WordPress avec droits de publication' },
+      { name: 'application_password', label: 'Mot de passe d\'application', placeholder: 'xxxx xxxx xxxx xxxx', description: 'Généré dans Profil → Mots de passe d\'application' }
     ],
     helpLinks: [
-      { label: 'Créer une clé Webservice', url: 'https://devdocs.prestashop-project.org/9/webservice/tutorials/creating-access/' }
+      { label: 'Créer un mot de passe d\'application', url: 'https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/' },
+      { label: 'Documentation API REST WordPress', url: 'https://developer.wordpress.org/rest-api/reference/posts/' }
     ],
     videoTutorials: [
-      { label: '📹 Générer une clé API PrestaShop', url: 'https://www.youtube.com/watch?v=kQdpJxK_MhI', description: 'Tutoriel en français - Guide pas à pas complet' },
-      { label: '📹 Créer une clé API de webservice', url: 'https://www.youtube.com/watch?v=fPNE_f6butw', description: 'YATEO - Création et accès aux clés API webservice' },
-      { label: '📹 PrestaShop 8 – Webservices (API)', url: 'https://www.youtube.com/watch?v=-UsuM1X6Low', description: 'Cours complet sur les webservices PrestaShop' }
+      { label: '📹 WordPress REST API - Premiers pas', url: 'https://www.youtube.com/watch?v=fFNXWinbgro', description: 'Introduction complète à l\'API REST WordPress' },
+      { label: '📹 Application Passwords WordPress', url: 'https://www.youtube.com/watch?v=qqN7NVfyQNg', description: 'Créer et gérer les mots de passe d\'application' }
     ]
   },
   {
@@ -428,7 +430,7 @@ export function SocialParamsDialog({ siteId, siteName, children }: SocialParamsD
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${group.priority === 'high' ? 'bg-green-500' :
-                                group.priority === 'medium' ? 'bg-blue-500' : 'bg-gray-400'
+                              group.priority === 'medium' ? 'bg-blue-500' : 'bg-gray-400'
                               }`}
                             style={{ width: `${percentage}%` }}
                           />
