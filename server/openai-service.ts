@@ -54,13 +54,13 @@ export class OpenAIService {
       const prompts = await supabaseService.getAllSystemPrompts();
 
       // Chercher un prompt marqué comme "General" ou prendre le premier
-      const activePrompt = prompts.find(p => p.nom?.toLowerCase().includes('general') || p.actif) || prompts[0];
+      const activePrompt = prompts.find(p => p.name?.toLowerCase().includes('general') || p.isActive) || prompts[0];
 
       if (activePrompt && activePrompt.promptSystem) {
         console.log('✅ Prompt système actif récupéré from Supabase');
         return {
           systemMessage: activePrompt.promptSystem,
-          outputStructure: activePrompt.structureSortie || ''
+          outputStructure: activePrompt.outputStructure || ''
         };
       } else {
         console.log('⚠️ Aucun prompt système actif trouvé, utilisation du prompt par défaut');
@@ -295,7 +295,7 @@ Renvoie UNIQUEMENT le texte du nouveau prompt.`;
       }
 
       const response = await anthropic.messages.create({
-        model: getClaudeModel(),
+        model: "claude-3-5-haiku-20241022",
         max_tokens: 4000,
         system: systemMessage,
         messages: [

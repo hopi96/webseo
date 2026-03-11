@@ -57,6 +57,35 @@ interface EditorialEvent {
   siteId: number;
 }
 
+const ExpandableText = ({ text, maxLength = 150 }: { text: string, maxLength?: number }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  if (!text) return null;
+  
+  if (text.length <= maxLength) {
+    return <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 whitespace-pre-wrap">{text}</p>;
+  }
+  
+  return (
+    <div className="mb-2">
+      <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+        {isExpanded ? text : `${text.substring(0, maxLength)}...`}
+      </p>
+      <button 
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsExpanded(!isExpanded);
+        }} 
+        className="text-blue-600 dark:text-blue-400 hover:underline font-medium text-xs mt-1"
+      >
+        {isExpanded ? "Voir moins" : "Lire plus"}
+      </button>
+    </div>
+  );
+};
+
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -79,6 +108,9 @@ export default function Calendar() {
   const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [bulkStatus, setBulkStatus] = useState<string>("");
+
+  // État pour le Drag & Drop
+  const [draggedElementId, setDraggedElementId] = useState<number | null>(null);
 
   // États pour les statistiques cliquables
   const [statsDialogOpen, setStatsDialogOpen] = useState(false);
@@ -352,6 +384,31 @@ export default function Calendar() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour les articles.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation pour la mise à jour d'un seul contenu (Drag & Drop)
+  const updateDateMutation = useMutation({
+    mutationFn: async (data: { id: number, dateDePublication: string }) => {
+      const response = await apiRequest("PUT", `/api/editorial-content/${data.id}`, { 
+        dateDePublication: data.dateDePublication 
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Date mise à jour",
+        description: "L'article a été déplacé avec succès.",
+      });
+      // Rafraîchir les données
+      queryClient.invalidateQueries({ queryKey: ['/api/editorial-content'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de déplacer l'article.",
         variant: "destructive",
       });
     }
@@ -718,6 +775,30 @@ export default function Calendar() {
                             }
                           `}
                           onClick={() => day && setSelectedDate(day)}
+                          onDragOver={(e) => {
+                            if (day) {
+                              e.preventDefault();
+                              e.currentTarget.classList.add('bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-300');
+                            }
+                          }}
+                          onDragLeave={(e) => {
+                            e.currentTarget.classList.remove('bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-300');
+                          }}
+                          onDrop={(e) => {
+                            if (day) {
+                              e.preventDefault();
+                              e.currentTarget.classList.remove('bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-300');
+                              const contentIdStr = e.dataTransfer.getData("contentId");
+                              if (contentIdStr) {
+                                const newDate = new Date(day);
+                                newDate.setHours(12, 0, 0, 0); // avoid strict timezone shifts
+                                updateDateMutation.mutate({ 
+                                  id: parseInt(contentIdStr), 
+                                  dateDePublication: newDate.toISOString() 
+                                });
+                              }
+                            }
+                          }}
                         >
                           {day && (
                             <>
@@ -759,7 +840,16 @@ export default function Calendar() {
                                   return (
                                     <div
                                       key={event.id}
-                                      className={`text-xs p-1 rounded truncate flex items-center gap-1 ${getTypeColor(event.type)}`}
+                                      draggable
+                                      onDragStart={(e) => {
+                                        e.stopPropagation();
+                                        e.dataTransfer.setData("contentId", event.id.toString());
+                                        setDraggedElementId(event.id);
+                                      }}
+                                      onDragEnd={() => setDraggedElementId(null)}
+                                      className={`text-xs p-1 rounded truncate flex items-center gap-1 cursor-grab active:cursor-grabbing ${getTypeColor(event.type)} ${
+                                        draggedElementId === event.id ? 'opacity-50' : ''
+                                      }`}
                                     >
                                       <Icon className={`h-3 w-3 shrink-0 ${iconClassName}`} />
                                       <span className="truncate">{event.title}</span>
@@ -958,9 +1048,9 @@ export default function Calendar() {
                               </Button>
                             </div>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                            {event.description}
-                          </p>
+                          {event.description && (
+                            <ExpandableText text={event.description} maxLength={120} />
+                          )}
                           <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant="secondary" className="text-xs">
                               {getSiteName(event.siteId)}

@@ -41,7 +41,10 @@ interface SocialParams {
     access_token: string;
   };
   xtwitter?: {
+    app_key: string;
+    app_secret: string;
     access_token: string;
+    access_secret: string;
   };
   tiktok?: {
     access_token: string;
@@ -186,17 +189,20 @@ const platformConfigs = [
     name: 'X (Twitter)',
     icon: Twitter,
     color: 'text-black',
-    difficulty: 'Facile',
-    description: 'Publiez vos tweets automatiquement pour engager votre audience',
+    difficulty: 'Moyen',
+    description: 'Publiez vos tweets automatiquement avec une signature sécurisée (OAuth 1.0a)',
     fields: [
-      { name: 'access_token', label: 'Bearer Token', placeholder: 'Bearer Token X/Twitter', description: 'Token d\'autorisation pour Twitter/X' }
+      { name: 'app_key', label: 'API Key (Consumer Key)', placeholder: 'Clé d\'API de l\'application', description: 'Identifie votre application X' },
+      { name: 'app_secret', label: 'API Key Secret', placeholder: 'Secret de la clé d\'API', description: 'Mot de passe de votre application' },
+      { name: 'access_token', label: 'Access Token', placeholder: 'Token d\'accès utilisateur', description: 'Identifie le compte qui va tweeter' },
+      { name: 'access_secret', label: 'Access Token Secret', placeholder: 'Secret du token d\'accès', description: 'Mot de passe du token d\'accès' }
     ],
     helpLinks: [
-      { label: 'Générer un Bearer Token', url: 'https://developer.x.com/ja/docs/basics/authentication/guides/bearer-tokens' }
+      { label: 'Créer une App Twitter et générer les clés', url: 'https://developer.twitter.com/en/portal/dashboard' },
+      { label: 'Comprendre l\'authentification OAuth 1.0a', url: 'https://developer.twitter.com/en/docs/authentication/oauth-1-0a' }
     ],
     videoTutorials: [
-      { label: '📹 Obtenir les clés API et Bearer Token', url: 'https://www.youtube.com/watch?v=Op70wCjIiuk', description: 'Mise à jour 2024 - Méthode recommandée pour X/Twitter' },
-      { label: '📹 Démarrer sur l\'API v2', url: 'https://www.youtube.com/watch?v=kH4CmHCNbIg', description: 'Vue d\'ensemble complète + récupération du Bearer Token' }
+      { label: '📹 Obtenir les 4 clés API Twitter (OAuth 1.0a)', url: 'https://www.youtube.com/watch?v=kH4CmHCNbIg', description: 'Où trouver les Consumer Keys et Access Tokens dans le portail développeur' }
     ]
   },
   {

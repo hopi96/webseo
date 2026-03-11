@@ -53,24 +53,25 @@ export interface DbPublicationLog {
     created_at: string;
 }
 
-// Initialisation du client Supabase
-let supabase: SupabaseClient | null = null;
+// Initialisation du client admin Supabase (mis en cache)
+let supabaseAdmin: SupabaseClient | null = null;
 
-function getSupabaseAdmin(): SupabaseClient {
-    if (!supabase) {
+export function getSupabaseAdmin(): SupabaseClient {
+    if (!supabaseAdmin) {
         const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_ANON_KEY;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-        if (!supabaseUrl || !supabaseKey) {
-            throw new Error('Variables SUPABASE_URL et SUPABASE_ANON_KEY requises');
+        if (!supabaseUrl || !supabaseServiceKey) {
+            throw new Error('Les variables SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont requises.');
         }
 
-        supabase = createClient(supabaseUrl, supabaseKey);
-        console.log('✅ Client Supabase initialisé');
+        supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+            auth: { autoRefreshToken: false, persistSession: false }
+        });
+        console.log('✅ Client Admin Supabase initialisé');
     }
-    return supabase;
+    return supabaseAdmin;
 }
-
 // Type pour les sites avec analyse SEO (compatible avec l'ancien format)
 export interface AirtableSite {
     id: number;
@@ -1481,14 +1482,4 @@ export class SupabaseService {
 
 export const supabaseService = new SupabaseService();
 
-export function getSupabaseAdmin(): SupabaseClient {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('La variable d\'environnement SUPABASE_SERVICE_ROLE_KEY est requise.');
-    }
-    return createClient(supabaseUrl, supabaseServiceKey, {
-        auth: { autoRefreshToken: false, persistSession: false }
-    });
-}
 

@@ -6,7 +6,9 @@ import { useSite } from "@/lib/site-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, RefreshCw, Bot, AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Loader2, RefreshCw, Bot, AlertTriangle, CheckCircle2, Clock, XCircle, Timer } from "lucide-react";
+import { formatDistanceToNow, isPast } from "date-fns";
+import { fr } from "date-fns/locale";
 
 type MonitoringOverview = {
   now: string;
@@ -101,6 +103,14 @@ export default function Monitoring() {
       hour: "2-digit",
       minute: "2-digit"
     });
+
+  const getTimeStatus = (dateString: string) => {
+    const pubDate = new Date(dateString);
+    if (isPast(pubDate)) {
+      return <span className="text-orange-600 flex items-center gap-1"><Timer className="w-3 h-3"/>Publication imminente (en cours...)</span>;
+    }
+    return <span className="text-blue-600 flex items-center gap-1"><Timer className="w-3 h-3"/>Dans {formatDistanceToNow(pubDate, { locale: fr })}</span>;
+  };
 
   return (
     <div className="min-h-screen app-shell page-enter">
@@ -310,8 +320,17 @@ export default function Monitoring() {
                   {(overview.nextScheduled || []).map((item) => (
                     <div key={item.id} className="border rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary">{item.platform}</Badge>
-                        <span className="text-xs text-gray-500">{formatDate(item.publicationDate)}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{item.platform}</Badge>
+                          {item.status === 'validé' && <Badge variant="default" className="bg-green-600">Prêt</Badge>}
+                          {item.status !== 'validé' && <Badge variant="outline">{item.status}</Badge>}
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-xs text-gray-500">{formatDate(item.publicationDate)}</span>
+                          <span className="text-xs font-medium mt-1">
+                            {item.status === 'validé' ? getTimeStatus(item.publicationDate) : <span className="text-gray-400">En attente de validation</span>}
+                          </span>
+                        </div>
                       </div>
                       <p className="text-sm text-gray-700 dark:text-gray-300">{item.excerpt}</p>
                     </div>

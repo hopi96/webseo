@@ -5,6 +5,7 @@
 
 import type { EditorialContent } from '@shared/schema';
 import { supabaseService } from './supabase-service';
+import { TwitterApi } from 'twitter-api-v2';
 
 type PublishResult = {
     contentId: number | string;
@@ -416,48 +417,45 @@ export class SocialPublisherService {
         }
     }
 
-    private async publishX(content: EditorialContent, config?: { access_token?: string }): Promise<PublishResult> {
-        if (!config?.access_token) {
+    private async publishX(content: EditorialContent, config?: { app_key?: string; app_secret?: string; access_token?: string; access_secret?: string }): Promise<PublishResult> {
+        if (!config?.app_key || !config?.app_secret || !config?.access_token || !config?.access_secret) {
             return {
                 contentId: content.id,
                 platform: 'xtwitter',
                 success: false,
-                message: 'Config X/Twitter manquante (access_token)'
+                message: 'Config X/Twitter incomplète (4 clés OAuth 1.0a requises: app_key, app_secret, access_token, access_secret)'
             };
         }
 
         try {
-            const response = await fetch('https://api.twitter.com/2/tweets', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${config.access_token}`
-                },
-                body: JSON.stringify({ text: content.contentText })
+            // Instanciation du client X avec OAuth 1.0a (User Context)
+            const twitterClient = new TwitterApi({
+                appKey: config.app_key,
+                appSecret: config.app_secret,
+                accessToken: config.access_token,
+                accessSecret: config.access_secret,
             });
-            const data = await response.json();
-            if (!response.ok) {
-                return {
-                    contentId: content.id,
-                    platform: 'xtwitter',
-                    success: false,
-                    message: data?.detail || data?.error || 'Erreur X/Twitter'
-                };
-            }
+
+            // L'API V2 permet de tweeter simplement du texte
+            const tweet = await twitterClient.v2.tweet(content.contentText);
 
             return {
                 contentId: content.id,
                 platform: 'xtwitter',
                 success: true,
                 message: 'Publié sur X/Twitter',
-                externalId: data?.data?.id
+                externalId: tweet.data.id
             };
         } catch (error: any) {
+            console.error('Erreur X/Twitter détaillée:', error);
+            // Extraction du message d'erreur si fourni par l'API
+            const apiMessage = error?.data?.detail || error?.data?.error || error?.message || 'Erreur X/Twitter';
+            
             return {
                 contentId: content.id,
                 platform: 'xtwitter',
                 success: false,
-                message: error?.message || 'Erreur X/Twitter'
+                message: `Erreur Twitter API : ${apiMessage}`
             };
         }
     }
@@ -626,15 +624,21 @@ export class SocialPublisherService {
         const body = content.contentText;
 
         // Construire le payload WordPress REST API
+        // On publie en 'draft' (brouillon) pour que l'utilisateur puisse relire et valider l'article final dans WP
         const payload: Record<string, any> = {
             title,
             content: body,
-            status: 'publish'
+            status: 'draft' // <-- Modifié ici (était 'publish')
         };
 
         // Authentification Basic Auth avec Application Password
         const credentials = Buffer.from(`${config.username}:${config.application_password}`).toString('base64');
-        const baseUrl = config.base_url.replace(/\/$/, '');
+
+        // Nettoyer l'URL de base (ex: si l'utilisateur a rentré /wp-admin par erreur)
+        const baseUrl = config.base_url
+            .replace(/\/wp-admin\/?$/, '') // enlever /wp-admin ou /wp-admin/ à la fin
+            .replace(/\/$/, '');           // enlever le slash final
+
         const endpoint = `${baseUrl}/wp-json/wp/v2/posts`;
 
         try {
@@ -647,7 +651,19 @@ export class SocialPublisherService {
                 body: JSON.stringify(payload)
             });
 
-            const data = await response.json();
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                return {
+                    contentId: content.id,
+                    platform: 'blog',
+                    success: false,
+                    message: `Erreur API WordPress (réponse non-JSON): L'URL ${baseUrl} semble incorrecte ou l'API REST y est désactivée.`
+                };
+            }
+
             if (!response.ok) {
                 return {
                     contentId: content.id,
