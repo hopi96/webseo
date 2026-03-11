@@ -153,9 +153,12 @@ Génère un contenu optimisé pour cette plateforme avec une structure claire : 
 };
 
 // OpenAI uniquement pour la génération d'images (DALL-E)
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
+let openai: OpenAI | null = null;
+if (process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+} else {
+    console.warn('⚠️ OPENAI_API_KEY non configurée. La génération d\'images DALL-E sera désactivée.');
+}
 
 const CONTENT_GEN_DEBUG = process.env.CONTENT_GEN_DEBUG === 'true';
 
@@ -387,6 +390,10 @@ N'ajoute pas de texte d'introduction type "Voici le post".`;
      */
     async generateImage(contentText: string, platform: string): Promise<string> {
         console.log(`🎨 Génération image DALL-E pour ${platform}`);
+
+        if (!openai) {
+            throw new Error('OpenAI non configuré. Veuillez définir la variable OPENAI_API_KEY.');
+        }
 
         // D'abord, générer un prompt d'image à partir du contenu
         const promptResponse = await openai.chat.completions.create({

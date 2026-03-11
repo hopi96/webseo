@@ -63,9 +63,12 @@ export const SUPPORTED_PLATFORMS = [
 export type Platform = typeof SUPPORTED_PLATFORMS[number];
 
 // Initialisation OpenAI
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
+let openai: OpenAI | null = null;
+if (process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+} else {
+    console.warn('⚠️ OPENAI_API_KEY non configurée. La génération de calendrier via OpenAI sera désactivée.');
+}
 
 
 const ISO_DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -328,6 +331,9 @@ export class ContentCalendarService {
         const prompt = this.buildCalendarPrompt(params);
 
         try {
+            if (!openai) {
+                throw new Error('OpenAI non configuré. Veuillez définir la variable OPENAI_API_KEY.');
+            }
             const response = await openai.chat.completions.create({
                 model: 'gpt-4o',
                 messages: [
