@@ -10,10 +10,15 @@ packages = ["gh"]
 deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
 run = ["node", "./dist/index.cjs"]
+publicDir = "dist/public"
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
 
 [workflows]
 runButton = "Project"
@@ -41,3 +46,4 @@ outputType = "webview"
 
 [agent]
 integrations = ["javascript_mem_db:1.0.0", "javascript_openai:1.0.0", "javascript_database:1.0.0"]
+expertMode = true

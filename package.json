@@ -6,8 +6,8 @@
   "scripts": {
     "predev": "node -e \"const { execSync } = require('child_process'); try { const result = execSync('netstat -ano | findstr :5000', {encoding: 'utf-8'}); const lines = result.split('\\n').filter(l => l.includes('LISTENING')); lines.forEach(line => { const pid = line.trim().split(/\\s+/).pop(); if (pid) execSync('taskkill /PID ' + pid + ' /F', {stdio: 'ignore'}); }); console.log('Port 5000 nettoyé'); } catch(e) { console.log('Port 5000 disponible'); }\"",
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outfile=dist/index.cjs --external:../vite.config",
+    "start": "cross-env NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push"
   },
