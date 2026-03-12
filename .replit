@@ -9,7 +9,7 @@ packages = ["gh"]
 [deployment]
 deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
-run = ["node", "./dist/index.cjs"]
+run = ["cross-env", "NODE_ENV=production", "npx", "tsx", "server/index.ts"]
 publicDir = "dist/public"
 
 [[ports]]

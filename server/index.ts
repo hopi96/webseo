@@ -1,18 +1,18 @@
 import 'dotenv/config';
-if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = 'production';
-}
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { socialPublisherService } from "./social-publisher-service";
 
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'production';
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Servir les images uploadées
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.use((req, res, next) => {
@@ -56,19 +56,14 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // Lancer le publisher automatique des réseaux sociaux
   socialPublisherService.start();
 
-  // Serve the app - tries port 5000 first, then finds an available port
   const startPort = process.env.PORT ? parseInt(process.env.PORT) : 5000;
 
   const startServer = (port: number) => {
