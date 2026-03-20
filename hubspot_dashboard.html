@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Balmont Conseil — CRM Dashboard v4</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',system-ui,sans-serif; background:#0f1117; color:#e0e0e0; min-height:100vh; }
+.header { background:linear-gradient(135deg,#ff6b35,#f7931a); padding:20px 32px; display:flex; align-items:center; justify-content:space-between; }
+.header h1 { font-size:24px; color:#fff; font-weight:800; }
+.header p  { color:rgba(255,255,255,.8); font-size:13px; margin-top:2px; }
+.nav { background:#13161f; border-bottom:1px solid #2a2d3a; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
+.nav-btn { padding:12px 18px; font-size:13px; cursor:pointer; color:#888; border-bottom:2px solid transparent;
+           white-space:nowrap; transition:all .2s; background:none; border-top:none; border-left:none; border-right:none; }
+.nav-btn.active { color:#ff6b35; border-bottom-color:#ff6b35; font-weight:600; }
+.nav-btn:hover  { color:#ccc; }
+.page { display:none; padding:24px; max-width:1440px; margin:0 auto; }
+.page.active { display:block; }
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px; }
+.kpi { background:#1a1d27; border-radius:12px; padding:18px; border:1px solid #2a2d3a; }
+.kpi-lbl { font-size:11px; color:#666; text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+.kpi-val { font-size:32px; font-weight:800; line-height:1; }
+.kpi-sub { font-size:11px; color:#555; margin-top:4px; }
+.red   .kpi-val { color:#ff4757; }
+.orange.kpi-val, .orange .kpi-val { color:#ffa502; }
+.blue  .kpi-val { color:#1e90ff; }
+.green .kpi-val { color:#2ed573; }
+.purple.kpi-val, .purple .kpi-val { color:#a29bfe; }
+.accent.kpi-val, .accent .kpi-val { color:#ff6b35; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
+.grid-4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+@media(max-width:900px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
+.card { background:#1a1d27; border-radius:12px; padding:20px; border:1px solid #2a2d3a; margin-bottom:18px; }
+.card h3 { font-size:12px; color:#aaa; text-transform:uppercase; letter-spacing:.8px; margin-bottom:14px; }
+.card h2 { font-size:16px; color:#fff; font-weight:700; margin-bottom:14px; }
+.chart-wrap { position:relative; height:220px; }
+.chart-wrap-lg { position:relative; height:300px; }
+.tbl-card { background:#1a1d27; border-radius:12px; border:1px solid #2a2d3a; overflow:hidden; margin-bottom:18px; }
+.tbl-hdr { padding:14px 18px; border-bottom:1px solid #2a2d3a; display:flex; align-items:center; justify-content:space-between; }
+.tbl-hdr h3 { font-size:15px; font-weight:600; color:#fff; }
+table { width:100%; border-collapse:collapse; }
+th { padding:9px 14px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:#555; border-bottom:1px solid #2a2d3a; }
+td { padding:9px 14px; font-size:13px; border-bottom:1px solid #1a1d27; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,.02); }
+.badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-hot    { background:rgba(255,71,87,.2);  color:#ff4757; }
+.badge-warm   { background:rgba(255,165,2,.2);  color:#ffa502; }
+.badge-cold   { background:rgba(30,144,255,.2); color:#1e90ff; }
+.badge-stage  { background:rgba(162,155,254,.15); color:#a29bfe; }
+.badge-alert  { background:rgba(255,71,87,.15); color:#ff6b81; }
+.badge-ok     { background:rgba(46,213,115,.15); color:#2ed573; }
+.badge-grey   { background:rgba(255,255,255,.08); color:#aaa; }
+.alert-box { background:rgba(255,71,87,.08); border:1px solid rgba(255,71,87,.25);
+             border-radius:10px; padding:14px 18px; margin-bottom:20px; }
+.alert-box h3 { color:#ff4757; font-size:14px; margin-bottom:6px; }
+.alert-box p  { color:#bbb; font-size:13px; line-height:1.7; }
+.search { width:100%; padding:9px 14px; background:#13161f; border:1px solid #2a2d3a;
+          border-radius:8px; color:#e0e0e0; font-size:13px; margin-bottom:12px; outline:none; }
+.search:focus { border-color:#ff6b35; }
+.stat-row { display:flex; justify-content:space-between; align-items:center;
+            padding:8px 0; border-bottom:1px solid #1e2130; font-size:13px; }
+.stat-row:last-child { border-bottom:none; }
+.stat-val { font-weight:700; color:#e0e0e0; }
+a { color:#ff6b35; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.section-title { font-size:18px; font-weight:700; color:#fff; margin-bottom:16px; margin-top:8px; }
+/* Slider */
+input[type=range] { width:100%; accent-color:#ff6b35; }
+.sim-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.sim-lbl { font-size:13px; color:#aaa; min-width:220px; }
+.sim-val { font-size:14px; font-weight:700; color:#ff6b35; min-width:60px; text-align:right; }
+/* Cartographie */
+.carto-wrap { overflow-x:auto; }
+.carto-col { display:flex; flex-direction:column; gap:12px; min-width:180px; }
+.carto-cols { display:flex; gap:40px; padding:20px 0; align-items:flex-start; }
+.carto-node { border-radius:10px; padding:12px 16px; font-size:13px; font-weight:600;
+              border:2px solid transparent; cursor:default; }
+.carto-node.ok    { background:rgba(46,213,115,.12); border-color:rgba(46,213,115,.4); color:#2ed573; }
+.carto-node.warn  { background:rgba(255,165,2,.10);  border-color:rgba(255,165,2,.4);  color:#ffa502; }
+.carto-node.err   { background:rgba(255,71,87,.10);  border-color:rgba(255,71,87,.3);  color:#ff4757; }
+.carto-node.hub   { background:rgba(255,107,53,.15); border-color:rgba(255,107,53,.5); color:#ff6b35; font-size:15px; padding:18px 24px; }
+.carto-title { font-size:11px; color:#555; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.arrow { color:#555; font-size:20px; align-self:center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🏛️ Balmont Conseil — CRM Dashboard v4</h1>
+    <p>Mis à jour le 12/03/2026 à 18:55 UTC &nbsp;·&nbsp; 878 contacts &nbsp;·&nbsp; 7 deals &nbsp;·&nbsp; 388 tâches</p>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="goPage('p_overview',this)">🏠 Vue d'ensemble</button>
+  <button class="nav-btn" onclick="goPage('p_ca',this)">💰 CA & Projections</button>
+  <button class="nav-btn" onclick="goPage('p_stats',this)">📊 Actions & Stats</button>
+  <button class="nav-btn" onclick="goPage('p_leads',this)">🔴 Leads</button>
+  <button class="nav-btn" onclick="goPage('p_pipeline',this)">💼 Pipeline</button>
+  <button class="nav-btn" onclick="goPage('p_nurturing',this)">📧 Nurturing</button>
+  <button class="nav-btn" onclick="goPage('p_tasks',this)">⏰ Tâches</button>
+  <button class="nav-btn" onclick="goPage('p_carto',this)">🗺️ Cartographie</button>
+  <button class="nav-btn" onclick="goPage('p_impact',this)">📈 Impact CA</button>
+</nav>
+
+<div id="p_overview"  class="page active">
+<div class="kpi-grid">
+  <div class="kpi blue" ><div class="kpi-lbl">Contacts</div><div class="kpi-val">878</div><div class="kpi-sub">Base CRM totale</div></div>
+  <div class="kpi red"  ><div class="kpi-lbl">🔴 Chauds</div><div class="kpi-val">4</div><div class="kpi-sub">Score ≥ 50</div></div>
+  <div class="kpi orange"><div class="kpi-lbl">🟡 Tièdes</div><div class="kpi-val">69</div><div class="kpi-sub">Score 20–49</div></div>
+  <div class="kpi blue" ><div class="kpi-lbl">🔵 Froids</div><div class="kpi-val">805</div><div class="kpi-sub">Score &lt; 20</div></div>
+  <div class="kpi red"  ><div class="kpi-lbl">🚨 À relancer</div><div class="kpi-val">867</div><div class="kpi-sub">Overdue</div></div>
+  <div class="kpi green"><div class="kpi-lbl">💰 Pipeline</div><div class="kpi-val">50K€</div><div class="kpi-sub">5 deals actifs</div></div>
+  <div class="kpi green"><div class="kpi-lbl">✅ Deals gagnés</div><div class="kpi-val">2K€</div><div class="kpi-sub">2 deals</div></div>
+  <div class="kpi red"  ><div class="kpi-lbl">⏰ Tâches retard</div><div class="kpi-val">382</div><div class="kpi-sub">Sur 388 tâches</div></div>
+  <div class="kpi purple"><div class="kpi-lbl">📧 Nurturing</div><div class="kpi-val">3</div><div class="kpi-sub">3 bloqué(s) &gt;14j</div></div>
+</div>
+
+<div class="alert-box">
+  <h3>⚠️ Points d'attention immédiats</h3>
+  <p>
+    <strong>382 tâches en retard</strong> — dont certaines depuis plusieurs mois.<br>
+    <strong>867 contacts</strong> nécessitent une relance urgente.<br>
+    <strong>3 contacts</strong> bloqués dans la séquence nurturing (&gt;14j sans avancer).<br>
+    <strong>5 deals</strong> actifs dans le pipeline pour 50K€ potentiel.
+  </p>
+</div>
+
+<div class="grid-3">
+  <div class="card"><h3>🌡️ Scoring Leads</h3><div class="chart-wrap"><canvas id="c_scoring"></canvas></div></div>
+  <div class="card"><h3>📌 Lifecycle Stage</h3><div class="chart-wrap"><canvas id="c_stage"></canvas></div></div>
+  <div class="card"><h3>⏰ État des Tâches</h3><div class="chart-wrap"><canvas id="c_tasks"></canvas></div></div>
+</div>
+
+<div class="section-title">🔴 Top leads chauds</div>
+<div class="tbl-card">
+  <table><thead><tr><th>Contact</th><th>Score</th><th>Stage</th><th>Statut</th><th>Dernier contact</th><th>Nb contacts</th><th></th></tr></thead>
+  <tbody><tr>
+          <td><strong>Jonathan Go</strong><br><small style="color:#666">jonathnan.gomez@gmail.com · +33628579656</small></td>
+          <td><span class="badge badge-hot">🔴 65</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>0j</td>
+          <td>5</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/178868224935" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>ANDRE Andre</strong><br><small style="color:#666">ludovic@iwantlead.fr · 0782556326</small></td>
+          <td><span class="badge badge-hot">🔴 55</span></td>
+          <td><span class="badge badge-stage">customer</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>219j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/122695614879" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Elton DAMASO</strong><br><small style="color:#666">damaso.elton@gmail.com · 0688239031</small></td>
+          <td><span class="badge badge-hot">🔴 50</span></td>
+          <td><span class="badge badge-stage">opportunity</span></td>
+          <td style="font-size:12px">Interessé</td>
+          <td>263j</td>
+          <td>6</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/126393557276" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>hop test</strong><br><small style="color:#666">babyhopi@gmail.com · +33777769854</small></td>
+          <td><span class="badge badge-hot">🔴 50</span></td>
+          <td><span class="badge badge-stage">opportunity</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/158432881200" target="_blank">↗</a></td>
+        </tr>
+</tbody></table>
+</div></div>
+<div id="p_ca"        class="page">
+<div class="grid-4" style="margin-bottom:24px">
+  <div class="kpi green"><div class="kpi-lbl">💰 Pipeline actif</div><div class="kpi-val">50K€</div><div class="kpi-sub">5 deals</div></div>
+  <div class="kpi green"><div class="kpi-lbl">✅ CA gagné</div><div class="kpi-val">2K€</div><div class="kpi-sub">2 deals closedwon</div></div>
+  <div class="kpi orange"><div class="kpi-lbl">📊 Deal moyen</div><div class="kpi-val">1K€</div><div class="kpi-sub">Basé sur deals gagnés</div></div>
+  <div class="kpi purple"><div class="kpi-lbl">🎯 Potentiel leads chauds</div><div class="kpi-val">1K€</div><div class="kpi-sub">30% taux conversion</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card"><h3>💼 Répartition pipeline par stage</h3><div class="chart-wrap"><canvas id="c_deal_stage"></canvas></div></div>
+  <div class="card"><h3>📈 Projections CA — leads tièdes</h3><div class="chart-wrap"><canvas id="c_proj"></canvas></div></div>
+</div>
+
+<div class="section-title">📋 Tous les deals</div>
+<div class="tbl-card">
+  <table><thead><tr><th>Deal</th><th>Montant</th><th>Stage</th><th>Date clôture</th></tr></thead>
+  <tbody><tr>
+          <td><strong>Invest 50K Corum cash</strong></td>
+          <td style="font-weight:700;color:#2ed573">2,800 €</td>
+          <td><span class="badge badge-ok">closedwon</span></td>
+          <td>2025-05-19</td>
+        </tr>
+<tr>
+          <td><strong>Créer 2 tickets à 25k€ fixe et 1 ticket à souscription mensuelle</strong></td>
+          <td style="font-weight:700;color:#2ed573">50,000 €</td>
+          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td>2025-07-31</td>
+        </tr>
+<tr>
+          <td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 14:30:23</strong></td>
+          <td style="font-weight:700;color:#2ed573">—</td>
+          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td>—</td>
+        </tr>
+<tr>
+          <td><strong>BC Workflow Test 1770421308</strong></td>
+          <td style="font-weight:700;color:#2ed573">—</td>
+          <td><span class="badge badge-ok">closedwon</span></td>
+          <td>2026-02-06</td>
+        </tr>
+<tr>
+          <td><strong>Auto Deal for babyhopi@gmail.com 1770460570</strong></td>
+          <td style="font-weight:700;color:#2ed573">—</td>
+          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td>—</td>
+        </tr>
+<tr>
+          <td><strong>Deal Contact Test 1770421771</strong></td>
+          <td style="font-weight:700;color:#2ed573">—</td>
+          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td>—</td>
+        </tr>
+<tr>
+          <td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 18:14:27</strong></td>
+          <td style="font-weight:700;color:#2ed573">—</td>
+          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td>—</td>
+        </tr>
+</tbody></table>
+</div>
+
+<div class="card">
+  <h2>💡 Analyse & recommandations CA</h2>
+  <div class="stat-row"><span>Leads tièdes (69) × deal moyen × 5% (pessimiste)</span><span class="stat-val">4,830 €</span></div>
+  <div class="stat-row"><span>Leads tièdes (69) × deal moyen × 10% (réaliste)</span><span class="stat-val">9,660 €</span></div>
+  <div class="stat-row"><span>Leads tièdes (69) × deal moyen × 20% (optimiste)</span><span class="stat-val">19,320 €</span></div>
+  <div class="stat-row"><span>Leads chauds (4) × deal moyen × 30%</span><span class="stat-val">1,680 €</span></div>
+</div></div>
+<div id="p_stats"     class="page">
+<div class="grid-4" style="margin-bottom:24px">
+  <div class="kpi blue" ><div class="kpi-lbl">Contactés &lt;7j</div><div class="kpi-val">1</div><div class="kpi-sub">cette semaine</div></div>
+  <div class="kpi blue" ><div class="kpi-lbl">Contactés &lt;30j</div><div class="kpi-val">2</div><div class="kpi-sub">ce mois</div></div>
+  <div class="kpi orange"><div class="kpi-lbl">En nurturing</div><div class="kpi-val">3</div><div class="kpi-sub">3 bloqués</div></div>
+  <div class="kpi red"  ><div class="kpi-lbl">Taux blocage nur.</div><div class="kpi-val">100%</div><div class="kpi-sub">>14j sans avancer</div></div>
+</div>
+<div class="grid-2">
+  <div class="card"><h3>📊 Distribution des scores</h3><div class="chart-wrap"><canvas id="c_score_dist"></canvas></div></div>
+  <div class="card"><h3>👤 Contacts par statut lead</h3><div class="chart-wrap"><canvas id="c_statut"></canvas></div></div>
+</div>
+<div class="grid-2">
+  <div class="card"><h2>📋 Répartition statuts</h2><div class="stat-row"><span>non défini</span><span class="stat-val">798 <small style="color:#555">(90.9%)</small></span></div>
+<div class="stat-row"><span>A traiter</span><span class="stat-val">60 <small style="color:#555">(6.8%)</small></span></div>
+<div class="stat-row"><span>Abandon</span><span class="stat-val">7 <small style="color:#555">(0.8%)</small></span></div>
+<div class="stat-row"><span>Interessé</span><span class="stat-val">6 <small style="color:#555">(0.7%)</small></span></div>
+<div class="stat-row"><span>Client</span><span class="stat-val">6 <small style="color:#555">(0.7%)</small></span></div>
+<div class="stat-row"><span>A relancer</span><span class="stat-val">1 <small style="color:#555">(0.1%)</small></span></div>
+</div>
+  <div class="card">
+    <h2>📧 Stats nurturing</h2>
+    <div class="stat-row"><span>Total contacts séquence SCPI</span><span class="stat-val">3</span></div>
+    <div class="stat-row"><span>Contacts bloqués (&gt;14j)</span><span class="stat-val" style="color:#ff4757">3</span></div>
+    <div class="stat-row"><span>Étapes actives dans la séquence</span><span class="stat-val">1</span></div>
+    <div class="stat-row"><span>Emails dans la séquence totale</span><span class="stat-val">11 (J0→J14)</span></div>
+    <div class="stat-row"><span>Taux de progression (non bloqués)</span><span class="stat-val" style="color:#2ed573">0%</span></div>
+  </div>
+</div></div>
+<div id="p_leads"     class="page">
+<div class="grid-4" style="margin-bottom:18px">
+  <div class="kpi red"  ><div class="kpi-lbl">🔴 Chauds</div><div class="kpi-val">4</div></div>
+  <div class="kpi orange"><div class="kpi-lbl">🟡 Tièdes</div><div class="kpi-val">69</div></div>
+  <div class="kpi blue" ><div class="kpi-lbl">🔵 Froids</div><div class="kpi-val">805</div></div>
+  <div class="kpi red"  ><div class="kpi-lbl">🚨 À relancer</div><div class="kpi-val">867</div></div>
+</div>
+<input class="search" id="s_leads" type="text" placeholder="🔍 Rechercher un contact..." oninput="filterTbl('tb_leads',this.value)">
+<div class="tbl-card">
+  <table><thead><tr><th>Contact</th><th>Score</th><th>Stage</th><th>Statut</th><th>Dernier contact</th><th>Nb contacts</th><th></th></tr></thead>
+  <tbody id="tb_leads"><tr>
+          <td><strong>Jonathan Go</strong><br><small style="color:#666">jonathnan.gomez@gmail.com · +33628579656</small></td>
+          <td><span class="badge badge-hot">🔴 65</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>0j</td>
+          <td>5</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/178868224935" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>ANDRE Andre</strong><br><small style="color:#666">ludovic@iwantlead.fr · 0782556326</small></td>
+          <td><span class="badge badge-hot">🔴 55</span></td>
+          <td><span class="badge badge-stage">customer</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>219j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/122695614879" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Elton DAMASO</strong><br><small style="color:#666">damaso.elton@gmail.com · 0688239031</small></td>
+          <td><span class="badge badge-hot">🔴 50</span></td>
+          <td><span class="badge badge-stage">opportunity</span></td>
+          <td style="font-size:12px">Interessé</td>
+          <td>263j</td>
+          <td>6</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/126393557276" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>hop test</strong><br><small style="color:#666">babyhopi@gmail.com · +33777769854</small></td>
+          <td><span class="badge badge-hot">🔴 50</span></td>
+          <td><span class="badge badge-stage">opportunity</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/158432881200" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Jean-Etienne Gourgues</strong><br><small style="color:#666">jegourgues@outlook.com · +447733600500</small></td>
+          <td><span class="badge badge-warm">🟡 45</span></td>
+          <td><span class="badge badge-stage">customer</span></td>
+          <td style="font-size:12px">Client</td>
+          <td>223j</td>
+          <td>12</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/132895161885" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Laurent Breysse</strong><br><small style="color:#666">laurentbreysse@voila.fr · +330676398363</small></td>
+          <td><span class="badge badge-warm">🟡 40</span></td>
+          <td><span class="badge badge-stage">customer</span></td>
+          <td style="font-size:12px">Client</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/134532441936" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Pascal Blin</strong><br><small style="color:#666">pascal.blin@gmail.com · 0670743753</small></td>
+          <td><span class="badge badge-warm">🟡 35</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">Interessé</td>
+          <td>195j</td>
+          <td>26</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/126620797625" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Heinrich Kruizinga</strong><br><small style="color:#666">erik.kruizinga@orange.fr · 0665142447</small></td>
+          <td><span class="badge badge-warm">🟡 35</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">Interessé</td>
+          <td>265j</td>
+          <td>11</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/127869383472" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>David Lallemand Riorda</strong><br><small style="color:#666">david@atlantispiercing.com · +330662415967</small></td>
+          <td><span class="badge badge-warm">🟡 35</span></td>
+          <td><span class="badge badge-stage">customer</span></td>
+          <td style="font-size:12px">Client</td>
+          <td>269j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/128748606577" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Anne Mozzanega</strong><br><small style="color:#666">anne.mozzanega@live.fr · +330683240823</small></td>
+          <td><span class="badge badge-warm">🟡 35</span></td>
+          <td><span class="badge badge-stage">customer</span></td>
+          <td style="font-size:12px">Client</td>
+          <td>239j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/134514106719" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Virginie Giroud</strong><br><small style="color:#666">philippegiroud298@neuf.fr · +33619113728</small></td>
+          <td><span class="badge badge-warm">🟡 35</span></td>
+          <td><span class="badge badge-stage">customer</span></td>
+          <td style="font-size:12px">Client</td>
+          <td>204j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/134514111240" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Aubin</strong><br><small style="color:#666">david.aubin@atlantistar.fr · +33 6 76 90 30 50</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>190j</td>
+          <td>5</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/141062926198" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Marc Miribel</strong><br><small style="color:#666">marc.miribel@mphygiene.com · +33 6 11 28 06 63</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>5</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/141491843328" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>ALAUZE</strong><br><small style="color:#666">jfalauze@hotmail.com · +225 07 07017249</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>5</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/144140921915" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>William Gribelin Gribelin</strong><br><small style="color:#666">william.gribelin@gmail.com · 0604534235</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>5</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/144352397109" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Ricard Ricard</strong><br><small style="color:#666">ricard_didier@yahoo.com · +225 0705038981</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>5</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/147450540445" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Alexis Sagnier Sagnier</strong><br><small style="color:#666">alexis.sagnier@gmail.com · +33601773296</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/161186361462" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>CAMPOY</strong><br><small style="color:#666">criscampoy.cc@gmail.com · +33 6 63 23 55 43</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/173052132144" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Thabet</strong><br><small style="color:#666">tarek.thabet@remax.com.tn · +216 95 993 899</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/175244535852" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Le Gal</strong><br><small style="color:#666">j_le_gal@hotmail.com · +221 77 569 36 38</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/175337358858" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>DOUMBÉ</strong><br><small style="color:#666">comptedab@gmail.com · +33 6 25 87 82 22</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/176089780896" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>cecilia de Petiville</strong><br><small style="color:#666">ceciliadepetiville@gmail.com · +33677277460</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/183594546499" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Emmanuel</strong><br><small style="color:#666">manu.ville846@gmail.com · +33650614885</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/183984668492" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>charles test</strong><br><small style="color:#666">test@gmail.com · +33632453261</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/184458585174" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Emmanuel Das Dores</strong><br><small style="color:#666">seraphimofficiel@gmail.com · +33625393180</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/186821247412" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Francis Ndimba</strong><br><small style="color:#666">contact@advised-seo.fr</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>29j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/196033630354" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Flow Test</strong><br><small style="color:#666">workflow.test.1770421771@example.com</small></td>
+          <td><span class="badge badge-warm">🟡 30</span></td>
+          <td><span class="badge badge-stage">opportunity</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/200039122190" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Philippe Klein</strong><br><small style="color:#666">philippe.klein@gmx.com · +330659020034</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">Interessé</td>
+          <td>150j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/128731660427" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Maurice Possiti</strong><br><small style="color:#666">rodrigue37@hotmail.fr · 06 51 53 29 08</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>223j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/141057359187" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Intins</strong><br><small style="color:#666">xi.nts@outlook.fr · +33 6 16 28 31 71</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>223j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/141279892793" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Samyn</strong><br><small style="color:#666">beatrice.samyn@gmail.com · +33 6 18 87 55 12</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/141444209442" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>AYOUB</strong><br><small style="color:#666">jeanayoub@wanadoo.fr · 01 23 45 67 89 </small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/141673826185" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>PHILIPPE-MARIE TEOTAHI</strong><br><small style="color:#666">21teotahi@gmail.com · 0761897163</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>223j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/142445704544" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Carla Melus</strong><br><small style="color:#666">carlamelus02@gmail.com · 0644771616</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">Interessé</td>
+          <td>217j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/142974770089" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>BREUIL</strong><br><small style="color:#666">pbisa@me.com · +33 6 11 07 50 75</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/143112182961" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>FAYE</strong><br><small style="color:#666">fayes.salif@gmail.com · +33 6 51 12 32 40</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/144194750579" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Florent Moreau</strong><br><small style="color:#666">florent-moreau@planeteda.fr · +33 6 60 46 77 40</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>205j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/144576675753" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Benkara</strong><br><small style="color:#666">sabahbenkara75@gmail.com · +212 661-324497</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/144723970738" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>DELANOY</strong><br><small style="color:#666">fam.delanoy@cegetel.net · +7 903 665-29-15</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145394177839" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Baptiste</strong><br><small style="color:#666">contact@pascal-vanlerberghe.fr · 0622670497</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145682438943" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Patrick VANDERBOSSE</strong><br><small style="color:#666">patrick.vanderbosse@gmail.com · 0613594960</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>199j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145682438944" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Iren Csonka</strong><br><small style="color:#666">irenecsonka55@gmail.com · 0673039992</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145703409580" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Cherifa</strong><br><small style="color:#666">cherifaallag@gmail.com · 0778389062</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145704897667" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>laurent rigaux</strong><br><small style="color:#666">laurent.rigaux17@gmail.com · 0650919274</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145710504708" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Mickael Junior ANDRIAMAMONJY</strong><br><small style="color:#666">mickael.andriamamonjy10@gmail.com · 0628050939</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145710504709" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Fernandes</strong><br><small style="color:#666">fernandesb59@gmail.com · 0033320458791</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145710519215" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Tuovic</strong><br><small style="color:#666">stuovic@yahoo.fr · +33 6 03 56 22 97</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145892134443" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Boulday</strong><br><small style="color:#666">y.boulday@financeconseil.fr · +33 2 41 72 84 96</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/146099680692" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Gallur Cédric</strong><br><small style="color:#666">ludric@live.fr · +33673909824</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/146413699933" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Yony Guibe</strong><br><small style="color:#666">yguibe36@gmail.com · +33610512054</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/146713743486" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Jeanson</strong><br><small style="color:#666">amiantech@amiantech.com · 0610178767</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/146797903154" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>MARCHAND</strong><br><small style="color:#666">marchandsylvain78@gmail.com · +1 514-706-7825</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/146849871638" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Matteo Caudron</strong><br><small style="color:#666">frostloky1@gmail.com · +33783324904</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/147219222947" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Raphaël Gertz</strong><br><small style="color:#666">raphaelgertz164@gmail.com · +33783975464</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/147396654904" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Emmanuel gaide</strong><br><small style="color:#666">pob84@orange.fr · +33750936691</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/147566722587" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Alain</strong><br><small style="color:#666">tatoualain3@gmail.com · +33641200105</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>199j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/148058675757" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>BRUSCHI</strong><br><small style="color:#666">stephanebruschi@outlook.com · +33 6 47 03 58 21</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/148252113552" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>eric.gallay@mphygiene.com</strong><br><small style="color:#666">eric.gallay@mphygiene.com · 0688988523</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>201j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/148805556238" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Walter sauvage</strong><br><small style="color:#666">sauvageation@gmail.com · +33789212125</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/148828584758" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Thomas chambon</strong><br><small style="color:#666">thomasktm87@gmail.com · +33624613802</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/149132201838" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Maxime dhainaut</strong><br><small style="color:#666">max.dhai62220@gmail.com · +33666143040</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>190j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/150544521751" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Youcef krallafa</strong><br><small style="color:#666">lauyou@hotmail.fr · +33601447343</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>190j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/150789624428" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>CATTO</strong><br><small style="color:#666">erwan.catto@gmail.com · +254 715 230727</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>190j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/150911894322" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Devaud-Berranger Devaud</strong><br><small style="color:#666">christelle.devaud@investimmo-patrimoine.com · +33 6 76 60 88 84</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>189j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/151652477106" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Clement SOCFACK</strong><br><small style="color:#666">clementdorang@gmail.com · +33775229358</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>190j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/151653249401" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>De Maria Melissa</strong><br><small style="color:#666">melissacuzzucoli@gmail.com · +33651514986</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>190j</td>
+          <td>3</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/152016780728" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Claudine Blanchard</strong><br><small style="color:#666">blanchardbreteil@gmail.com · +33644899745</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>190j</td>
+          <td>4</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/152345827993" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Gueugnon</strong><br><small style="color:#666">maylisdechassey@gmail.com · +33 6 70 44 26 38</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>150j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/161817907098" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Sarah tripicchio</strong><br><small style="color:#666">yetna_m@yahoo.fr · +33650904525</small></td>
+          <td><span class="badge badge-warm">🟡 25</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>94j</td>
+          <td>2</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/183038069422" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Emeric Olivier</strong><br><small style="color:#666">emeric.olivier@tibbloc.fr · +33748115924</small></td>
+          <td><span class="badge badge-warm">🟡 20</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">Interessé</td>
+          <td>248j</td>
+          <td>1</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/135557298236" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Exposito elma Exposito</strong><br><small style="color:#666">valade.violette@laposte.net · 0602154270</small></td>
+          <td><span class="badge badge-warm">🟡 20</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>216j</td>
+          <td>1</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/145000790528" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Mouchet</strong><br><small style="color:#666">laurent.marszyckii@gmail.com · +33609749254</small></td>
+          <td><span class="badge badge-warm">🟡 20</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>195j</td>
+          <td>1</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/149603479440" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Crespon</strong><br><small style="color:#666">alexandre.crespon@scheier.fr · +33 6 89 83 01 99</small></td>
+          <td><span class="badge badge-warm">🟡 20</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">A traiter</td>
+          <td>94j</td>
+          <td>1</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/182696548013" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Julien CHARVET</strong><br><small style="color:#666">djul38110@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448025" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>CHRISTOPHER DE SAMPAIO</strong><br><small style="color:#666">crispoker38510@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448026" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Maitre Notaire</strong><br><small style="color:#666">hugues.desgroux@notaires.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448052" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Nathalie DOURTHE</strong><br><small style="color:#666">dourthenathalie.gmail.com@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448067" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>AMEL LAROUCI</strong><br><small style="color:#666">julveno.amel@gmail.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448073" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>daisy marie claire GUICHARD</strong><br><small style="color:#666">mc.guichard@wanadoo.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448079" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>DIDIER LALANNE</strong><br><small style="color:#666">lalanne@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448080" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>liliane PEIGNAULT</strong><br><small style="color:#666">lilidouce1@laposte.net</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448082" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>KEN COMAT</strong><br><small style="color:#666">ckone9718@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448083" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>CEDRIC LODI</strong><br><small style="color:#666">mr.leduc.octavia.lodi@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784448093" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Emmanuelle Navillod</strong><br><small style="color:#666">emmanuelle.navillod@idex.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784454467" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>DAVID POURRADIER</strong><br><small style="color:#666">david.pourradier68@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784454490" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>CHANTAL DIALLO</strong><br><small style="color:#666">diallo@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136784454710" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Maud MOTTARD</strong><br><small style="color:#666">m.mottard@neuf.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786138972" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>BERNARD DELAPORTE</strong><br><small style="color:#666">bernarddelap@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786139016" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>ROMUALD DUPUIS</strong><br><small style="color:#666">romualddupuis55@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786139017" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Bernard ROUS</strong><br><small style="color:#666">roux.bj@orange.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786139023" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>GWENDOLINE BLANCHARD</strong><br><small style="color:#666">gwendoline.blanchard@bbox.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786146075" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>SAMUEL GAUDINET</strong><br><small style="color:#666">sam.gaudinet@orange.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786146076" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>JEAN PIERRE PERRET</strong><br><small style="color:#666">info@3jmusic.fr · 047-488-9915</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786521233" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>GOURRIER Audrey</strong><br><small style="color:#666">gourrieraudrey@yahoo.fr · 027-602-3026</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786521262" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>MARIE CHRISTINE DAYMAN</strong><br><small style="color:#666">daymanmarie@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786521263" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>PATRICK BON</strong><br><small style="color:#666">patbribon@yahoo.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786521272" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>XAVIER THIRIET</strong><br><small style="color:#666">jarod800@orange.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786521350" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>LAURENT CORAI</strong><br><small style="color:#666">laurent.corai@aliceadsl.fr</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786521362" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>Samy</strong><br><small style="color:#666">kinesis.fr@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786528177" target="_blank">↗</a></td>
+        </tr>
+<tr>
+          <td><strong>FRANCOISE MANNAT</strong><br><small style="color:#666">francoisemannat322@gmail.com</small></td>
+          <td><span class="badge badge-cold">🔵 10</span></td>
+          <td><span class="badge badge-stage">lead</span></td>
+          <td style="font-size:12px">non défini</td>
+          <td>—</td>
+          <td>0</td>
+          <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/136786528258" target="_blank">↗</a></td>
+        </tr>
+</tbody></table>
+</div></div>
+<div id="p_pipeline"  class="page">
+<div class="grid-4" style="margin-bottom:24px">
+  <div class="kpi green"><div class="kpi-lbl">Pipeline actif</div><div class="kpi-val">50K€</div><div class="kpi-sub">5 deals</div></div>
+  <div class="kpi green"><div class="kpi-lbl">CA gagné</div><div class="kpi-val">2K€</div><div class="kpi-sub">2 closedwon</div></div>
+  <div class="kpi red"  ><div class="kpi-lbl">CA perdu</div><div class="kpi-val">0€</div><div class="kpi-sub">0 closedlost</div></div>
+  <div class="kpi orange"><div class="kpi-lbl">Deal moyen</div><div class="kpi-val">1K€</div></div>
+</div>
+<div class="card"><h3>💼 Pipeline par stage (valeur €)</h3><div class="chart-wrap-lg"><canvas id="c_pipeline_bar"></canvas></div></div>
+<div class="tbl-card">
+  <div class="tbl-hdr"><h3>Tous les deals (7)</h3></div>
+  <table><thead><tr><th>Nom</th><th>Montant</th><th>Stage</th><th>Clôture</th></tr></thead><tbody>
+  <tr><td><strong>Invest 50K Corum cash</strong></td><td style='color:#2ed573;font-weight:700'>2,800 €</td><td><span class="badge badge-ok">closedwon</span></td><td>2025-05-19</td></tr>
+<tr><td><strong>Créer 2 tickets à 25k€ fixe et 1 ticket à souscription mensuelle</strong></td><td style='color:#2ed573;font-weight:700'>50,000 €</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>2025-07-31</td></tr>
+<tr><td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 14:30:23</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
+<tr><td><strong>BC Workflow Test 1770421308</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-ok">closedwon</span></td><td>2026-02-06</td></tr>
+<tr><td><strong>Auto Deal for babyhopi@gmail.com 1770460570</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
+<tr><td><strong>Deal Contact Test 1770421771</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
+<tr><td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 18:14:27</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
+</tbody></table></div></div>
+<div id="p_nurturing" class="page">
+<div class="grid-4" style="margin-bottom:24px">
+  <div class="kpi purple"><div class="kpi-lbl">En séquence</div><div class="kpi-val">3</div></div>
+  <div class="kpi red"   ><div class="kpi-lbl">⚠️ Bloqués &gt;14j</div><div class="kpi-val">3</div></div>
+  <div class="kpi blue"  ><div class="kpi-lbl">Étapes actives</div><div class="kpi-val">1</div></div>
+  <div class="kpi green" ><div class="kpi-lbl">En progression</div><div class="kpi-val">0</div></div>
+</div>
+<div class="grid-2" style="margin-bottom:18px">
+  <div class="card"><h3>📊 Distribution par étape</h3><div class="chart-wrap"><canvas id="c_nur_steps"></canvas></div></div>
+  <div class="card">
+    <h2>📧 Séquence SCPI</h2>
+    <div class="stat-row"><span>Workflow</span><span class="stat-val">Chaque jour 15h05</span></div>
+    <div class="stat-row"><span>Emails total (J0→J14)</span><span class="stat-val">11</span></div>
+    <div class="stat-row"><span>Étapes : J0, J2, J5, J6, J7, J9–J15</span><span class="stat-val">12 steps</span></div>
+    <div class="stat-row"><span>Bloqués &gt;14j</span><span class="stat-val" style="color:#ff4757">3</span></div>
+  </div>
+</div>
+<div class="tbl-card">
+          <div class="tbl-hdr"><h3>👤 Contacts en nurturing (3)</h3></div>
+          <table><thead><tr><th>Contact</th><th>Étape</th><th>Thème</th><th>Dernier envoi</th><th>Prochaine étape</th><th>Statut</th><th>Historique</th><th></th></tr></thead>
+          <tbody><tr>
+              <td><strong>hop test</strong><br><small style="color:#666">babyhopi@gmail.com</small></td>
+              <td><span class="badge badge-alert">J6</span></td>
+              <td style="font-size:12px">Fiscalité & montages</td>
+              <td>2026-02-03</td>
+              <td><span class="badge badge-stage">J7</span></td>
+              <td><span class="badge badge-alert">⚠️ 37j</span></td>
+              <td style="font-size:11px;color:#555;max-width:200px;overflow:hidden">2026-01-23 > 2026-01-23 > J2 -- 2026-01-23 > J2 -- 2026-01-2…</td>
+              <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/158432881200" target="_blank">↗</a></td>
+            </tr>
+<tr>
+              <td><strong>Alexis Sagnier Sagnier</strong><br><small style="color:#666">alexis.sagnier@gmail.com</small></td>
+              <td><span class="badge badge-alert">J6</span></td>
+              <td style="font-size:12px">Fiscalité & montages</td>
+              <td>2026-02-03</td>
+              <td><span class="badge badge-stage">J7</span></td>
+              <td><span class="badge badge-alert">⚠️ 37j</span></td>
+              <td style="font-size:11px;color:#555;max-width:200px;overflow:hidden">J2 -- 2026-01-25 > 2026-01-28 > J2 -- 2026-01-30 > J5 -- 202…</td>
+              <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/161186361462" target="_blank">↗</a></td>
+            </tr>
+<tr>
+              <td><strong>Jonathan Go</strong><br><small style="color:#666">jonathnan.gomez@gmail.com</small></td>
+              <td><span class="badge badge-alert">J6</span></td>
+              <td style="font-size:12px">Fiscalité & montages</td>
+              <td>2026-01-29</td>
+              <td><span class="badge badge-stage">J7</span></td>
+              <td><span class="badge badge-alert">⚠️ 42j</span></td>
+              <td style="font-size:11px;color:#555;max-width:200px;overflow:hidden">J2 -- 2026-01-25 > J5 -- 2026-01-28 > J6 -- 2026-01-29</td>
+              <td><a href="https://app.hubspot.com/contacts/49336048/record/0-1/178868224935" target="_blank">↗</a></td>
+            </tr>
+</tbody></table></div></div>
+<div id="p_tasks"     class="page">
+<div class="grid-4" style="margin-bottom:24px">
+  <div class="kpi red"  ><div class="kpi-lbl">⏰ En retard</div><div class="kpi-val">382</div></div>
+  <div class="kpi orange"><div class="kpi-lbl">📅 À venir</div><div class="kpi-val">5</div></div>
+  <div class="kpi green"><div class="kpi-lbl">✅ Complétées</div><div class="kpi-val">1</div></div>
+  <div class="kpi blue" ><div class="kpi-lbl">Total tâches</div><div class="kpi-val">388</div></div>
+</div>
+<div class="card"><h3>📊 Répartition par statut</h3><div class="chart-wrap"><canvas id="c_tasks2"></canvas></div></div>
+<div class="tbl-card">
+  <div class="tbl-hdr"><h3>⏰ Tâches en retard (382)</h3></div>
+  <table><thead><tr><th>Sujet</th><th>Priorité</th><th>Date prévue</th><th>Retard</th></tr></thead>
+  <tbody><tr><td>tâche de test</td><td><span class="badge badge-grey">NONE</span></td><td>2025-05-26</td><td><span class="badge badge-alert">290j</span></td></tr>
+<tr><td>Relancer le 04/06</td><td><span class="badge badge-grey">NONE</span></td><td>2025-06-04</td><td><span class="badge badge-alert">281j</span></td></tr>
+<tr><td>À relancer </td><td><span class="badge badge-grey">NONE</span></td><td>2025-06-04</td><td><span class="badge badge-alert">281j</span></td></tr>
+<tr><td>A relancer - attente des fonds</td><td><span class="badge badge-grey">NONE</span></td><td>2025-06-19</td><td><span class="badge badge-alert">266j</span></td></tr>
+<tr><td>Rappeler M. Teotahi pour investissement </td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
+<tr><td>Rappeler Mme Melus</td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
+<tr><td>Rappeler M. Possiti pour investissement </td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
+<tr><td>Appeler Monsieur</td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-22</td><td><span class="badge badge-alert">202j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-01</td><td><span class="badge badge-alert">192j</span></td></tr>
+<tr><td>À rappeler pour projet SCPI</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-01</td><td><span class="badge badge-alert">192j</span></td></tr>
+<tr><td>rappeler projet investissement SCPI</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-02</td><td><span class="badge badge-alert">191j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-02</td><td><span class="badge badge-alert">191j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-03</td><td><span class="badge badge-alert">190j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-04</td><td><span class="badge badge-alert">189j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-05</td><td><span class="badge badge-alert">188j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-06</td><td><span class="badge badge-alert">187j</span></td></tr>
+<tr><td>Appeler en début septembre </td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-07</td><td><span class="badge badge-alert">186j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-07</td><td><span class="badge badge-alert">186j</span></td></tr>
+<tr><td>Appeler Madame Melus pour investir en SCPI</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
+<tr><td>Appeler Mme Exposito pour projet investissement scpi</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-09</td><td><span class="badge badge-alert">184j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-10</td><td><span class="badge badge-alert">183j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-11</td><td><span class="badge badge-alert">182j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-12</td><td><span class="badge badge-alert">181j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-13</td><td><span class="badge badge-alert">180j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-14</td><td><span class="badge badge-alert">179j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-15</td><td><span class="badge badge-alert">178j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-16</td><td><span class="badge badge-alert">177j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-17</td><td><span class="badge badge-alert">176j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-18</td><td><span class="badge badge-alert">175j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-18</td><td><span class="badge badge-alert">175j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-19</td><td><span class="badge badge-alert">174j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-19</td><td><span class="badge badge-alert">174j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-20</td><td><span class="badge badge-alert">173j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-20</td><td><span class="badge badge-alert">173j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-21</td><td><span class="badge badge-alert">172j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-21</td><td><span class="badge badge-alert">172j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-22</td><td><span class="badge badge-alert">171j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-22</td><td><span class="badge badge-alert">171j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-23</td><td><span class="badge badge-alert">170j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-23</td><td><span class="badge badge-alert">170j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-24</td><td><span class="badge badge-alert">169j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-24</td><td><span class="badge badge-alert">169j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-25</td><td><span class="badge badge-alert">168j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-25</td><td><span class="badge badge-alert">168j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-26</td><td><span class="badge badge-alert">167j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-26</td><td><span class="badge badge-alert">167j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-27</td><td><span class="badge badge-alert">166j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-27</td><td><span class="badge badge-alert">166j</span></td></tr>
+</tbody></table>
+</div>
+<div class="tbl-card">
+  <div class="tbl-hdr"><h3>📅 Tâches à venir (5)</h3></div>
+  <table><thead><tr><th>Sujet</th><th>Priorité</th><th>Date prévue</th></tr></thead>
+  <tbody><tr><td>Rappeler Monsieur Blin pour son suivi patrimonial</td><td><span class="badge badge-grey">NONE</span></td><td>2026-08-18</td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-12</td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-12</td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-13</td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-13</td></tr>
+</tbody></table>
+</div></div>
+<div id="p_carto"     class="page">
+<div class="carto-wrap">
+  <div class="carto-cols">
+    <div>
+      <div class="carto-title">🌐 Sources Leads</div>
+      <div class="carto-col">
+        <div class="carto-node ok">🌐 Google Business Profile<br><small>GBP → HubSpot ✅</small></div>
+        <div class="carto-node ok">🔍 SEO Site Web<br><small>Site → HubSpot ✅</small></div>
+        <div class="carto-node err">💰 SEA / Scale City (Damien)<br><small>❌ Non connecté — en attente</small></div>
+        <div class="carto-node err">📝 Formulaire qualification<br><small>❌ À créer</small></div>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div>
+      <div class="carto-title">🎯 CRM Central</div>
+      <div class="carto-col">
+        <div class="carto-node hub">🎯 HubSpot CRM<br><small>Hub central<br>877 contacts · 7 deals</small></div>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div>
+      <div class="carto-title">🤖 Automatisations</div>
+      <div class="carto-col">
+        <div class="carto-node ok">🤖 n8n Workflows<br><small>Scoring + nurturing + bot ✅</small></div>
+        <div class="carto-node ok">📧 Gmail (séquence SCPI)<br><small>mrhopipro@gmail.com ✅</small></div>
+        <div class="carto-node ok">📊 Dashboard v4<br><small>Lecture HubSpot ✅</small></div>
+        <div class="carto-node ok">🤖 Auto-reply bot<br><small>babyhopi détection ✅</small></div>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div>
+      <div class="carto-title">📤 Actions Sortantes</div>
+      <div class="carto-col">
+        <div class="carto-node ok">📅 Calendly<br><small>Prise de RDV ✅</small></div>
+        <div class="carto-node err">📱 WhatsApp Pro<br><small>❌ Numéro Free Alexis attendu</small></div>
+        <div class="carto-node err">🎙️ Fathom<br><small>❌ À connecter avec email pro</small></div>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div>
+      <div class="carto-title">📄 Post-RDV</div>
+      <div class="carto-col">
+        <div class="carto-node err">📄 DER Auto<br><small>❌ À implémenter (Sprint 3)</small></div>
+        <div class="carto-node err">✍️ Signature électronique<br><small>❌ À implémenter (Sprint 3)</small></div>
+        <div class="carto-node err">🧠 Préconisation IA<br><small>❌ Pipeline post-RDV (Sprint 3)</small></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2" style="margin-top:24px">
+  <div class="card">
+    <h2>✅ Fondations opérationnelles</h2>
+    <div class="stat-row"><span>Gmail API OAuth2</span><span class="stat-val" style="color:#2ed573">✅ Connecté</span></div>
+    <div class="stat-row"><span>HubSpot CRM</span><span class="stat-val" style="color:#2ed573">✅ Connecté</span></div>
+    <div class="stat-row"><span>Dashboard v4</span><span class="stat-val" style="color:#2ed573">✅ Opérationnel</span></div>
+    <div class="stat-row"><span>Scoring IA (SCPI)</span><span class="stat-val" style="color:#ffa502">⚠️ Faux positifs</span></div>
+    <div class="stat-row"><span>Séquence nurturing</span><span class="stat-val" style="color:#2ed573">✅ Active</span></div>
+    <div class="stat-row"><span>Auto-reply bot email</span><span class="stat-val" style="color:#2ed573">✅ Actif</span></div>
+  </div>
+  <div class="card">
+    <h2>❌ En attente / À faire</h2>
+    <div class="stat-row"><span>Scale City → HubSpot sync</span><span class="stat-val" style="color:#ff4757">❌ Damien attendu</span></div>
+    <div class="stat-row"><span>WhatsApp Pro</span><span class="stat-val" style="color:#ff4757">❌ Numéro Alexis</span></div>
+    <div class="stat-row"><span>Formulaire qualification</span><span class="stat-val" style="color:#ff4757">❌ À créer</span></div>
+    <div class="stat-row"><span>Tracking clics emails</span><span class="stat-val" style="color:#ff4757">❌ À implémenter</span></div>
+    <div class="stat-row"><span>Fathom + email pro</span><span class="stat-val" style="color:#ff4757">❌ Connexion Alexis</span></div>
+    <div class="stat-row"><span>Website tracking</span><span class="stat-val" style="color:#ff4757">❌ Francis/Nicolas</span></div>
+  </div>
+</div></div>
+<div id="p_impact"    class="page">
+<div class="alert-box">
+  <h3>📈 Simulateur d'impact CA — ajuste les curseurs</h3>
+  <p>Calcule le CA potentiel selon ton taux de conversion et ton deal moyen.</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>🎚️ Paramètres de simulation</h2>
+    <div class="sim-row">
+      <span class="sim-lbl">Leads tièdes (69) — taux conversion</span>
+      <input type="range" id="sl_warm_rate" min="1" max="30" value="10" oninput="updateSim()">
+      <span class="sim-val" id="v_warm_rate">10%</span>
+    </div>
+    <div class="sim-row">
+      <span class="sim-lbl">Leads chauds (4) — taux conversion</span>
+      <input type="range" id="sl_hot_rate" min="5" max="60" value="30" oninput="updateSim()">
+      <span class="sim-val" id="v_hot_rate">30%</span>
+    </div>
+    <div class="sim-row">
+      <span class="sim-lbl">Montant moyen deal (€)</span>
+      <input type="range" id="sl_avg_deal" min="1000" max="50000" step="500" value="1400" oninput="updateSim()">
+      <span class="sim-val" id="v_avg_deal">1400 €</span>
+    </div>
+
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid #2a2d3a">
+      <div class="stat-row"><span>💰 CA potentiel tièdes</span><span class="stat-val" id="r_warm">—</span></div>
+      <div class="stat-row"><span>🔴 CA potentiel chauds</span><span class="stat-val" id="r_hot">—</span></div>
+      <div class="stat-row"><span>📊 CA total simulé</span><span class="stat-val" id="r_total" style="color:#ff6b35;font-size:18px">—</span></div>
+      <div class="stat-row"><span>+ Pipeline existant</span><span class="stat-val">50K€</span></div>
+    </div>
+  </div>
+  <div class="card"><h3>📊 Scénarios comparatifs</h3><div class="chart-wrap-lg"><canvas id="c_impact"></canvas></div></div>
+</div>
+
+<div class="card">
+  <h2>📋 Scénarios prédéfinis</h2>
+  <div class="stat-row"><span>🔵 Pessimiste — warm×5% + hot×15%</span><span class="stat-val">5,670 €</span></div>
+  <div class="stat-row"><span>🟡 Réaliste — warm×10% + hot×30%</span><span class="stat-val">11,340 €</span></div>
+  <div class="stat-row"><span>🔴 Optimiste — warm×20% + hot×50%</span><span class="stat-val">22,120 €</span></div>
+  <div class="stat-row"><span>🚀 Max théorique — tous warm×15% + hot×60%</span><span class="stat-val">17,850 €</span></div>
+</div></div>
+
+<script>
+const N_WARM = 69;
+const N_HOT  = 4;
+const CO = {plugins:{legend:{labels:{color:'#aaa',font:{size:11}}}}};
+
+// ── Charts Vue d'ensemble ──────────────────────────────────────────────────
+new Chart(document.getElementById('c_scoring'),{
+  type:'doughnut',
+  data:{labels:['🔴 Chauds (4)','🟡 Tièdes (69)','🔵 Froids (805)'],
+    datasets:[{data:[4,69,805],backgroundColor:['#ff4757','#ffa502','#1e90ff'],borderWidth:0}]},
+  options:{...CO,maintainAspectRatio:false,cutout:'65%'}
+});
+new Chart(document.getElementById('c_stage'),{
+  type:'bar',
+  data:{labels:["customer", "opportunity", "lead", "other"],datasets:[{data:[6, 3, 868, 1],backgroundColor:'#a29bfe',borderRadius:6}]},
+  options:{...CO,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
+});
+new Chart(document.getElementById('c_tasks'),{
+  type:'doughnut',
+  data:{labels:['⚠️ Retard (382)','📅 À venir (5)','✅ Complétées (1)'],
+    datasets:[{data:[382,5,1],backgroundColor:['#ff4757','#ffa502','#2ed573'],borderWidth:0}]},
+  options:{...CO,maintainAspectRatio:false,cutout:'60%'}
+});
+
+// ── Charts CA ──────────────────────────────────────────────────────────────
+new Chart(document.getElementById('c_deal_stage'),{
+  type:'doughnut',
+  data:{labels:["closedwon", "appointmentscheduled"],datasets:[{data:[2800.0, 50000.0],backgroundColor:['#ff6b35','#2ed573','#ff4757','#a29bfe','#1e90ff'],borderWidth:0}]},
+  options:{...CO,maintainAspectRatio:false,cutout:'55%'}
+});
+new Chart(document.getElementById('c_proj'),{
+  type:'bar',
+  data:{
+    labels:['Pessimiste (5%)','Réaliste (10%)','Optimiste (20%)'],
+    datasets:[{label:'CA potentiel leads tièdes (€)',data:[4830,9660,19320],backgroundColor:['#1e90ff','#ffa502','#2ed573'],borderRadius:8}]
+  },
+  options:{...CO,maintainAspectRatio:false,
+    scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
+});
+
+// ── Charts Stats ───────────────────────────────────────────────────────────
+new Chart(document.getElementById('c_score_dist'),{
+  type:'bar',
+  data:{labels:["0-19", "20-34", "35-49", "50-64", "65+"],datasets:[{data:[805, 62, 7, 3, 1],backgroundColor:['#1e90ff','#74b9ff','#ffa502','#ff7675','#ff4757'],borderRadius:6}]},
+  options:{...CO,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
+});
+new Chart(document.getElementById('c_statut'),{
+  type:'bar',
+  data:{labels:["A traiter", "Interess\u00e9", "Abandon", "Client", "non d\u00e9fini", "A relancer"],datasets:[{data:[60, 6, 7, 6, 798, 1],backgroundColor:'#ff6b35',borderRadius:6}]},
+  options:{...CO,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#888',maxRotation:45},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
+});
+
+// ── Charts Pipeline ────────────────────────────────────────────────────────
+new Chart(document.getElementById('c_pipeline_bar'),{
+  type:'bar',
+  data:{labels:["closedwon", "appointmentscheduled"],datasets:[{label:'Valeur (€)',data:[2800.0, 50000.0],backgroundColor:'#ff6b35',borderRadius:8}]},
+  options:{...CO,maintainAspectRatio:false,
+    scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
+});
+
+// ── Charts Nurturing ───────────────────────────────────────────────────────
+new Chart(document.getElementById('c_nur_steps'),{
+  type:'bar',
+  data:{labels:["J6"],datasets:[{data:[3],backgroundColor:'#a29bfe',borderRadius:6}]},
+  options:{...CO,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888',stepSize:1},grid:{color:'#1e2130'}}}}
+});
+
+// ── Charts Tâches ──────────────────────────────────────────────────────────
+new Chart(document.getElementById('c_tasks2'),{
+  type:'doughnut',
+  data:{labels:['⚠️ Retard','📅 À venir','✅ Complétées'],
+    datasets:[{data:[382,5,1],backgroundColor:['#ff4757','#ffa502','#2ed573'],borderWidth:0}]},
+  options:{...CO,maintainAspectRatio:false,cutout:'60%'}
+});
+
+// ── Impact CA chart & slider ───────────────────────────────────────────────
+let impactChart = null;
+function updateSim() {
+  const wr = parseInt(document.getElementById('sl_warm_rate').value);
+  const hr = parseInt(document.getElementById('sl_hot_rate').value);
+  const ad = parseInt(document.getElementById('sl_avg_deal').value);
+  document.getElementById('v_warm_rate').textContent = wr + '%';
+  document.getElementById('v_hot_rate').textContent  = hr + '%';
+  document.getElementById('v_avg_deal').textContent  = ad.toLocaleString('fr') + ' €';
+  const rw = Math.round(N_WARM * ad * wr / 100);
+  const rh = Math.round(N_HOT  * ad * hr / 100);
+  document.getElementById('r_warm').textContent  = rw.toLocaleString('fr') + ' €';
+  document.getElementById('r_hot').textContent   = rh.toLocaleString('fr') + ' €';
+  document.getElementById('r_total').textContent = (rw+rh).toLocaleString('fr') + ' €';
+  if(impactChart) { impactChart.data.datasets[0].data = [rw, rh, rw+rh]; impactChart.update(); }
+}
+impactChart = new Chart(document.getElementById('c_impact'),{
+  type:'bar',
+  data:{
+    labels:['CA potentiel tièdes','CA potentiel chauds','CA total simulé'],
+    datasets:[{data:[0,0,0],backgroundColor:['#1e90ff','#ff4757','#ff6b35'],borderRadius:8,label:'CA (€)'}]
+  },
+  options:{...CO,maintainAspectRatio:false,
+    scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
+});
+updateSim();
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function goPage(id, btn) {
+  document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function filterTbl(id, q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#' + id + ' tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
