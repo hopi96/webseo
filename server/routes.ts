@@ -1928,6 +1928,14 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
     }
   });
 
+  app.get("/hubspot-dashboard", (_req, res) => {
+    const filePath = path.join(process.cwd(), "hubspot_dashboard.html");
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).send("Dashboard introuvable.");
+    }
+    res.sendFile(filePath);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
