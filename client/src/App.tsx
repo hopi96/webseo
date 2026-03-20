@@ -12,6 +12,7 @@ import Planning from "@/pages/planning";
 import Monitoring from "@/pages/monitoring";
 import Settings from "@/pages/settings";
 import DocumentationPDF from "@/pages/documentation-pdf";
+import HubspotDashboard from "@/pages/hubspot-dashboard";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -55,6 +56,11 @@ function Router() {
       <Route path="/documentation-pdf">
         <ProtectedRoute>
           <DocumentationPDF />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/hubspot-dashboard">
+        <ProtectedRoute>
+          <HubspotDashboard />
         </ProtectedRoute>
       </Route>
       <Route path="*">

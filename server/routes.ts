@@ -1928,7 +1928,7 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
     }
   });
 
-  app.get("/hubspot-dashboard", (_req, res) => {
+  app.get("/crm-report", (_req, res) => {
     const filePath = path.join(process.cwd(), "hubspot_dashboard.html");
     if (!fs.existsSync(filePath)) {
       return res.status(404).send("Dashboard introuvable.");
