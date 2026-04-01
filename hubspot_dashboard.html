@@ -143,7 +143,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
   <tbody><tr>
           <td><strong>Jonathan Go</strong><br><small style="color:#666">jonathnan.gomez@gmail.com · +33628579656</small></td>
           <td><span class="badge badge-hot">🔴 65</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>0j</td>
           <td>5</td>
@@ -152,7 +152,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>ANDRE Andre</strong><br><small style="color:#666">ludovic@iwantlead.fr · 0782556326</small></td>
           <td><span class="badge badge-hot">🔴 55</span></td>
-          <td><span class="badge badge-stage">customer</span></td>
+          <td><span class="badge badge-stage">Client</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>219j</td>
           <td>3</td>
@@ -161,7 +161,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Elton DAMASO</strong><br><small style="color:#666">damaso.elton@gmail.com · 0688239031</small></td>
           <td><span class="badge badge-hot">🔴 50</span></td>
-          <td><span class="badge badge-stage">opportunity</span></td>
+          <td><span class="badge badge-stage">Opportunité</span></td>
           <td style="font-size:12px">Interessé</td>
           <td>263j</td>
           <td>6</td>
@@ -170,7 +170,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>hop test</strong><br><small style="color:#666">babyhopi@gmail.com · +33777769854</small></td>
           <td><span class="badge badge-hot">🔴 50</span></td>
-          <td><span class="badge badge-stage">opportunity</span></td>
+          <td><span class="badge badge-stage">Opportunité</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -181,14 +181,43 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <div id="p_ca"        class="page">
 <div class="grid-4" style="margin-bottom:24px">
   <div class="kpi green"><div class="kpi-lbl">💰 Pipeline actif</div><div class="kpi-val">50K€</div><div class="kpi-sub">5 deals</div></div>
-  <div class="kpi green"><div class="kpi-lbl">✅ CA gagné</div><div class="kpi-val">2K€</div><div class="kpi-sub">2 deals closedwon</div></div>
+  <div class="kpi green"><div class="kpi-lbl">✅ CA gagné</div><div class="kpi-val">2K€</div><div class="kpi-sub">2 deals gagnés</div></div>
   <div class="kpi orange"><div class="kpi-lbl">📊 Deal moyen</div><div class="kpi-val">1K€</div><div class="kpi-sub">Basé sur deals gagnés</div></div>
   <div class="kpi purple"><div class="kpi-lbl">🎯 Potentiel leads chauds</div><div class="kpi-val">1K€</div><div class="kpi-sub">30% taux conversion</div></div>
 </div>
 
+<!-- ── Objectif CA annuel ───────────────────────────── -->
+<div class="card" style="margin-bottom:24px">
+  <h2>🎯 Objectif CA annuel</h2>
+  <div style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:20px">
+    <div>
+      <label style="font-size:12px;color:#aaa;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.7px">Objectif (€)</label>
+      <input type="number" id="obj_ca" value="100000" min="0" step="1000" oninput="updateObjectif()"
+        style="background:#13161f;border:2px solid #ff6b35;color:#ff6b35;padding:10px 16px;border-radius:8px;font-size:22px;font-weight:800;width:210px;outline:none">
+    </div>
+    <div style="flex:1;min-width:220px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#aaa;margin-bottom:6px">
+        <span>CA réalisé : <strong id="obj_done_lbl" style="color:#2ed573">2 800 €</strong></span>
+        <span id="obj_pct_label" style="color:#ff6b35;font-weight:700;font-size:15px">2,8%</span>
+        <span>Objectif : <strong id="obj_target_label" style="color:#aaa">100 000 €</strong></span>
+      </div>
+      <div style="background:#13161f;border-radius:8px;height:18px;overflow:hidden;border:1px solid #2a2d3a">
+        <div id="obj_bar" style="height:100%;background:linear-gradient(90deg,#2ed573,#ff6b35);border-radius:8px;transition:width 0.5s ease;width:2.8%"></div>
+      </div>
+      <div style="font-size:12px;color:#555;margin-top:4px">Pipeline en cours (50 000 €) : <span id="obj_pipeline_bar_pct" style="color:#ffa502;font-weight:600">50%</span> de l'objectif</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+    <div class="kpi green"><div class="kpi-lbl">CA réalisé</div><div class="kpi-val" style="font-size:22px">2 800 €</div><div class="kpi-sub">2 deals gagnés</div></div>
+    <div class="kpi orange"><div class="kpi-lbl">Reste à atteindre</div><div class="kpi-val" id="obj_remaining" style="font-size:22px">97 200 €</div><div class="kpi-sub">pour l'objectif</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Atteinte objectif</div><div class="kpi-val" id="obj_pct" style="font-size:22px">2,8%</div><div class="kpi-sub">CA réalisé / objectif</div></div>
+    <div class="kpi purple"><div class="kpi-lbl">Pipeline / objectif</div><div class="kpi-val" id="obj_pipeline_pct" style="font-size:22px">50%</div><div class="kpi-sub">50 000 € en cours</div></div>
+  </div>
+</div>
+
 <div class="grid-2">
   <div class="card"><h3>💼 Répartition pipeline par stage</h3><div class="chart-wrap"><canvas id="c_deal_stage"></canvas></div></div>
-  <div class="card"><h3>📈 Projections CA — leads tièdes</h3><div class="chart-wrap"><canvas id="c_proj"></canvas></div></div>
+  <div class="card"><h3>📈 Projections CA vs Objectif annuel</h3><div class="chart-wrap"><canvas id="c_proj"></canvas></div></div>
 </div>
 
 <div class="section-title">📋 Tous les deals</div>
@@ -197,43 +226,43 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
   <tbody><tr>
           <td><strong>Invest 50K Corum cash</strong></td>
           <td style="font-weight:700;color:#2ed573">2,800 €</td>
-          <td><span class="badge badge-ok">closedwon</span></td>
+          <td><span class="badge badge-ok">Gagné</span></td>
           <td>2025-05-19</td>
         </tr>
 <tr>
           <td><strong>Créer 2 tickets à 25k€ fixe et 1 ticket à souscription mensuelle</strong></td>
           <td style="font-weight:700;color:#2ed573">50,000 €</td>
-          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td><span class="badge badge-stage">RDV planifié</span></td>
           <td>2025-07-31</td>
         </tr>
 <tr>
           <td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 14:30:23</strong></td>
           <td style="font-weight:700;color:#2ed573">—</td>
-          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td><span class="badge badge-stage">RDV planifié</span></td>
           <td>—</td>
         </tr>
 <tr>
           <td><strong>BC Workflow Test 1770421308</strong></td>
           <td style="font-weight:700;color:#2ed573">—</td>
-          <td><span class="badge badge-ok">closedwon</span></td>
+          <td><span class="badge badge-ok">Gagné</span></td>
           <td>2026-02-06</td>
         </tr>
 <tr>
           <td><strong>Auto Deal for babyhopi@gmail.com 1770460570</strong></td>
           <td style="font-weight:700;color:#2ed573">—</td>
-          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td><span class="badge badge-stage">RDV planifié</span></td>
           <td>—</td>
         </tr>
 <tr>
           <td><strong>Deal Contact Test 1770421771</strong></td>
           <td style="font-weight:700;color:#2ed573">—</td>
-          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td><span class="badge badge-stage">RDV planifié</span></td>
           <td>—</td>
         </tr>
 <tr>
           <td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 18:14:27</strong></td>
           <td style="font-weight:700;color:#2ed573">—</td>
-          <td><span class="badge badge-stage">appointmentscheduled</span></td>
+          <td><span class="badge badge-stage">RDV planifié</span></td>
           <td>—</td>
         </tr>
 </tbody></table>
@@ -287,7 +316,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
   <tbody id="tb_leads"><tr>
           <td><strong>Jonathan Go</strong><br><small style="color:#666">jonathnan.gomez@gmail.com · +33628579656</small></td>
           <td><span class="badge badge-hot">🔴 65</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>0j</td>
           <td>5</td>
@@ -296,7 +325,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>ANDRE Andre</strong><br><small style="color:#666">ludovic@iwantlead.fr · 0782556326</small></td>
           <td><span class="badge badge-hot">🔴 55</span></td>
-          <td><span class="badge badge-stage">customer</span></td>
+          <td><span class="badge badge-stage">Client</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>219j</td>
           <td>3</td>
@@ -305,7 +334,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Elton DAMASO</strong><br><small style="color:#666">damaso.elton@gmail.com · 0688239031</small></td>
           <td><span class="badge badge-hot">🔴 50</span></td>
-          <td><span class="badge badge-stage">opportunity</span></td>
+          <td><span class="badge badge-stage">Opportunité</span></td>
           <td style="font-size:12px">Interessé</td>
           <td>263j</td>
           <td>6</td>
@@ -314,7 +343,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>hop test</strong><br><small style="color:#666">babyhopi@gmail.com · +33777769854</small></td>
           <td><span class="badge badge-hot">🔴 50</span></td>
-          <td><span class="badge badge-stage">opportunity</span></td>
+          <td><span class="badge badge-stage">Opportunité</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -323,7 +352,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Jean-Etienne Gourgues</strong><br><small style="color:#666">jegourgues@outlook.com · +447733600500</small></td>
           <td><span class="badge badge-warm">🟡 45</span></td>
-          <td><span class="badge badge-stage">customer</span></td>
+          <td><span class="badge badge-stage">Client</span></td>
           <td style="font-size:12px">Client</td>
           <td>223j</td>
           <td>12</td>
@@ -332,7 +361,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Laurent Breysse</strong><br><small style="color:#666">laurentbreysse@voila.fr · +330676398363</small></td>
           <td><span class="badge badge-warm">🟡 40</span></td>
-          <td><span class="badge badge-stage">customer</span></td>
+          <td><span class="badge badge-stage">Client</span></td>
           <td style="font-size:12px">Client</td>
           <td>—</td>
           <td>0</td>
@@ -341,7 +370,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Pascal Blin</strong><br><small style="color:#666">pascal.blin@gmail.com · 0670743753</small></td>
           <td><span class="badge badge-warm">🟡 35</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">Interessé</td>
           <td>195j</td>
           <td>26</td>
@@ -350,7 +379,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Heinrich Kruizinga</strong><br><small style="color:#666">erik.kruizinga@orange.fr · 0665142447</small></td>
           <td><span class="badge badge-warm">🟡 35</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">Interessé</td>
           <td>265j</td>
           <td>11</td>
@@ -359,7 +388,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>David Lallemand Riorda</strong><br><small style="color:#666">david@atlantispiercing.com · +330662415967</small></td>
           <td><span class="badge badge-warm">🟡 35</span></td>
-          <td><span class="badge badge-stage">customer</span></td>
+          <td><span class="badge badge-stage">Client</span></td>
           <td style="font-size:12px">Client</td>
           <td>269j</td>
           <td>2</td>
@@ -368,7 +397,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Anne Mozzanega</strong><br><small style="color:#666">anne.mozzanega@live.fr · +330683240823</small></td>
           <td><span class="badge badge-warm">🟡 35</span></td>
-          <td><span class="badge badge-stage">customer</span></td>
+          <td><span class="badge badge-stage">Client</span></td>
           <td style="font-size:12px">Client</td>
           <td>239j</td>
           <td>2</td>
@@ -377,7 +406,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Virginie Giroud</strong><br><small style="color:#666">philippegiroud298@neuf.fr · +33619113728</small></td>
           <td><span class="badge badge-warm">🟡 35</span></td>
-          <td><span class="badge badge-stage">customer</span></td>
+          <td><span class="badge badge-stage">Client</span></td>
           <td style="font-size:12px">Client</td>
           <td>204j</td>
           <td>2</td>
@@ -386,7 +415,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Aubin</strong><br><small style="color:#666">david.aubin@atlantistar.fr · +33 6 76 90 30 50</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>190j</td>
           <td>5</td>
@@ -395,7 +424,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Marc Miribel</strong><br><small style="color:#666">marc.miribel@mphygiene.com · +33 6 11 28 06 63</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>5</td>
@@ -404,7 +433,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>ALAUZE</strong><br><small style="color:#666">jfalauze@hotmail.com · +225 07 07017249</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>5</td>
@@ -413,7 +442,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>William Gribelin Gribelin</strong><br><small style="color:#666">william.gribelin@gmail.com · 0604534235</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>5</td>
@@ -422,7 +451,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Ricard Ricard</strong><br><small style="color:#666">ricard_didier@yahoo.com · +225 0705038981</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>5</td>
@@ -431,7 +460,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Alexis Sagnier Sagnier</strong><br><small style="color:#666">alexis.sagnier@gmail.com · +33601773296</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -440,7 +469,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>CAMPOY</strong><br><small style="color:#666">criscampoy.cc@gmail.com · +33 6 63 23 55 43</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -449,7 +478,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Thabet</strong><br><small style="color:#666">tarek.thabet@remax.com.tn · +216 95 993 899</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -458,7 +487,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Le Gal</strong><br><small style="color:#666">j_le_gal@hotmail.com · +221 77 569 36 38</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -467,7 +496,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>DOUMBÉ</strong><br><small style="color:#666">comptedab@gmail.com · +33 6 25 87 82 22</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -476,7 +505,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>cecilia de Petiville</strong><br><small style="color:#666">ceciliadepetiville@gmail.com · +33677277460</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -485,7 +514,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Emmanuel</strong><br><small style="color:#666">manu.ville846@gmail.com · +33650614885</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -494,7 +523,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>charles test</strong><br><small style="color:#666">test@gmail.com · +33632453261</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -503,7 +532,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Emmanuel Das Dores</strong><br><small style="color:#666">seraphimofficiel@gmail.com · +33625393180</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>—</td>
           <td>0</td>
@@ -512,7 +541,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Francis Ndimba</strong><br><small style="color:#666">contact@advised-seo.fr</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>29j</td>
           <td>2</td>
@@ -521,7 +550,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Flow Test</strong><br><small style="color:#666">workflow.test.1770421771@example.com</small></td>
           <td><span class="badge badge-warm">🟡 30</span></td>
-          <td><span class="badge badge-stage">opportunity</span></td>
+          <td><span class="badge badge-stage">Opportunité</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -530,7 +559,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Philippe Klein</strong><br><small style="color:#666">philippe.klein@gmx.com · +330659020034</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">Interessé</td>
           <td>150j</td>
           <td>4</td>
@@ -539,7 +568,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Maurice Possiti</strong><br><small style="color:#666">rodrigue37@hotmail.fr · 06 51 53 29 08</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>223j</td>
           <td>2</td>
@@ -548,7 +577,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Intins</strong><br><small style="color:#666">xi.nts@outlook.fr · +33 6 16 28 31 71</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>223j</td>
           <td>2</td>
@@ -557,7 +586,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Samyn</strong><br><small style="color:#666">beatrice.samyn@gmail.com · +33 6 18 87 55 12</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -566,7 +595,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>AYOUB</strong><br><small style="color:#666">jeanayoub@wanadoo.fr · 01 23 45 67 89 </small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -575,7 +604,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>PHILIPPE-MARIE TEOTAHI</strong><br><small style="color:#666">21teotahi@gmail.com · 0761897163</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>223j</td>
           <td>2</td>
@@ -584,7 +613,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Carla Melus</strong><br><small style="color:#666">carlamelus02@gmail.com · 0644771616</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">Interessé</td>
           <td>217j</td>
           <td>2</td>
@@ -593,7 +622,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>BREUIL</strong><br><small style="color:#666">pbisa@me.com · +33 6 11 07 50 75</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -602,7 +631,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>FAYE</strong><br><small style="color:#666">fayes.salif@gmail.com · +33 6 51 12 32 40</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -611,7 +640,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Florent Moreau</strong><br><small style="color:#666">florent-moreau@planeteda.fr · +33 6 60 46 77 40</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>205j</td>
           <td>2</td>
@@ -620,7 +649,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Benkara</strong><br><small style="color:#666">sabahbenkara75@gmail.com · +212 661-324497</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -629,7 +658,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>DELANOY</strong><br><small style="color:#666">fam.delanoy@cegetel.net · +7 903 665-29-15</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -638,7 +667,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Baptiste</strong><br><small style="color:#666">contact@pascal-vanlerberghe.fr · 0622670497</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -647,7 +676,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Patrick VANDERBOSSE</strong><br><small style="color:#666">patrick.vanderbosse@gmail.com · 0613594960</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>199j</td>
           <td>4</td>
@@ -656,7 +685,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Iren Csonka</strong><br><small style="color:#666">irenecsonka55@gmail.com · 0673039992</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>2</td>
@@ -665,7 +694,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Cherifa</strong><br><small style="color:#666">cherifaallag@gmail.com · 0778389062</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -674,7 +703,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>laurent rigaux</strong><br><small style="color:#666">laurent.rigaux17@gmail.com · 0650919274</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -683,7 +712,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Mickael Junior ANDRIAMAMONJY</strong><br><small style="color:#666">mickael.andriamamonjy10@gmail.com · 0628050939</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>2</td>
@@ -692,7 +721,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Fernandes</strong><br><small style="color:#666">fernandesb59@gmail.com · 0033320458791</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -701,7 +730,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Tuovic</strong><br><small style="color:#666">stuovic@yahoo.fr · +33 6 03 56 22 97</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -710,7 +739,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Boulday</strong><br><small style="color:#666">y.boulday@financeconseil.fr · +33 2 41 72 84 96</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -719,7 +748,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Gallur Cédric</strong><br><small style="color:#666">ludric@live.fr · +33673909824</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -728,7 +757,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Yony Guibe</strong><br><small style="color:#666">yguibe36@gmail.com · +33610512054</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -737,7 +766,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Jeanson</strong><br><small style="color:#666">amiantech@amiantech.com · 0610178767</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>2</td>
@@ -746,7 +775,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>MARCHAND</strong><br><small style="color:#666">marchandsylvain78@gmail.com · +1 514-706-7825</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -755,7 +784,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Matteo Caudron</strong><br><small style="color:#666">frostloky1@gmail.com · +33783324904</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -764,7 +793,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Raphaël Gertz</strong><br><small style="color:#666">raphaelgertz164@gmail.com · +33783975464</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -773,7 +802,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Emmanuel gaide</strong><br><small style="color:#666">pob84@orange.fr · +33750936691</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -782,7 +811,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Alain</strong><br><small style="color:#666">tatoualain3@gmail.com · +33641200105</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>199j</td>
           <td>3</td>
@@ -791,7 +820,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>BRUSCHI</strong><br><small style="color:#666">stephanebruschi@outlook.com · +33 6 47 03 58 21</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>4</td>
@@ -800,7 +829,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>eric.gallay@mphygiene.com</strong><br><small style="color:#666">eric.gallay@mphygiene.com · 0688988523</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>201j</td>
           <td>2</td>
@@ -809,7 +838,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Walter sauvage</strong><br><small style="color:#666">sauvageation@gmail.com · +33789212125</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>2</td>
@@ -818,7 +847,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Thomas chambon</strong><br><small style="color:#666">thomasktm87@gmail.com · +33624613802</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>3</td>
@@ -827,7 +856,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Maxime dhainaut</strong><br><small style="color:#666">max.dhai62220@gmail.com · +33666143040</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>190j</td>
           <td>2</td>
@@ -836,7 +865,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Youcef krallafa</strong><br><small style="color:#666">lauyou@hotmail.fr · +33601447343</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>190j</td>
           <td>4</td>
@@ -845,7 +874,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>CATTO</strong><br><small style="color:#666">erwan.catto@gmail.com · +254 715 230727</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>190j</td>
           <td>3</td>
@@ -854,7 +883,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Devaud-Berranger Devaud</strong><br><small style="color:#666">christelle.devaud@investimmo-patrimoine.com · +33 6 76 60 88 84</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>189j</td>
           <td>4</td>
@@ -863,7 +892,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Clement SOCFACK</strong><br><small style="color:#666">clementdorang@gmail.com · +33775229358</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>190j</td>
           <td>2</td>
@@ -872,7 +901,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>De Maria Melissa</strong><br><small style="color:#666">melissacuzzucoli@gmail.com · +33651514986</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>190j</td>
           <td>3</td>
@@ -881,7 +910,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Claudine Blanchard</strong><br><small style="color:#666">blanchardbreteil@gmail.com · +33644899745</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>190j</td>
           <td>4</td>
@@ -890,7 +919,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Gueugnon</strong><br><small style="color:#666">maylisdechassey@gmail.com · +33 6 70 44 26 38</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>150j</td>
           <td>2</td>
@@ -899,7 +928,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Sarah tripicchio</strong><br><small style="color:#666">yetna_m@yahoo.fr · +33650904525</small></td>
           <td><span class="badge badge-warm">🟡 25</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>94j</td>
           <td>2</td>
@@ -908,7 +937,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Emeric Olivier</strong><br><small style="color:#666">emeric.olivier@tibbloc.fr · +33748115924</small></td>
           <td><span class="badge badge-warm">🟡 20</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">Interessé</td>
           <td>248j</td>
           <td>1</td>
@@ -917,7 +946,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Exposito elma Exposito</strong><br><small style="color:#666">valade.violette@laposte.net · 0602154270</small></td>
           <td><span class="badge badge-warm">🟡 20</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>216j</td>
           <td>1</td>
@@ -926,7 +955,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Mouchet</strong><br><small style="color:#666">laurent.marszyckii@gmail.com · +33609749254</small></td>
           <td><span class="badge badge-warm">🟡 20</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>195j</td>
           <td>1</td>
@@ -935,7 +964,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Crespon</strong><br><small style="color:#666">alexandre.crespon@scheier.fr · +33 6 89 83 01 99</small></td>
           <td><span class="badge badge-warm">🟡 20</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">A traiter</td>
           <td>94j</td>
           <td>1</td>
@@ -944,7 +973,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Julien CHARVET</strong><br><small style="color:#666">djul38110@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -953,7 +982,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>CHRISTOPHER DE SAMPAIO</strong><br><small style="color:#666">crispoker38510@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -962,7 +991,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Maitre Notaire</strong><br><small style="color:#666">hugues.desgroux@notaires.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -971,7 +1000,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Nathalie DOURTHE</strong><br><small style="color:#666">dourthenathalie.gmail.com@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -980,7 +1009,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>AMEL LAROUCI</strong><br><small style="color:#666">julveno.amel@gmail.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -989,7 +1018,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>daisy marie claire GUICHARD</strong><br><small style="color:#666">mc.guichard@wanadoo.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -998,7 +1027,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>DIDIER LALANNE</strong><br><small style="color:#666">lalanne@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1007,7 +1036,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>liliane PEIGNAULT</strong><br><small style="color:#666">lilidouce1@laposte.net</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1016,7 +1045,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>KEN COMAT</strong><br><small style="color:#666">ckone9718@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1025,7 +1054,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>CEDRIC LODI</strong><br><small style="color:#666">mr.leduc.octavia.lodi@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1034,7 +1063,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Emmanuelle Navillod</strong><br><small style="color:#666">emmanuelle.navillod@idex.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1043,7 +1072,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>DAVID POURRADIER</strong><br><small style="color:#666">david.pourradier68@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1052,7 +1081,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>CHANTAL DIALLO</strong><br><small style="color:#666">diallo@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1061,7 +1090,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Maud MOTTARD</strong><br><small style="color:#666">m.mottard@neuf.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1070,7 +1099,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>BERNARD DELAPORTE</strong><br><small style="color:#666">bernarddelap@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1079,7 +1108,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>ROMUALD DUPUIS</strong><br><small style="color:#666">romualddupuis55@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1088,7 +1117,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Bernard ROUS</strong><br><small style="color:#666">roux.bj@orange.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1097,7 +1126,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>GWENDOLINE BLANCHARD</strong><br><small style="color:#666">gwendoline.blanchard@bbox.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1106,7 +1135,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>SAMUEL GAUDINET</strong><br><small style="color:#666">sam.gaudinet@orange.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1115,7 +1144,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>JEAN PIERRE PERRET</strong><br><small style="color:#666">info@3jmusic.fr · 047-488-9915</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1124,7 +1153,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>GOURRIER Audrey</strong><br><small style="color:#666">gourrieraudrey@yahoo.fr · 027-602-3026</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1133,7 +1162,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>MARIE CHRISTINE DAYMAN</strong><br><small style="color:#666">daymanmarie@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1142,7 +1171,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>PATRICK BON</strong><br><small style="color:#666">patbribon@yahoo.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1151,7 +1180,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>XAVIER THIRIET</strong><br><small style="color:#666">jarod800@orange.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1160,7 +1189,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>LAURENT CORAI</strong><br><small style="color:#666">laurent.corai@aliceadsl.fr</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1169,7 +1198,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>Samy</strong><br><small style="color:#666">kinesis.fr@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1178,7 +1207,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <tr>
           <td><strong>FRANCOISE MANNAT</strong><br><small style="color:#666">francoisemannat322@gmail.com</small></td>
           <td><span class="badge badge-cold">🔵 10</span></td>
-          <td><span class="badge badge-stage">lead</span></td>
+          <td><span class="badge badge-stage">Prospect</span></td>
           <td style="font-size:12px">non défini</td>
           <td>—</td>
           <td>0</td>
@@ -1189,21 +1218,21 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <div id="p_pipeline"  class="page">
 <div class="grid-4" style="margin-bottom:24px">
   <div class="kpi green"><div class="kpi-lbl">Pipeline actif</div><div class="kpi-val">50K€</div><div class="kpi-sub">5 deals</div></div>
-  <div class="kpi green"><div class="kpi-lbl">CA gagné</div><div class="kpi-val">2K€</div><div class="kpi-sub">2 closedwon</div></div>
-  <div class="kpi red"  ><div class="kpi-lbl">CA perdu</div><div class="kpi-val">0€</div><div class="kpi-sub">0 closedlost</div></div>
+  <div class="kpi green"><div class="kpi-lbl">CA gagné</div><div class="kpi-val">2K€</div><div class="kpi-sub">2 deals gagnés</div></div>
+  <div class="kpi red"  ><div class="kpi-lbl">CA perdu</div><div class="kpi-val">0€</div><div class="kpi-sub">0 deals perdus</div></div>
   <div class="kpi orange"><div class="kpi-lbl">Deal moyen</div><div class="kpi-val">1K€</div></div>
 </div>
 <div class="card"><h3>💼 Pipeline par stage (valeur €)</h3><div class="chart-wrap-lg"><canvas id="c_pipeline_bar"></canvas></div></div>
 <div class="tbl-card">
   <div class="tbl-hdr"><h3>Tous les deals (7)</h3></div>
   <table><thead><tr><th>Nom</th><th>Montant</th><th>Stage</th><th>Clôture</th></tr></thead><tbody>
-  <tr><td><strong>Invest 50K Corum cash</strong></td><td style='color:#2ed573;font-weight:700'>2,800 €</td><td><span class="badge badge-ok">closedwon</span></td><td>2025-05-19</td></tr>
-<tr><td><strong>Créer 2 tickets à 25k€ fixe et 1 ticket à souscription mensuelle</strong></td><td style='color:#2ed573;font-weight:700'>50,000 €</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>2025-07-31</td></tr>
-<tr><td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 14:30:23</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
-<tr><td><strong>BC Workflow Test 1770421308</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-ok">closedwon</span></td><td>2026-02-06</td></tr>
-<tr><td><strong>Auto Deal for babyhopi@gmail.com 1770460570</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
-<tr><td><strong>Deal Contact Test 1770421771</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
-<tr><td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 18:14:27</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">appointmentscheduled</span></td><td>—</td></tr>
+  <tr><td><strong>Invest 50K Corum cash</strong></td><td style='color:#2ed573;font-weight:700'>2,800 €</td><td><span class="badge badge-ok">Gagné</span></td><td>2025-05-19</td></tr>
+<tr><td><strong>Créer 2 tickets à 25k€ fixe et 1 ticket à souscription mensuelle</strong></td><td style='color:#2ed573;font-weight:700'>50,000 €</td><td><span class="badge badge-stage">RDV planifié</span></td><td>2025-07-31</td></tr>
+<tr><td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 14:30:23</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">RDV planifié</span></td><td>—</td></tr>
+<tr><td><strong>BC Workflow Test 1770421308</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-ok">Gagné</span></td><td>2026-02-06</td></tr>
+<tr><td><strong>Auto Deal for babyhopi@gmail.com 1770460570</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">RDV planifié</span></td><td>—</td></tr>
+<tr><td><strong>Deal Contact Test 1770421771</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">RDV planifié</span></td><td>—</td></tr>
+<tr><td><strong>BC Workflow Test babyhopi@gmail.com 2026-02-07 18:14:27</strong></td><td style='color:#2ed573;font-weight:700'>—</td><td><span class="badge badge-stage">RDV planifié</span></td><td>—</td></tr>
 </tbody></table></div></div>
 <div id="p_nurturing" class="page">
 <div class="grid-4" style="margin-bottom:24px">
@@ -1218,7 +1247,7 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
     <h2>📧 Séquence SCPI</h2>
     <div class="stat-row"><span>Workflow</span><span class="stat-val">Chaque jour 15h05</span></div>
     <div class="stat-row"><span>Emails total (J0→J14)</span><span class="stat-val">11</span></div>
-    <div class="stat-row"><span>Étapes : J0, J2, J5, J6, J7, J9–J15</span><span class="stat-val">12 steps</span></div>
+    <div class="stat-row"><span>Étapes : J0, J2, J5, J6, J7, J9–J15</span><span class="stat-val">12 étapes</span></div>
     <div class="stat-row"><span>Bloqués &gt;14j</span><span class="stat-val" style="color:#ff4757">3</span></div>
   </div>
 </div>
@@ -1267,66 +1296,66 @@ input[type=range] { width:100%; accent-color:#ff6b35; }
 <div class="tbl-card">
   <div class="tbl-hdr"><h3>⏰ Tâches en retard (382)</h3></div>
   <table><thead><tr><th>Sujet</th><th>Priorité</th><th>Date prévue</th><th>Retard</th></tr></thead>
-  <tbody><tr><td>tâche de test</td><td><span class="badge badge-grey">NONE</span></td><td>2025-05-26</td><td><span class="badge badge-alert">290j</span></td></tr>
-<tr><td>Relancer le 04/06</td><td><span class="badge badge-grey">NONE</span></td><td>2025-06-04</td><td><span class="badge badge-alert">281j</span></td></tr>
-<tr><td>À relancer </td><td><span class="badge badge-grey">NONE</span></td><td>2025-06-04</td><td><span class="badge badge-alert">281j</span></td></tr>
-<tr><td>A relancer - attente des fonds</td><td><span class="badge badge-grey">NONE</span></td><td>2025-06-19</td><td><span class="badge badge-alert">266j</span></td></tr>
-<tr><td>Rappeler M. Teotahi pour investissement </td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
-<tr><td>Rappeler Mme Melus</td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
-<tr><td>Rappeler M. Possiti pour investissement </td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
-<tr><td>Appeler Monsieur</td><td><span class="badge badge-grey">NONE</span></td><td>2025-08-22</td><td><span class="badge badge-alert">202j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-01</td><td><span class="badge badge-alert">192j</span></td></tr>
-<tr><td>À rappeler pour projet SCPI</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-01</td><td><span class="badge badge-alert">192j</span></td></tr>
-<tr><td>rappeler projet investissement SCPI</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-02</td><td><span class="badge badge-alert">191j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-02</td><td><span class="badge badge-alert">191j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-03</td><td><span class="badge badge-alert">190j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-04</td><td><span class="badge badge-alert">189j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-05</td><td><span class="badge badge-alert">188j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-06</td><td><span class="badge badge-alert">187j</span></td></tr>
-<tr><td>Appeler en début septembre </td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-07</td><td><span class="badge badge-alert">186j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-07</td><td><span class="badge badge-alert">186j</span></td></tr>
-<tr><td>Appeler Madame Melus pour investir en SCPI</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
-<tr><td>Appeler Mme Exposito pour projet investissement scpi</td><td><span class="badge badge-grey">NONE</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-09</td><td><span class="badge badge-alert">184j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-10</td><td><span class="badge badge-alert">183j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-11</td><td><span class="badge badge-alert">182j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-12</td><td><span class="badge badge-alert">181j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-13</td><td><span class="badge badge-alert">180j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-14</td><td><span class="badge badge-alert">179j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-15</td><td><span class="badge badge-alert">178j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-16</td><td><span class="badge badge-alert">177j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-17</td><td><span class="badge badge-alert">176j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-18</td><td><span class="badge badge-alert">175j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-18</td><td><span class="badge badge-alert">175j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-19</td><td><span class="badge badge-alert">174j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-19</td><td><span class="badge badge-alert">174j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-20</td><td><span class="badge badge-alert">173j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-20</td><td><span class="badge badge-alert">173j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-21</td><td><span class="badge badge-alert">172j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-21</td><td><span class="badge badge-alert">172j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-22</td><td><span class="badge badge-alert">171j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-22</td><td><span class="badge badge-alert">171j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-23</td><td><span class="badge badge-alert">170j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-23</td><td><span class="badge badge-alert">170j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-24</td><td><span class="badge badge-alert">169j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-24</td><td><span class="badge badge-alert">169j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-25</td><td><span class="badge badge-alert">168j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-25</td><td><span class="badge badge-alert">168j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-26</td><td><span class="badge badge-alert">167j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-26</td><td><span class="badge badge-alert">167j</span></td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-27</td><td><span class="badge badge-alert">166j</span></td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2025-09-27</td><td><span class="badge badge-alert">166j</span></td></tr>
+  <tbody><tr><td>tâche de test</td><td><span class="badge badge-grey">Normale</span></td><td>2025-05-26</td><td><span class="badge badge-alert">290j</span></td></tr>
+<tr><td>Relancer le 04/06</td><td><span class="badge badge-grey">Normale</span></td><td>2025-06-04</td><td><span class="badge badge-alert">281j</span></td></tr>
+<tr><td>À relancer </td><td><span class="badge badge-grey">Normale</span></td><td>2025-06-04</td><td><span class="badge badge-alert">281j</span></td></tr>
+<tr><td>A relancer - attente des fonds</td><td><span class="badge badge-grey">Normale</span></td><td>2025-06-19</td><td><span class="badge badge-alert">266j</span></td></tr>
+<tr><td>Rappeler M. Teotahi pour investissement </td><td><span class="badge badge-grey">Normale</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
+<tr><td>Rappeler Mme Melus</td><td><span class="badge badge-grey">Normale</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
+<tr><td>Rappeler M. Possiti pour investissement </td><td><span class="badge badge-grey">Normale</span></td><td>2025-08-06</td><td><span class="badge badge-alert">218j</span></td></tr>
+<tr><td>Appeler Monsieur</td><td><span class="badge badge-grey">Normale</span></td><td>2025-08-22</td><td><span class="badge badge-alert">202j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-01</td><td><span class="badge badge-alert">192j</span></td></tr>
+<tr><td>À rappeler pour projet SCPI</td><td><span class="badge badge-grey">Normale</span></td><td>2025-09-01</td><td><span class="badge badge-alert">192j</span></td></tr>
+<tr><td>rappeler projet investissement SCPI</td><td><span class="badge badge-grey">Normale</span></td><td>2025-09-02</td><td><span class="badge badge-alert">191j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-02</td><td><span class="badge badge-alert">191j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-03</td><td><span class="badge badge-alert">190j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-04</td><td><span class="badge badge-alert">189j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-05</td><td><span class="badge badge-alert">188j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-06</td><td><span class="badge badge-alert">187j</span></td></tr>
+<tr><td>Appeler en début septembre </td><td><span class="badge badge-grey">Normale</span></td><td>2025-09-07</td><td><span class="badge badge-alert">186j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-07</td><td><span class="badge badge-alert">186j</span></td></tr>
+<tr><td>Appeler Madame Melus pour investir en SCPI</td><td><span class="badge badge-grey">Normale</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
+<tr><td>Appeler Mme Exposito pour projet investissement scpi</td><td><span class="badge badge-grey">Normale</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-08</td><td><span class="badge badge-alert">185j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-09</td><td><span class="badge badge-alert">184j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-10</td><td><span class="badge badge-alert">183j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-11</td><td><span class="badge badge-alert">182j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-12</td><td><span class="badge badge-alert">181j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-13</td><td><span class="badge badge-alert">180j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-14</td><td><span class="badge badge-alert">179j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-15</td><td><span class="badge badge-alert">178j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-16</td><td><span class="badge badge-alert">177j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-17</td><td><span class="badge badge-alert">176j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-18</td><td><span class="badge badge-alert">175j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-18</td><td><span class="badge badge-alert">175j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-19</td><td><span class="badge badge-alert">174j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-19</td><td><span class="badge badge-alert">174j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-20</td><td><span class="badge badge-alert">173j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-20</td><td><span class="badge badge-alert">173j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-21</td><td><span class="badge badge-alert">172j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-21</td><td><span class="badge badge-alert">172j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-22</td><td><span class="badge badge-alert">171j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-22</td><td><span class="badge badge-alert">171j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-23</td><td><span class="badge badge-alert">170j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-23</td><td><span class="badge badge-alert">170j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-24</td><td><span class="badge badge-alert">169j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-24</td><td><span class="badge badge-alert">169j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-25</td><td><span class="badge badge-alert">168j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-25</td><td><span class="badge badge-alert">168j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-26</td><td><span class="badge badge-alert">167j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-26</td><td><span class="badge badge-alert">167j</span></td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-27</td><td><span class="badge badge-alert">166j</span></td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2025-09-27</td><td><span class="badge badge-alert">166j</span></td></tr>
 </tbody></table>
 </div>
 <div class="tbl-card">
   <div class="tbl-hdr"><h3>📅 Tâches à venir (5)</h3></div>
   <table><thead><tr><th>Sujet</th><th>Priorité</th><th>Date prévue</th></tr></thead>
-  <tbody><tr><td>Rappeler Monsieur Blin pour son suivi patrimonial</td><td><span class="badge badge-grey">NONE</span></td><td>2026-08-18</td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-12</td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-12</td></tr>
-<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-13</td></tr>
-<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">HIGH</span></td><td>2026-03-13</td></tr>
+  <tbody><tr><td>Rappeler Monsieur Blin pour son suivi patrimonial</td><td><span class="badge badge-grey">Normale</span></td><td>2026-08-18</td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2026-03-12</td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2026-03-12</td></tr>
+<tr><td>Faire souscrire parts de SCPI</td><td><span class="badge badge-alert">Haute</span></td><td>2026-03-13</td></tr>
+<tr><td>Appel présentation SCPI M. Aubin</td><td><span class="badge badge-alert">Haute</span></td><td>2026-03-13</td></tr>
 </tbody></table>
 </div></div>
 <div id="p_carto"     class="page">
@@ -1456,7 +1485,7 @@ new Chart(document.getElementById('c_scoring'),{
 });
 new Chart(document.getElementById('c_stage'),{
   type:'bar',
-  data:{labels:["customer", "opportunity", "lead", "other"],datasets:[{data:[6, 3, 868, 1],backgroundColor:'#a29bfe',borderRadius:6}]},
+  data:{labels:["Client", "Opportunité", "Prospect", "Autre"],datasets:[{data:[6, 3, 868, 1],backgroundColor:'#a29bfe',borderRadius:6}]},
   options:{...CO,maintainAspectRatio:false,plugins:{legend:{display:false}},
     scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
 });
@@ -1470,14 +1499,17 @@ new Chart(document.getElementById('c_tasks'),{
 // ── Charts CA ──────────────────────────────────────────────────────────────
 new Chart(document.getElementById('c_deal_stage'),{
   type:'doughnut',
-  data:{labels:["closedwon", "appointmentscheduled"],datasets:[{data:[2800.0, 50000.0],backgroundColor:['#ff6b35','#2ed573','#ff4757','#a29bfe','#1e90ff'],borderWidth:0}]},
+  data:{labels:["Gagné", "RDV planifié"],datasets:[{data:[2800.0, 50000.0],backgroundColor:['#2ed573','#ff6b35','#ff4757','#a29bfe','#1e90ff'],borderWidth:0}]},
   options:{...CO,maintainAspectRatio:false,cutout:'55%'}
 });
-new Chart(document.getElementById('c_proj'),{
+let projChart = new Chart(document.getElementById('c_proj'),{
   type:'bar',
   data:{
-    labels:['Pessimiste (5%)','Réaliste (10%)','Optimiste (20%)'],
-    datasets:[{label:'CA potentiel leads tièdes (€)',data:[4830,9660,19320],backgroundColor:['#1e90ff','#ffa502','#2ed573'],borderRadius:8}]
+    labels:['Pessimiste (5%)','Réaliste (10%)','Optimiste (20%)','🎯 Objectif annuel'],
+    datasets:[
+      {label:'CA potentiel (€)',data:[4830,9660,19320,null],backgroundColor:['#1e90ff','#ffa502','#2ed573','transparent'],borderRadius:8},
+      {label:'Objectif',data:[null,null,null,100000],backgroundColor:'rgba(255,107,53,0.25)',borderColor:'#ff6b35',borderWidth:2,borderRadius:8}
+    ]
   },
   options:{...CO,maintainAspectRatio:false,
     scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
@@ -1500,7 +1532,7 @@ new Chart(document.getElementById('c_statut'),{
 // ── Charts Pipeline ────────────────────────────────────────────────────────
 new Chart(document.getElementById('c_pipeline_bar'),{
   type:'bar',
-  data:{labels:["closedwon", "appointmentscheduled"],datasets:[{label:'Valeur (€)',data:[2800.0, 50000.0],backgroundColor:'#ff6b35',borderRadius:8}]},
+  data:{labels:["Gagné", "RDV planifié"],datasets:[{label:'Valeur (€)',data:[2800.0, 50000.0],backgroundColor:'#ff6b35',borderRadius:8}]},
   options:{...CO,maintainAspectRatio:false,
     scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
 });
@@ -1547,6 +1579,32 @@ impactChart = new Chart(document.getElementById('c_impact'),{
     scales:{x:{ticks:{color:'#888'},grid:{color:'#1e2130'}},y:{ticks:{color:'#888'},grid:{color:'#1e2130'}}}}
 });
 updateSim();
+
+// ── Objectif CA annuel ─────────────────────────────────────────────────────
+const CA_DONE    = 2800;
+const PIPELINE   = 50000;
+function updateObjectif() {
+  const obj = Math.max(1, parseInt(document.getElementById('obj_ca').value) || 100000);
+  const pct  = Math.round(CA_DONE / obj * 1000) / 10;
+  const pctCapped = Math.min(100, pct);
+  const remaining = Math.max(0, obj - CA_DONE);
+  const pipPct = Math.round(PIPELINE / obj * 100);
+
+  document.getElementById('obj_bar').style.width          = pctCapped + '%';
+  document.getElementById('obj_pct').textContent          = pct + '%';
+  document.getElementById('obj_pct_label').textContent    = pct + '%';
+  document.getElementById('obj_target_label').textContent = obj.toLocaleString('fr') + ' €';
+  document.getElementById('obj_remaining').textContent    = remaining.toLocaleString('fr') + ' €';
+  document.getElementById('obj_pipeline_pct').textContent = pipPct + '%';
+  document.getElementById('obj_pipeline_bar_pct').textContent = pipPct + '%';
+
+  // Mise à jour du graphique projections
+  if (projChart) {
+    projChart.data.datasets[1].data = [null, null, null, obj];
+    projChart.update();
+  }
+}
+updateObjectif();
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 function goPage(id, btn) {
