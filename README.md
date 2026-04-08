@@ -1,55 +1,121 @@
+# WebSEO Platform
 
-# Dashboard SEO & Marketing Digital
+Application SEO + calendrier éditorial avec génération IA, publication sociale et maintenant une couche de **planning éditorial structuré** (import CSV/Sheet).
 
-Une application complète de gestion SEO et de génération de contenu éditorial pour sites web, développée avec React et Node.js.
+## Fonctionnalités principales
+- Analyse SEO et GEO
+- Calendrier éditorial (contenus à publier)
+- Génération IA de calendrier + rédaction
+- Publication sociale
+- Planning éditorial importable depuis CSV (nouveau)
 
-## 🚀 Fonctionnalités
+## Stack
+- Frontend: React + TypeScript + Tailwind + TanStack Query
+- Backend: Express + TypeScript
+- Database: Supabase Postgres
 
-### Analyse SEO
-- Analyse technique complète des sites web
-- Métriques de performance (Core Web Vitals)
-- Suivi des mots-clés et backlinks
-- Recommandations d'amélioration
-
-### Calendrier Éditorial
-- Génération automatique de contenu via IA
-- Planning multi-plateformes (Instagram, TikTok, YouTube, etc.)
-- Gestion centralisée des publications
-
-### Intégrations
-- Webhook n8n pour analyses SEO automatisées
-- OpenAI GPT-4 pour la génération de contenu
-- Airtable pour le stockage des données
-
-## 🛠 Stack Technique
-
-- **Frontend**: React 18 + TypeScript + Tailwind CSS
-- **Backend**: Node.js + Express + Drizzle ORM
-- **Base de données**: PostgreSQL (Neon)
-- **Outils**: Vite, TanStack Query, Radix UI
-
-## 📦 Installation
-
+## Installation
 ```bash
 npm install
 npm run dev
 ```
 
-L'application sera accessible sur `http://localhost:5000`
+Application sur `http://localhost:5000`.
 
-## 🔧 Configuration
+## Migration Planning (obligatoire)
+Appliquer la migration SQL suivante dans Supabase SQL Editor:
 
-1. Configurez vos variables d'environnement
-2. Mettez à jour l'URL du webhook dans `server/config.ts`
-3. Configurez vos clés API (OpenAI, Airtable)
+- [`supabase/migrations/010_add_editorial_planning.sql`](/c:/Users/Hopi/.gemini/antigravity/webseo/supabase/migrations/010_add_editorial_planning.sql)
 
-## 📱 Utilisation
+## Nouveau menu Planning
+Route: `/planning`
 
-1. Ajoutez vos sites web dans les paramètres
-2. Lancez une analyse SEO depuis le dashboard
-3. Consultez les rapports détaillés
-4. Générez votre calendrier éditorial
+Permet de:
+1. importer un CSV (preview + import),
+2. filtrer les lignes (mois, statut, calendrier, recherche),
+3. pousser une ligne vers `editorial_contents` avec “Créer contenu”.
 
-## 🏗 Architecture
+## Architecture de données
+```mermaid
+erDiagram
+  SITES ||--o{ EDITORIAL_CALENDARS : has
+  SITES ||--o{ EDITORIAL_CALENDAR_ITEMS : has
+  SITES ||--o{ EDITORIAL_CONTENTS : has
+  EDITORIAL_CALENDARS ||--o{ EDITORIAL_CALENDAR_ITEMS : contains
+  EDITORIAL_CALENDAR_ITEMS ||--o{ EDITORIAL_CONTENTS : creates
+  EDITORIAL_CONTENTS ||--o{ PUBLICATION_LOGS : logs
 
-Le projet suit une architecture modulaire avec séparation claire entre frontend et backend. Consultez `ARCHITECTURE.md` pour plus de détails.
+  SITES {
+    int id PK
+    text name
+    text url
+  }
+
+  EDITORIAL_CALENDARS {
+    int id PK
+    int site_id FK
+    text name
+    date period_start
+    date period_end
+    text source_type
+    text source_file_name
+    int total_rows
+  }
+
+  EDITORIAL_CALENDAR_ITEMS {
+    int id PK
+    int calendar_id FK
+    int site_id FK
+    timestamptz publication_date
+    text month_label
+    text day_label
+    text title
+    text primary_keyword
+    text brief_url
+    text brief_text
+    text content_seed
+    text raw_status
+    text workflow_status
+    text target_editorial_status
+    text source_url
+    text topic
+    text objective
+    text content_type
+    text dedup_key
+  }
+
+  EDITORIAL_CONTENTS {
+    int id PK
+    int site_id FK
+    int source_calendar_item_id FK
+    text content_type
+    text content_text
+    text status
+    timestamptz publication_date
+  }
+```
+
+## Architecture applicative (flux)
+```mermaid
+flowchart LR
+  A[UI Planning CSV] --> B[/api/planning/import]
+  B --> C[(editorial_calendars)]
+  B --> D[(editorial_calendar_items)]
+  D --> E[UI Planning Table]
+  E --> F[/api/planning/items/:id/create-content]
+  F --> G[(editorial_contents)]
+  G --> H[Calendrier éditorial]
+  G --> I[Publication sociale]
+```
+
+## API Planning (nouvelle)
+- `GET /api/planning/calendars?siteId=:id`
+- `GET /api/planning/items?siteId=:id&calendarId=&month=&workflowStatus=&search=`
+- `POST /api/planning/import` (multipart form-data: `file`, `siteId`, `year`, `dryRun`, `calendarName`)
+- `POST /api/planning/items/:id/create-content`
+
+## Notes mapping CSV
+- `Contenu` alimente `content_seed`
+- `Titre` alimente `title`
+- `Mot-clé principal`, `Brief`, `URL brief Semrank`, `URL` sont stockés en champs dédiés
+- `Status` du CSV est conservé (`raw_status`) + normalisé (`workflow_status`) + mappé vers statut éditorial (`target_editorial_status`)

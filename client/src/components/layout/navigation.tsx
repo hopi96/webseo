@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Calendar, Settings, Activity } from "lucide-react";
+import { Home, Calendar, Settings, Activity, FileSpreadsheet } from "lucide-react";
 
 export function Navigation() {
   const [location] = useLocation();
@@ -7,6 +7,7 @@ export function Navigation() {
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
     { href: "/calendar", icon: Calendar, label: "Calendrier" },
+    { href: "/planning", icon: FileSpreadsheet, label: "Planning" },
     { href: "/monitoring", icon: Activity, label: "Monitoring" },
     { href: "/settings", icon: Settings, label: "Paramètres" }
   ];

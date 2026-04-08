@@ -8,6 +8,7 @@ import { openaiService } from "./openai-service";
 import { buildMonitoringSummary } from "./monitoring-agent-service";
 import { contentGeneratorService } from "./content-generator-service";
 import workflowRoutes from "./workflow-routes";
+import planningRoutes from "./planning-routes";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -53,6 +54,7 @@ function extractAccessToken(req: Request): string | undefined {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Enregistrer les routes de workflow (remplacent n8n)
   app.use('/api/workflows', workflowRoutes);
+  app.use('/api/planning', planningRoutes);
 
   // Website routes
   app.get("/api/websites", async (req, res) => {

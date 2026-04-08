@@ -8,6 +8,7 @@ import { SiteProvider } from "@/lib/site-context";
 import Dashboard from "@/pages/dashboard";
 import Keywords from "@/pages/keywords";
 import Calendar from "@/pages/calendar";
+import Planning from "@/pages/planning";
 import Monitoring from "@/pages/monitoring";
 import Settings from "@/pages/settings";
 import DocumentationPDF from "@/pages/documentation-pdf";
@@ -34,6 +35,11 @@ function Router() {
       <Route path="/calendar">
         <ProtectedRoute>
           <Calendar />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/planning">
+        <ProtectedRoute>
+          <Planning />
         </ProtectedRoute>
       </Route>
       <Route path="/monitoring">
