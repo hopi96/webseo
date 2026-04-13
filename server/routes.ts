@@ -43,12 +43,43 @@ const upload = multer({
   }
 });
 
+const newsletterMediaUpload = multer({
+  storage: storage_multer,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB max for newsletter videos
+  },
+  fileFilter: (_req: any, file: any, cb: any) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image and video files are allowed'));
+    }
+  }
+});
+
 function extractAccessToken(req: Request): string | undefined {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7);
   }
   return undefined;
+}
+
+function normalizePublicationDate(value: unknown): string | null {
+  if (typeof value === 'string') {
+    const dateOnlyMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch;
+      return `${year}-${month}-${day}T12:00:00.000Z`;
+    }
+  }
+
+  const parsedDate = value instanceof Date ? value : new Date(String(value));
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return parsedDate.toISOString();
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -842,7 +873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Route Express Content Generation — Génère du contenu IA en un clic
   app.post("/api/express-content", async (req, res) => {
     try {
-      const { siteId, platform, topic, publicationDate, systemPrompt } = req.body;
+      const { siteId, platform, topic, publicationDate, systemPrompt, newsletterMediaPlan } = req.body;
 
       if (!siteId || !platform || !topic || !publicationDate) {
         return res.status(400).json({
@@ -855,6 +886,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📅 Date de publication: ${publicationDate}`);
       if (systemPrompt) {
         console.log(`📝 Prompt système personnalisé fourni (${systemPrompt.length} caractères)`);
+      }
+
+      const normalizedPublicationDate = normalizePublicationDate(publicationDate);
+      if (!normalizedPublicationDate) {
+        return res.status(400).json({
+          message: "Date de publication invalide"
+        });
       }
 
       // Construire le contexte enrichi avec le prompt système custom si fourni
@@ -870,8 +908,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         platform,
         theme: topic,
         context: contextParts.join('\n'),
-        publicationDate: new Date(publicationDate).toISOString(),
-        generateImage: ['instagram', 'pinterest'].includes(platform)
+        publicationDate: normalizedPublicationDate,
+        generateImage: ['instagram', 'pinterest'].includes(platform),
+        newsletterMediaPlan
       });
 
       console.log(`✅ Contenu Express créé: ID ${result.id}`);
@@ -1317,6 +1356,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('✅ Image uploadée avec succès:', imageUrl);
       res.json({ imageUrl });
+    });
+  });
+
+  // Route pour uploader des médias intégrés dans les newsletters
+  app.post("/api/upload-newsletter-media", (req: any, res) => {
+    newsletterMediaUpload.single('media')(req, res, (err: any) => {
+      if (err) {
+        console.error('❌ Erreur upload média newsletter:', err);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: "Fichier trop lourd (max 50MB)" });
+        }
+        return res.status(400).json({ message: err.message });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Aucun fichier média fourni" });
+      }
+
+      const mediaUrl = `/uploads/${req.file.filename}`;
+      const mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+
+      res.json({
+        mediaUrl,
+        mediaType,
+        originalName: req.file.originalname
+      });
     });
   });
 

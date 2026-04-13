@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { supabaseService } from "./supabase-service";
 import { extractClaudeText, getClaudeModel, requireAnthropic } from "./claude-client";
+import { ensureNewsletterMediaBlocks } from "@shared/newsletter-media";
 
 let openai: OpenAI | null = null;
 
@@ -185,7 +186,10 @@ ${outputFormat}`;
       const result = this.parseJsonResponse(content) ?? {};
 
       const finalTitle = this.pickString(result.title, 'Titre généré');
-      const finalContent = this.pickString(result.content, 'Contenu généré');
+      let finalContent = this.pickString(result.content, 'Contenu généré');
+      if ((request.contentType || '').toLowerCase() === 'newsletter') {
+        finalContent = ensureNewsletterMediaBlocks(finalContent);
+      }
       const finalSuggestions = this.pickStringArray(result.suggestions);
 
       if (CONTENT_GEN_DEBUG) {
@@ -344,6 +348,8 @@ Renvoie UNIQUEMENT le texte du nouveau prompt.`;
 - Objet (max 50 caractères) et Preheader.
 - Introduction courte.
 - Corps structuré avec titres (H2) et paragraphes aérés.
+- Sections média : ajoute des emplacements sur ligne seule quand utile, avec [IMAGE_SECTION: description concrète de l'image à ajouter] et [VIDEO_SECTION: sujet de la vidéo à intégrer, URL à ajouter].
+- N'invente aucune URL image ou vidéo.
 - CTA unique et clair.
 Ton : proche, expert, accessible.
 Inclure "Objet:" et "Preheader:" dans le contenu.`;
@@ -474,7 +480,7 @@ Ton : informatif, local, accueillant.`;
         style: "vivid",
       });
 
-      const imageUrl = response.data[0].url;
+      const imageUrl = response.data?.[0]?.url;
 
       if (!imageUrl) {
         throw new Error("Aucune URL d'image retournée par DALL-E 3");

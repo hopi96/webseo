@@ -2,6 +2,11 @@ import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import DOMPurify from 'dompurify';
+import {
+    getNewsletterMediaBlocks,
+    splitNewsletterMediaContent,
+    type NewsletterMediaBlock
+} from '@shared/newsletter-media';
 
 type ContentFormat = 'html' | 'markdown' | 'plain';
 
@@ -14,6 +19,10 @@ export function detectContentFormat(content: string): ContentFormat {
     }
 
     const trimmed = content.trim();
+
+    if (getNewsletterMediaBlocks(trimmed).length > 0) {
+        return 'markdown';
+    }
 
     // Check for HTML - look for common HTML tags
     const htmlPatterns = [
@@ -69,14 +78,39 @@ interface ContentRendererProps {
  * Render content based on its detected format
  */
 export function ContentRenderer({ content, className = '', maxLength }: ContentRendererProps) {
-    const format = useMemo(() => detectContentFormat(content), [content]);
-
     const displayContent = useMemo(() => {
         if (maxLength && content.length > maxLength) {
             return content.substring(0, maxLength) + '...';
         }
         return content;
     }, [content, maxLength]);
+
+    const parts = useMemo(() => splitNewsletterMediaContent(displayContent), [displayContent]);
+    const hasMediaBlocks = parts.some((part) => part.kind === 'media');
+
+    if (hasMediaBlocks) {
+        return (
+            <div className={className}>
+                {parts.map((part, index) => (
+                    part.kind === 'media' ? (
+                        <NewsletterMediaBlockView key={`media-${part.index}-${index}`} block={part.block} />
+                    ) : (
+                        <FormattedContent key={`text-${index}`} content={part.text} className="mb-4" />
+                    )
+                ))}
+            </div>
+        );
+    }
+
+    return <FormattedContent content={displayContent} className={className} />;
+}
+
+function FormattedContent({ content, className = '' }: ContentRendererProps) {
+    const format = useMemo(() => detectContentFormat(content), [content]);
+
+    const displayContent = useMemo(() => {
+        return content;
+    }, [content]);
 
     if (format === 'html') {
         // Sanitize HTML to prevent XSS attacks
@@ -160,6 +194,75 @@ export function ContentRenderer({ content, className = '', maxLength }: ContentR
     return (
         <div className={className}>
             <p className="whitespace-pre-wrap">{displayContent}</p>
+        </div>
+    );
+}
+
+function isUsableMediaUrl(url?: string): url is string {
+    return Boolean(url && url.trim() && !/^URL\s+à\s+ajouter$/i.test(url.trim()) && !/^URL\s+a\s+ajouter$/i.test(url.trim()));
+}
+
+function getYoutubeEmbedUrl(url: string): string | null {
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+function isDirectVideoUrl(url: string): boolean {
+    return url.startsWith('/uploads/') || /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+}
+
+function NewsletterMediaBlockView({ block }: { block: NewsletterMediaBlock }) {
+    const hasUrl = isUsableMediaUrl(block.url);
+    const mediaUrl = hasUrl ? block.url : undefined;
+
+    if (block.type === 'image') {
+        return (
+            <figure className="my-5 overflow-hidden rounded-lg border bg-muted/40">
+                {mediaUrl ? (
+                    <img src={mediaUrl} alt={block.description} className="w-full max-h-[360px] object-cover" />
+                ) : (
+                    <div className="flex min-h-[140px] items-center justify-center bg-muted px-4 text-center text-sm text-muted-foreground">
+                        Image à ajouter
+                    </div>
+                )}
+                <figcaption className="px-4 py-3 text-sm text-muted-foreground">
+                    {block.description}
+                </figcaption>
+            </figure>
+        );
+    }
+
+    const embedUrl = mediaUrl ? getYoutubeEmbedUrl(mediaUrl) : null;
+
+    return (
+        <div className="my-5 overflow-hidden rounded-lg border bg-muted/40">
+            {embedUrl ? (
+                <iframe
+                    src={embedUrl}
+                    title={block.description}
+                    className="aspect-video w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                />
+            ) : mediaUrl && isDirectVideoUrl(mediaUrl) ? (
+                <video src={mediaUrl} controls className="aspect-video w-full bg-black" />
+            ) : mediaUrl ? (
+                <a
+                    href={mediaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-4 py-5 text-sm font-medium text-blue-600 hover:underline"
+                >
+                    Ouvrir la vidéo
+                </a>
+            ) : (
+                <div className="flex min-h-[120px] items-center justify-center bg-muted px-4 text-center text-sm text-muted-foreground">
+                    Vidéo à intégrer
+                </div>
+            )}
+            <div className="px-4 py-3 text-sm text-muted-foreground">
+                {block.description}
+            </div>
         </div>
     );
 }

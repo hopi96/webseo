@@ -43,6 +43,7 @@ import {
   getImageSourceLabel,
   type FormImageState
 } from "@/lib/image-utils";
+import { NewsletterMediaEditor } from "./newsletter-media-editor";
 
 interface EditArticleDialogProps {
   open: boolean;
@@ -384,6 +385,13 @@ export function EditArticleDialog({ open, onOpenChange, article }: EditArticleDi
                 </FormItem>
               )}
             />
+
+            {form.watch("typeContent") === "newsletter" && (
+              <NewsletterMediaEditor
+                content={form.watch("contentText") || ""}
+                onContentChange={(nextContent) => form.setValue("contentText", nextContent, { shouldDirty: true })}
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

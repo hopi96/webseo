@@ -23,6 +23,7 @@ import {
   getImageSourceLabel,
   type FormImageState
 } from "@/lib/image-utils";
+import { NewsletterMediaEditor } from "./newsletter-media-editor";
 
 const addArticleSchema = z.object({
   contentText: z.string().min(1, "Le contenu est requis"),
@@ -396,6 +397,13 @@ export function AddArticleDialog({ open, onOpenChange, defaultDate }: AddArticle
                   </Select>
                 </div>
               </div>
+
+              {form.watch("typeContent") === "newsletter" && (
+                <NewsletterMediaEditor
+                  content={form.watch("contentText") || ""}
+                  onContentChange={(nextContent) => form.setValue("contentText", nextContent, { shouldDirty: true })}
+                />
+              )}
 
               <div>
                 <div className="flex items-center gap-2 mb-2">

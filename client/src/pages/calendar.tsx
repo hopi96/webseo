@@ -310,7 +310,7 @@ export default function Calendar() {
   };
 
   const handleAddArticle = (date?: Date) => {
-    const selectedDateString = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    const selectedDateString = getDateKey(date ?? new Date());
     setAddDialogDate(selectedDateString);
     setIsAddDialogOpen(true);
   };
@@ -321,7 +321,7 @@ export default function Calendar() {
   };
 
   const handleExpressContent = (date?: Date) => {
-    const selectedDateString = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    const selectedDateString = getDateKey(date ?? new Date());
     setExpressDialogDate(selectedDateString);
     setIsExpressDialogOpen(true);
   };

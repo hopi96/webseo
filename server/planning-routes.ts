@@ -1,4 +1,4 @@
-﻿import { Router, Request, Response } from "express";
+import { Router, Request, Response } from "express";
 import multer from "multer";
 import { getSupabaseAdmin } from "./supabase-service";
 import { parseEditorialPlanningCsv } from "./editorial-planning-import";
@@ -302,7 +302,34 @@ router.get("/items", async (req: Request, res: Response) => {
       return true;
     });
 
-    res.json(filtered);
+    // Fetch which items already have editorial content created
+    const itemIds = filtered.map((item: any) => item.id);
+    const contentExistsSet = new Set<number>();
+    if (itemIds.length > 0) {
+      // Query in chunks of 50 to avoid URL length issues
+      for (let i = 0; i < itemIds.length; i += 50) {
+        const chunk = itemIds.slice(i, i + 50);
+        const { data: existingContents, error: existingContentsError } = await sb
+          .from("editorial_contents")
+          .select("source_calendar_item_id")
+          .in("source_calendar_item_id", chunk);
+        if (existingContentsError) throw existingContentsError;
+        if (existingContents) {
+          for (const row of existingContents) {
+            if (row.source_calendar_item_id) {
+              contentExistsSet.add(row.source_calendar_item_id);
+            }
+          }
+        }
+      }
+    }
+
+    const enriched = filtered.map((item: any) => ({
+      ...item,
+      has_content: contentExistsSet.has(item.id)
+    }));
+
+    res.json(enriched);
   } catch (error: any) {
     console.error("❌ Erreur GET /api/planning/items:", error);
     if (String(error?.message || "").includes("editorial_calendar_items")) {

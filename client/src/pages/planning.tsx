@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { UnifiedHeader } from "@/components/layout/unified-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSite } from "@/lib/site-context";
 import { queryClient } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabase";
-import { CalendarPlus, FileSpreadsheet, RefreshCw, Search, Upload, Pencil, Save, Trash2, X } from "lucide-react";
+import { CalendarPlus, FileSpreadsheet, RefreshCw, Search, Upload, Pencil, Save, Trash2, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 type PlanningCalendar = {
   id: number;
@@ -45,6 +45,7 @@ type PlanningItem = {
   objective: string | null;
   content_type: string;
   created_at: string;
+  has_content: boolean;
 };
 
 type ImportPreview = {
@@ -97,6 +98,8 @@ export default function PlanningPage() {
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [editDraft, setEditDraft] = useState<Record<string, string>>({});
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   const { data: calendars = [], isLoading: isLoadingCalendars } = useQuery<PlanningCalendar[]>({
     queryKey: ["/api/planning/calendars", activeSiteId],
@@ -373,8 +376,29 @@ export default function PlanningPage() {
     return { total, published, scheduled, ready };
   }, [items]);
 
-  const visibleItemIds = useMemo(() => items.map((item) => item.id), [items]);
+  // Pagination logic
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(items.length / itemsPerPage)), [items.length, itemsPerPage]);
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return items.slice(start, start + itemsPerPage);
+  }, [items, currentPage, itemsPerPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, monthFilter, statusFilter, calendarFilter]);
+
+  // Ensure currentPage stays within bounds
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
+
+  const visibleItemIds = useMemo(() => paginatedItems.map((item) => item.id), [paginatedItems]);
   const selectedCount = selectedItemIds.length;
+  const selectedCreatableItemIds = useMemo(
+    () => selectedItemIds.filter((id) => items.some((item) => item.id === id && !item.has_content)),
+    [items, selectedItemIds]
+  );
   const allVisibleSelected = visibleItemIds.length > 0 && visibleItemIds.every((id) => selectedItemIds.includes(id));
   const hasPendingBulkAction =
     createContentBatchMutation.isPending || deleteBatchMutation.isPending || createContentMutation.isPending;
@@ -566,7 +590,7 @@ export default function PlanningPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Lignes du planning</CardTitle>
+            <CardTitle>Lignes du planning <span className="text-sm font-normal text-muted-foreground ml-2">({items.length} résultat{items.length !== 1 ? "s" : ""})</span></CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -574,8 +598,8 @@ export default function PlanningPage() {
               <Button
                 size="sm"
                 variant="outline"
-                disabled={selectedCount === 0 || hasPendingBulkAction}
-                onClick={() => createContentBatchMutation.mutate(selectedItemIds)}
+                disabled={selectedCreatableItemIds.length === 0 || hasPendingBulkAction}
+                onClick={() => createContentBatchMutation.mutate(selectedCreatableItemIds)}
               >
                 Creer contenus selectionnes
               </Button>
@@ -594,220 +618,290 @@ export default function PlanningPage() {
             ) : items.length === 0 ? (
               <p className="text-sm text-muted-foreground">Aucune ligne de planning pour ce filtre.</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1200px] text-sm">
-                  <thead>
-                    <tr className="text-left border-b">
-                      <th className="py-2 pr-3">
-                        <Checkbox
-                          checked={allVisibleSelected}
-                          onCheckedChange={(value) => toggleSelectAllVisible(Boolean(value))}
-                          aria-label="Selectionner toutes les lignes visibles"
-                        />
-                      </th>
-                      <th className="py-2 pr-3">Mois</th>
-                      <th className="py-2 pr-3">Jour</th>
-                      <th className="py-2 pr-3">Titre</th>
-                      <th className="py-2 pr-3">Mot-clé</th>
-                      <th className="py-2 pr-3">Brief</th>
-                      <th className="py-2 pr-3">Contenu</th>
-                      <th className="py-2 pr-3">Statut Sheet</th>
-                      <th className="py-2 pr-3">Workflow</th>
-                      <th className="py-2 pr-3">URL</th>
-                      <th className="py-2 pr-3">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item) => (
-                      <tr key={item.id} className="border-b align-top">
-                        <td className="py-2 pr-3">
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1200px] text-sm">
+                    <thead>
+                      <tr className="text-left border-b">
+                        <th className="py-2 pr-3">
                           <Checkbox
-                            checked={selectedItemIds.includes(item.id)}
-                            onCheckedChange={(value) => toggleItemSelection(item.id, Boolean(value))}
-                            aria-label={`Selectionner la ligne ${item.id}`}
+                            checked={allVisibleSelected}
+                            onCheckedChange={(value) => toggleSelectAllVisible(Boolean(value))}
+                            aria-label="Selectionner toutes les lignes visibles"
                           />
-                        </td>
-                        <td className="py-2 pr-3">{item.month_label || "-"}</td>
-                        <td className="py-2 pr-3">{item.day_label || "-"}</td>
-                        <td className="py-2 pr-3 font-medium max-w-[260px]">
-                          {editingItemId === item.id ? (
-                            <Input
-                              value={editDraft.title || ""}
-                              onChange={(e) => setEditDraft((prev) => ({ ...prev, title: e.target.value }))}
-                            />
-                          ) : (
-                            <div className="line-clamp-3">{item.title}</div>
-                          )}
-                        </td>
-                        <td className="py-2 pr-3 max-w-[220px]">
-                          {editingItemId === item.id ? (
-                            <Input
-                              value={editDraft.primary_keyword || ""}
-                              onChange={(e) => setEditDraft((prev) => ({ ...prev, primary_keyword: e.target.value }))}
-                            />
-                          ) : (
-                            <div className="line-clamp-3">{item.primary_keyword || "-"}</div>
-                          )}
-                        </td>
-                        <td className="py-2 pr-3 max-w-[220px]">
-                          {editingItemId === item.id ? (
-                            <Textarea
-                              value={editDraft.brief_text || ""}
-                              onChange={(e) => setEditDraft((prev) => ({ ...prev, brief_text: e.target.value }))}
-                              rows={4}
-                            />
-                          ) : (
-                            <div className="line-clamp-3">{item.brief_text || "-"}</div>
-                          )}
-                        </td>
-                        <td className="py-2 pr-3 max-w-[220px]">
-                          {editingItemId === item.id ? (
-                            <Textarea
-                              value={editDraft.content_seed || ""}
-                              onChange={(e) => setEditDraft((prev) => ({ ...prev, content_seed: e.target.value }))}
-                              rows={4}
-                            />
-                          ) : (
-                            <div className="line-clamp-3">{item.content_seed || "-"}</div>
-                          )}
-                        </td>
-                        <td className="py-2 pr-3">
-                          {editingItemId === item.id ? (
-                            <Input
-                              value={editDraft.raw_status || ""}
-                              onChange={(e) => setEditDraft((prev) => ({ ...prev, raw_status: e.target.value }))}
-                            />
-                          ) : (
-                            item.raw_status || "-"
-                          )}
-                        </td>
-                        <td className="py-2 pr-3">
-                          {editingItemId === item.id ? (
-                            <div className="space-y-2 min-w-[170px]">
-                              <Select
-                                value={editDraft.workflow_status || item.workflow_status}
-                                onValueChange={(value) => setEditDraft((prev) => ({ ...prev, workflow_status: value }))}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="todo">todo</SelectItem>
-                                  <SelectItem value="ready">ready</SelectItem>
-                                  <SelectItem value="scheduled">scheduled</SelectItem>
-                                  <SelectItem value="published">published</SelectItem>
-                                  <SelectItem value="other">other</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Select
-                                value={editDraft.target_editorial_status || item.target_editorial_status}
-                                onValueChange={(value) => setEditDraft((prev) => ({ ...prev, target_editorial_status: value }))}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="en attente">en attente</SelectItem>
-                                  <SelectItem value="à réviser">à réviser</SelectItem>
-                                  <SelectItem value="validé">validé</SelectItem>
-                                  <SelectItem value="publié">publié</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          ) : (
-                            <Badge className={workflowStatusBadge(item.workflow_status)}>
-                              {item.workflow_status}
-                            </Badge>
-                          )}
-                        </td>
-                        <td className="py-2 pr-3 w-[300px] max-w-[300px]">
-                          {editingItemId === item.id ? (
-                            <div className="space-y-2">
-                              <Input
-                                value={editDraft.source_url || ""}
-                                onChange={(e) => setEditDraft((prev) => ({ ...prev, source_url: e.target.value }))}
-                                placeholder="https://..."
-                              />
-                              <Input
-                                type="date"
-                                value={editDraft.publication_date || ""}
-                                onChange={(e) => setEditDraft((prev) => ({ ...prev, publication_date: e.target.value }))}
-                              />
-                            </div>
-                          ) : (
-                            item.source_url ? (
-                              <a
-                                className="block max-w-[300px] truncate text-blue-600 hover:underline"
-                                href={item.source_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                title={item.source_url}
-                              >
-                                {item.source_url}
-                              </a>
-                            ) : "-"
-                          )}
-                        </td>
-                        <td className="py-2 pr-3">
-                          <div className="flex gap-2">
-                            {editingItemId === item.id ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={updateItemMutation.isPending}
-                                  onClick={() => saveEdit(item.id)}
-                                >
-                                  <Save className="h-4 w-4 mr-1" />
-                                  Enregistrer
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  disabled={updateItemMutation.isPending}
-                                  onClick={cancelEdit}
-                                >
-                                  <X className="h-4 w-4 mr-1" />
-                                  Annuler
-                                </Button>
-                              </>
-                            ) : (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={editingItemId !== null}
-                                  onClick={() => beginEdit(item)}
-                                >
-                                  <Pencil className="h-4 w-4 mr-1" />
-                                  Modifier
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={createContentMutation.isPending || hasPendingBulkAction}
-                                  onClick={() => createContentMutation.mutate(item.id)}
-                                >
-                                  Creer contenu
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  disabled={deleteItemMutation.isPending || hasPendingBulkAction}
-                                  onClick={() => deleteItemMutation.mutate(item.id)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  Supprimer
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </td>
+                        </th>
+                        <th className="py-2 pr-3">Mois</th>
+                        <th className="py-2 pr-3">Jour</th>
+                        <th className="py-2 pr-3">Titre</th>
+                        <th className="py-2 pr-3">Mot-clé</th>
+                        <th className="py-2 pr-3">Brief</th>
+                        <th className="py-2 pr-3">Contenu</th>
+                        <th className="py-2 pr-3">Statut Sheet</th>
+                        <th className="py-2 pr-3">Workflow</th>
+                        <th className="py-2 pr-3">URL</th>
+                        <th className="py-2 pr-3">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {paginatedItems.map((item) => (
+                        <tr key={item.id} className="border-b align-top">
+                          <td className="py-2 pr-3">
+                            <Checkbox
+                              checked={selectedItemIds.includes(item.id)}
+                              onCheckedChange={(value) => toggleItemSelection(item.id, Boolean(value))}
+                              aria-label={`Selectionner la ligne ${item.id}`}
+                            />
+                          </td>
+                          <td className="py-2 pr-3">{item.month_label || "-"}</td>
+                          <td className="py-2 pr-3">{item.day_label || "-"}</td>
+                          <td className="py-2 pr-3 font-medium max-w-[260px]">
+                            {editingItemId === item.id ? (
+                              <Input
+                                value={editDraft.title || ""}
+                                onChange={(e) => setEditDraft((prev) => ({ ...prev, title: e.target.value }))}
+                              />
+                            ) : (
+                              <div className="line-clamp-3">{item.title}</div>
+                            )}
+                          </td>
+                          <td className="py-2 pr-3 max-w-[220px]">
+                            {editingItemId === item.id ? (
+                              <Input
+                                value={editDraft.primary_keyword || ""}
+                                onChange={(e) => setEditDraft((prev) => ({ ...prev, primary_keyword: e.target.value }))}
+                              />
+                            ) : (
+                              <div className="line-clamp-3">{item.primary_keyword || "-"}</div>
+                            )}
+                          </td>
+                          <td className="py-2 pr-3 max-w-[220px]">
+                            {editingItemId === item.id ? (
+                              <Textarea
+                                value={editDraft.brief_text || ""}
+                                onChange={(e) => setEditDraft((prev) => ({ ...prev, brief_text: e.target.value }))}
+                                rows={4}
+                              />
+                            ) : (
+                              <div className="line-clamp-3">{item.brief_text || "-"}</div>
+                            )}
+                          </td>
+                          <td className="py-2 pr-3 max-w-[220px]">
+                            {editingItemId === item.id ? (
+                              <Textarea
+                                value={editDraft.content_seed || ""}
+                                onChange={(e) => setEditDraft((prev) => ({ ...prev, content_seed: e.target.value }))}
+                                rows={4}
+                              />
+                            ) : (
+                              <div className="line-clamp-3">{item.content_seed || "-"}</div>
+                            )}
+                          </td>
+                          <td className="py-2 pr-3">
+                            {editingItemId === item.id ? (
+                              <Input
+                                value={editDraft.raw_status || ""}
+                                onChange={(e) => setEditDraft((prev) => ({ ...prev, raw_status: e.target.value }))}
+                              />
+                            ) : (
+                              item.raw_status || "-"
+                            )}
+                          </td>
+                          <td className="py-2 pr-3">
+                            {editingItemId === item.id ? (
+                              <div className="space-y-2 min-w-[170px]">
+                                <Select
+                                  value={editDraft.workflow_status || item.workflow_status}
+                                  onValueChange={(value) => setEditDraft((prev) => ({ ...prev, workflow_status: value }))}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="todo">todo</SelectItem>
+                                    <SelectItem value="ready">ready</SelectItem>
+                                    <SelectItem value="scheduled">scheduled</SelectItem>
+                                    <SelectItem value="published">published</SelectItem>
+                                    <SelectItem value="other">other</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={editDraft.target_editorial_status || item.target_editorial_status}
+                                  onValueChange={(value) => setEditDraft((prev) => ({ ...prev, target_editorial_status: value }))}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="en attente">en attente</SelectItem>
+                                    <SelectItem value="à réviser">à réviser</SelectItem>
+                                    <SelectItem value="validé">validé</SelectItem>
+                                    <SelectItem value="publié">publié</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ) : (
+                              <Badge className={workflowStatusBadge(item.workflow_status)}>
+                                {item.workflow_status}
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-2 pr-3 w-[300px] max-w-[300px]">
+                            {editingItemId === item.id ? (
+                              <div className="space-y-2">
+                                <Input
+                                  value={editDraft.source_url || ""}
+                                  onChange={(e) => setEditDraft((prev) => ({ ...prev, source_url: e.target.value }))}
+                                  placeholder="https://..."
+                                />
+                                <Input
+                                  type="date"
+                                  value={editDraft.publication_date || ""}
+                                  onChange={(e) => setEditDraft((prev) => ({ ...prev, publication_date: e.target.value }))}
+                                />
+                              </div>
+                            ) : (
+                              item.source_url ? (
+                                <a
+                                  className="block max-w-[300px] truncate text-blue-600 hover:underline"
+                                  href={item.source_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={item.source_url}
+                                >
+                                  {item.source_url}
+                                </a>
+                              ) : "-"
+                            )}
+                          </td>
+                          <td className="py-2 pr-3">
+                            <div className="flex gap-2">
+                              {editingItemId === item.id ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={updateItemMutation.isPending}
+                                    onClick={() => saveEdit(item.id)}
+                                  >
+                                    <Save className="h-4 w-4 mr-1" />
+                                    Enregistrer
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    disabled={updateItemMutation.isPending}
+                                    onClick={cancelEdit}
+                                  >
+                                    <X className="h-4 w-4 mr-1" />
+                                    Annuler
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={editingItemId !== null}
+                                    onClick={() => beginEdit(item)}
+                                  >
+                                    <Pencil className="h-4 w-4 mr-1" />
+                                    Modifier
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={item.has_content || createContentMutation.isPending || hasPendingBulkAction}
+                                    onClick={() => createContentMutation.mutate(item.id)}
+                                    className={item.has_content ? "bg-muted text-muted-foreground hover:bg-muted hover:text-muted-foreground cursor-not-allowed" : undefined}
+                                    title={item.has_content ? "Un contenu éditorial existe déjà pour cette ligne" : "Créer le contenu éditorial"}
+                                  >
+                                    {item.has_content ? "Contenu créé" : "Créer contenu"}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    disabled={deleteItemMutation.isPending || hasPendingBulkAction}
+                                    onClick={() => deleteItemMutation.mutate(item.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Supprimer
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Lignes par page :</span>
+                    <Select value={String(itemsPerPage)} onValueChange={(v) => { setItemsPerPage(Number(v)); setCurrentPage(1); }}>
+                      <SelectTrigger className="w-[75px] h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="ml-2">
+                      {Math.min((currentPage - 1) * itemsPerPage + 1, items.length)}–{Math.min(currentPage * itemsPerPage, items.length)} sur {items.length}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled={currentPage <= 1}
+                      onClick={() => setCurrentPage(1)}
+                      title="Première page"
+                    >
+                      <ChevronsLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled={currentPage <= 1}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      title="Page précédente"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm px-3 font-medium">
+                      Page {currentPage} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      title="Page suivante"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                      title="Dernière page"
+                    >
+                      <ChevronsRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -815,4 +909,3 @@ export default function PlanningPage() {
     </div>
   );
 }
-

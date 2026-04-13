@@ -8,6 +8,7 @@ import { supabaseService } from './supabase-service';
 import type { CalendarEntry } from './content-calendar-service';
 import { researchAgentService, type ResearchBrief } from './research-agent-service';
 import { extractClaudeText, getClaudeModel, requireAnthropic } from './claude-client';
+import { ensureNewsletterMediaBlocks } from '@shared/newsletter-media';
 
 // Types
 export interface ContentGenerationRequest {
@@ -17,6 +18,11 @@ export interface ContentGenerationRequest {
     context: string;
     publicationDate: string;
     generateImage?: boolean;
+    newsletterMediaPlan?: {
+        sectionCount?: number;
+        includeImageSections?: boolean;
+        includeVideoSections?: boolean;
+    };
 }
 
 export interface GeneratedContent {
@@ -52,6 +58,11 @@ STRUCTURE DE LA NEWSLETTER :
 4. **Corps (Body)** : Apporte de la valeur (Conseils, Histoire, Nouveauté). Utilise des sauts de ligne pour la lisibilité.
    - Utilise une structure H2 claire pour séparer les idées.
 5. **Call to Action (CTA)** : Unique et clair. Qu'attend-on du lecteur ?
+
+BLOCS MEDIA :
+- Quand les instructions de génération demandent des médias, réserve des emplacements éditoriaux précis au lieu d'inventer des URLs.
+- Utilise uniquement ces lignes autonomes : [IMAGE_SECTION: description concrète de l'image à ajouter] ou [VIDEO_SECTION: sujet de la vidéo à intégrer, URL à ajouter].
+- Chaque bloc média doit être relié à la section qui le précède.
 
 TON : Proche, expert, mais accessible. Pas de jargon inutile.`;
 
@@ -323,11 +334,13 @@ export class ContentGeneratorService {
     ): Promise<string> {
         // Construction du prompt utilisateur avec le contexte spécifique du post
         const researchSection = researchBrief ? this.formatResearchBrief(researchBrief) : '';
+        const newsletterMediaInstructions = this.buildNewsletterMediaInstructions(request);
 
         const userPrompt = `DÉTAILS DU POST À CRÉER :
 Thème: ${request.theme}
 Contexte/Angle: ${request.context}
 Date de publication: ${request.publicationDate}
+${newsletterMediaInstructions ? `\n${newsletterMediaInstructions}` : ''}
 
 RAPPEL IMPORTANT :
 Un agent IA de support a réalisé une recherche web récente pour améliorer la qualité du post.
@@ -372,17 +385,18 @@ N'ajoute pas de texte d'introduction type "Voici le post".`;
 
         // Nettoyer le markdown si présent
         const cleaned = this.cleanContent(content);
+        const finalContent = this.finalizeGeneratedContent(cleaned, request);
 
         if (CONTENT_GEN_DEBUG) {
             console.log('🧠 [Claude][Content] Usage', response.usage);
             console.log('🧠 [Claude][Content] Stop reason', response.stop_reason);
             console.log('🧠 [Claude][Content] Output stats', {
-                words: countWords(cleaned),
-                characters: cleaned.length
+                words: countWords(finalContent),
+                characters: finalContent.length
             });
         }
 
-        return cleaned;
+        return finalContent;
     }
 
     /**
@@ -478,7 +492,49 @@ Description: ${description}`;
         return buildSystemPrompt(platform, contextString);
     }
 
-    
+    private buildNewsletterMediaInstructions(request: ContentGenerationRequest): string {
+        if ((request.platform || '').toLowerCase() !== 'newsletter') {
+            return '';
+        }
+
+        const plan = request.newsletterMediaPlan || {};
+        const sectionCount = Math.min(Math.max(Number(plan.sectionCount || 3), 2), 6);
+        const includeImages = plan.includeImageSections !== false;
+        const includeVideos = plan.includeVideoSections !== false;
+
+        if (!includeImages && !includeVideos) {
+            return `INSTRUCTIONS NEWSLETTER :
+- Structure la newsletter en ${sectionCount} sections H2 lisibles, avec une introduction courte, un CTA final et un rythme clair.`;
+        }
+
+        const mediaLines: string[] = [];
+        if (includeImages) {
+            mediaLines.push('- Ajoute 1 à 2 emplacements image avec la syntaxe exacte sur une ligne seule : [IMAGE_SECTION: description concrète de l\'image à ajouter].');
+        }
+        if (includeVideos) {
+            mediaLines.push('- Ajoute 1 emplacement vidéo avec la syntaxe exacte sur une ligne seule : [VIDEO_SECTION: sujet de la vidéo à intégrer, URL à ajouter].');
+        }
+
+        return `INSTRUCTIONS NEWSLETTER :
+- Structure la newsletter en ${sectionCount} sections H2 distinctes, avec introduction courte, corps aéré et CTA final.
+${mediaLines.join('\n')}
+- Place chaque bloc média juste après la section qu'il enrichit.
+- N'invente jamais d'URL image ou vidéo. Utilise "URL à ajouter" pour les vidéos quand l'URL n'est pas fournie.
+- Les emplacements média doivent aider la mise en page, pas couper une phrase.`;
+    }
+
+    private finalizeGeneratedContent(content: string, request: ContentGenerationRequest): string {
+        if ((request.platform || '').toLowerCase() !== 'newsletter') {
+            return content;
+        }
+
+        const plan = request.newsletterMediaPlan || {};
+        return ensureNewsletterMediaBlocks(content, {
+            includeImages: plan.includeImageSections !== false,
+            includeVideos: plan.includeVideoSections !== false,
+            sectionCount: plan.sectionCount || 3
+        });
+    }
 
     /**
      * Formate le brief de recherche pour l'injection dans le prompt

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -58,6 +59,9 @@ export function ExpressContentDialog({
     const [systemPrompt, setSystemPrompt] = useState<string>("");
     const [showPromptSection, setShowPromptSection] = useState(false);
     const [isAdaptingPrompt, setIsAdaptingPrompt] = useState(false);
+    const [newsletterSectionCount, setNewsletterSectionCount] = useState(3);
+    const [newsletterImageSections, setNewsletterImageSections] = useState(true);
+    const [newsletterVideoSections, setNewsletterVideoSections] = useState(true);
 
     // Fetch system prompts for the selected site
     const { data: sitePrompts = [] } = useQuery<any[]>({
@@ -100,6 +104,9 @@ export function ExpressContentDialog({
                 setSystemPrompt("");
                 setShowPromptSection(false);
                 setIsAdaptingPrompt(false);
+                setNewsletterSectionCount(3);
+                setNewsletterImageSections(true);
+                setNewsletterVideoSections(true);
                 expressMutation.reset();
             }, 200);
             return () => clearTimeout(timer);
@@ -113,6 +120,11 @@ export function ExpressContentDialog({
             topic: string;
             publicationDate: string;
             systemPrompt?: string;
+            newsletterMediaPlan?: {
+                sectionCount: number;
+                includeImageSections: boolean;
+                includeVideoSections: boolean;
+            };
         }) => {
             const response = await apiRequest("POST", "/api/express-content", data);
             if (!response.ok) {
@@ -227,6 +239,11 @@ export function ExpressContentDialog({
             topic: topic.trim(),
             publicationDate: selectedDate,
             systemPrompt: systemPrompt.trim() || undefined,
+            newsletterMediaPlan: platform === "newsletter" ? {
+                sectionCount: newsletterSectionCount,
+                includeImageSections: newsletterImageSections,
+                includeVideoSections: newsletterVideoSections,
+            } : undefined,
         });
     };
 
@@ -400,6 +417,56 @@ export function ExpressContentDialog({
                                 }}
                             />
                         </div>
+
+                        {platform === "newsletter" && (
+                            <div className="space-y-3 rounded-lg border p-3">
+                                <div>
+                                    <Label className="text-sm font-medium">Sections média newsletter</Label>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Ajoute des emplacements propres pour insérer ensuite des images ou des vidéos dans la newsletter.
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div className="space-y-1">
+                                        <Label className="text-xs text-muted-foreground">Nombre de sections</Label>
+                                        <Select
+                                            value={String(newsletterSectionCount)}
+                                            onValueChange={(value) => setNewsletterSectionCount(Number(value))}
+                                        >
+                                            <SelectTrigger className="h-9">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="2">2</SelectItem>
+                                                <SelectItem value="3">3</SelectItem>
+                                                <SelectItem value="4">4</SelectItem>
+                                                <SelectItem value="5">5</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex items-center justify-between rounded-md border px-3 py-2">
+                                        <Label htmlFor="newsletter-images" className="text-sm">
+                                            Images
+                                        </Label>
+                                        <Switch
+                                            id="newsletter-images"
+                                            checked={newsletterImageSections}
+                                            onCheckedChange={setNewsletterImageSections}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between rounded-md border px-3 py-2">
+                                        <Label htmlFor="newsletter-videos" className="text-sm">
+                                            Vidéos
+                                        </Label>
+                                        <Switch
+                                            id="newsletter-videos"
+                                            checked={newsletterVideoSections}
+                                            onCheckedChange={setNewsletterVideoSections}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* System prompt section - collapsible */}
                         <div className="border rounded-lg overflow-hidden">
